@@ -25,7 +25,6 @@ flutter pub get ironsource_mediation
 ```groovy
 // PROJECT_ROOT/android/app/build.gradle
 dependencies {
-  ...
   implementation 'com.google.android.gms:play-services-ads-identifier:18.0.0'
   implementation 'com.google.android.gms:play-services-basement:18.0.0'
   implementation 'com.google.android.gms:play-services-appset:16.0.1'
