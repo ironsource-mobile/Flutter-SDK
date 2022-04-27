@@ -1,6 +1,6 @@
 name: ironsource_mediation
 description: an ironSource SDK Flutter bridge #TODO:
-version: 0.1.0
+version: 1.0.0
 homepage: "https://is.com"
 
 environment:
