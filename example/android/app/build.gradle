@@ -71,8 +71,4 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.google.android.gms:play-services-basement:18.0.0'
 
-    // Add Adapters and Network SDKs here
-    // AdMob and Ad Manager Network
-    implementation 'com.google.android.gms:play-services-ads:20.5.0'
-    implementation 'com.ironsource.adapters:admobadapter:4.3.26'
 }

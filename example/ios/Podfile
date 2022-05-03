@@ -32,8 +32,7 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
-  # Add Adapters here
-  pod 'IronSourceAdMobAdapter','4.3.30.2'
+
 end
 
 post_install do |installer|
