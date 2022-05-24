@@ -751,7 +751,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     activity?.runOnUiThread {
       channel.invokeMethod(methodName, args, object : Result {
         override fun success(result: Any?) {}
-        override fun error(errorCode: String?, errorMessage: String?, errorDetails: Any?) {
+        override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
           Log.e(TAG, "Error: invokeMethod $methodName failed "
               + "errorCode: $errorCode, message: $errorMessage, details: $errorDetails")
         }
