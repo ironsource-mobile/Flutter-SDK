@@ -4,15 +4,15 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'ironsource_mediation'
-  s.version          = '1.0.0'
-  s.summary          = "The Leading Mobile Advertising Technology Platform"
+  s.version          = '1.1.0'
+  s.summary          = 'The Leading Mobile Advertising Technology Platform'
   s.description      = <<-DESC
 Monetize & Promote Your Apps
 Mobile sdk for IronSource
-DESC
-  s.homepage         = "http://www.is.com/"
+                       DESC
+  s.homepage         = 'http://www.is.com/'
   s.license = { :type => 'Commercial', :text => 'https://platform.ironsrc.com/partners/terms-and-conditions-new-user' }
-  s.author           = { "IronSource" => "http://www.is.com/contact/" }
+  s.author           = { 'IronSource' => 'http://www.is.com/contact/' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
