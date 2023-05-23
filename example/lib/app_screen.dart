@@ -12,8 +12,6 @@ import './utils.dart';
 
 const _APP_USER_ID = 'some-unique-app-user-id-123';
 
-const _IS_MANUAL_RV = true;
-
 class AppScreen extends StatefulWidget {
   const AppScreen({Key? key}) : super(key: key);
 
@@ -27,20 +25,22 @@ class _AppScreenState extends State<AppScreen>
   void initState() {
     super.initState();
 
-    /// Wait until all listeners are set in the child widgets.
-    /// instance is always initialized when this is called since it's only called in runApp.
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    // Wait until all listeners are set in the child widgets.
+    // instance is always initialized when this is called since it's only called in runApp.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       initIronSource();
     });
   }
 
-  /// For iOS14 IDFA access
-  /// Must be called when the app is in the state UIApplicationStateActive
+  // For iOS14 IDFA access
+  // Must be called when the app is in the state UIApplicationStateActive
   Future<void> checkATT() async {
-    final currentStatus = await ATTrackingManager.getTrackingAuthorizationStatus();
+    final currentStatus =
+        await ATTrackingManager.getTrackingAuthorizationStatus();
     print('ATTStatus: $currentStatus');
     if (currentStatus == ATTStatus.NotDetermined) {
-      final returnedStatus = await ATTrackingManager.requestTrackingAuthorization();
+      final returnedStatus =
+          await ATTrackingManager.requestTrackingAuthorization();
       print('ATTStatus returned: $returnedStatus');
     }
     return;
@@ -52,7 +52,7 @@ class _AppScreenState extends State<AppScreen>
     IronSource.validateIntegration();
   }
 
-  /// Sample Segment Params
+  // Sample Segment Params
   Future<void> setSegment() {
     final segment = IronSourceSegment();
     segment.age = 20;
@@ -72,19 +72,21 @@ class _AppScreenState extends State<AppScreen>
       // CCPA
       'do_not_sell': ['false'],
       // COPPA
-      'is_child_directed': ['false']
+      'is_child_directed': ['false'],
+      'is_test_suite': ['enable']
     });
+
     return;
   }
 
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
-        ? "1304d220d"
+        ? "85460dcd"
         : Platform.isIOS
-            ? "fe6d93e9"
+            ? "8545d445"
             : throw Exception("Unsupported Platform");
     try {
-      IronSource.setFlutterVersion('2.8.1');
+      IronSource.setFlutterVersion('3.3.0'); // fetch automatically
       IronSource.setImpressionDataListener(this);
       await enableDebug();
       await IronSource.shouldTrackNetworkState(true);
@@ -126,8 +128,8 @@ class _AppScreenState extends State<AppScreen>
     }
   }
 
-  Widget _getRVSection() {
-    return _IS_MANUAL_RV ? const RewardedVideoManualLoadSection() : const RewardedVideoSection();
+  Widget _getRewardedVideoSection() {
+    return const RewardedVideoManualLoadSection();
   }
 
   @override
@@ -141,16 +143,16 @@ class _AppScreenState extends State<AppScreen>
               // header logo
               Image.asset('assets/images/iS_logo.png'),
               Utils.spacerLarge,
-              // RV
-              _getRVSection(),
+              // RewardedVideo
+              _getRewardedVideoSection(),
               Utils.spacerLarge,
-              // IS
+              // Interstitial
               const InterstitialSection(),
               Utils.spacerLarge,
-              // BN
+              // Banner
               const BannerSection(),
               Utils.spacerLarge,
-              // OW
+              // OfferWall
               const OfferwallSection(),
               Utils.spacerLarge,
               // iOS14
@@ -162,13 +164,14 @@ class _AppScreenState extends State<AppScreen>
     );
   }
 
-  /// ImpressionData listener ======================================================================
+  // ImpressionData listener
+
   @override
   void onImpressionSuccess(IronSourceImpressionData? impressionData) {
     print('Impression Data: $impressionData');
   }
 
-  /// Initialization listener ======================================================================
+  // Initialization listener
   @override
   void onInitializationComplete() {
     print('onInitializationComplete');

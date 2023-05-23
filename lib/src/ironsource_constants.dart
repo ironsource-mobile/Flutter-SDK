@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '1.1.0';
-  static const String ANDROID_SDK_VERSION = '7.2.1.1';
-  static const String IOS_SDK_VERSION = '7.2.1.2';
+  static const String PLUGIN_VERSION = '1.2.0';
+  static const String ANDROID_SDK_VERSION = '7.3.0.1';
+  static const String IOS_SDK_VERSION = '7.3.0';
 }
 
 /// Argument Keys
@@ -32,8 +32,10 @@ class IronConstKey {
   static const String TOTAL_CREDITS_FLAG = 'totalCreditsFlag';
   static const String PARAMETERS = 'parameters';
   static const String OFFSET = 'offset';
-  
-  /// ImpressionData
+  static const String ERROR = 'error';
+  static const String AD_INFO = 'adInfo';
+
+  // ImpressionData
   static const String AUCTION_ID = 'auctionId';
   static const String AD_UNIT = 'adUnit';
   static const String COUNTRY = 'country';
@@ -47,11 +49,11 @@ class IronConstKey {
   static const String PRECISION = 'precision';
   static const String LIFETIME_REVENUE = 'lifetimeRevenue';
   static const String ENCRYPTED_CPM = 'encryptedCPM';
-  
-  /// iOS 14 ConsentView
+
+  // iOS 14 ConsentView
   static const CONSENT_VIEW_TYPE = 'consentViewType';
 
-  /// setPluginData
+  // setPluginData
   static const String PLUGIN_TYPE = 'pluginType';
   static const String PLUGIN_VERSION = 'pluginVersion';
   static const String PLUGIN_FRAMEWORK_VERSION = 'pluginFrameworkVersion';

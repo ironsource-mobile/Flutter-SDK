@@ -36,7 +36,8 @@ class _IOSSectionState extends State<IOSSection> with IronSourceConsentViewListe
     ]);
   }
 
-  /// ConsentView listener =========================================================================
+  // ConsentView listener //////////////////////////////////////////////////////////////////////////
+  
   @override
   void consentViewDidAccept(String consentViewType) {
     print('consentViewDidAccept consentViewType:$consentViewType');

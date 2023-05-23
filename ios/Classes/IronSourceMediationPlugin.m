@@ -1,23 +1,28 @@
 #import "IronSourceMediationPlugin.h"
 #import <IronSource/IronSource.h>
 #import "ATTrackingManagerChannel.h"
+#import "InitDelegateMethodHandler.h"
+#import "ConsentViewDelegateMethodHandler.h"
+#import "ImpressionDataDelegateMethodHandler.h"
+#import "ISPlacementInfo.h"
+#import "LevelPlayRewardedVideoDelegateMethodHandler.h"
+#import "LevelPlayInterstitialDelegateMethodHandler.h"
+#import "LevelPlayBannerDelegateMethodHandler.h"
 
-@interface IronSourceMediationPlugin() <
-    ISRewardedVideoDelegate,
-    ISInterstitialDelegate,
-    ISBannerDelegate,
-    ISOfferwallDelegate,
-    ISImpressionDataDelegate,
-    ISConsentViewDelegate,
-    ISRewardedVideoManualDelegate,
-    ISInitializationDelegate
->
+@interface IronSourceMediationPlugin()<
+ISRewardedVideoDelegate,
+ISInterstitialDelegate,
+ISBannerDelegate,
+ISRewardedVideoManualDelegate,
+ISOfferwallDelegate>
 @property (nonatomic,strong) FlutterMethodChannel* channel;
 @property (nonatomic,weak) ISBannerView* bannerView;
 @property (nonatomic,strong) NSNumber* bannerOffset;
 @property (nonatomic) NSInteger bannerPosition;
 @property (nonatomic) BOOL shouldHideBanner;
 @property (nonatomic,strong) UIViewController* bannerViewController;
+@property (nonatomic,strong) InitDelegateMethodHandler* initializationDelegate;
+@property (nonatomic,strong) UIViewController* CurrentViewController;
 @end
 
 @implementation IronSourceMediationPlugin
@@ -47,91 +52,119 @@
                                      binaryMessenger:[registrar messenger]];
     IronSourceMediationPlugin* instance = [[IronSourceMediationPlugin alloc] initWithChannel:channel];
     [registrar addMethodCallDelegate:instance channel:channel];
-    // set ironSource Listeners
+    
+    // Set ironSource delegates
+    // Init
+    instance.initializationDelegate = [[InitDelegateMethodHandler alloc] initWithChannel:channel];
+    // ConsentView
+    [IronSource setConsentViewWithDelegate: [[ConsentViewDelegateMethodHandler alloc] initWithChannel:channel]];
+    // RewardedVideo
     [IronSource setRewardedVideoDelegate:instance];
+    // Interstitial
     [IronSource setInterstitialDelegate:instance];
+    // Banner
     [IronSource setBannerDelegate:instance];
+    // OfferWall
     [IronSource setOfferwallDelegate:instance];
-    [IronSource addImpressionDataDelegate:instance];
-    [IronSource setConsentViewWithDelegate:instance];
+    // Imp Data
+    [IronSource addImpressionDataDelegate:[[ImpressionDataDelegateMethodHandler alloc] initWithChannel:channel]];
+    
+# pragma mark - LevelPlay Delegates=========================================================================
+    // LevelPlay RewardedVideo
+     [IronSource setLevelPlayRewardedVideoDelegate:[[LevelPlayRewardedVideoDelegateMethodHandler alloc] initWithChannel:channel]];
+    // LevelPlay Interstitial
+    [IronSource setLevelPlayInterstitialDelegate:[[LevelPlayInterstitialDelegateMethodHandler alloc] initWithChannel:channel]];
+    // LevelPlay Banner
+    [IronSource setLevelPlayBannerDelegate:[[LevelPlayBannerDelegateMethodHandler alloc] initWithChannel:channel]];
     
     // ATT Brigde
     [ATTrackingManagerChannel registerWithMessenger:[registrar messenger]];
 }
 
+/// Clean up
+- (void)detachFromEngineForRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar{
+    self.channel = nil;
+    self.bannerView = nil;
+    self.bannerViewController = nil;
+    self.bannerOffset = nil;
+    self.initializationDelegate = nil;
+}
+
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     if([@"validateIntegration" isEqualToString:call.method]) { /* Base API ====================*/
-        [self validateIntegrationWithResult:result];
+        [self validateIntegration:result];
     } else if([@"shouldTrackNetworkState" isEqualToString:call.method]) {
-        [self shouldTrackNetworkStateWithArgs:call.arguments result:result];
+        [self shouldTrackNetworkState:call.arguments result:result];
     } else if([@"setAdaptersDebug" isEqualToString:call.method]) {
-        [self setAdaptersDebugWithArgs:call.arguments result:result];
+        [self setAdaptersDebug:call.arguments result:result];
     } else if([@"setDynamicUserId" isEqualToString:call.method]) {
-        [self setDynamicUserIdWithArgs:call.arguments result:result];
+        [self setDynamicUserId:call.arguments result:result];
     } else if([@"getAdvertiserId" isEqualToString:call.method]) {
-        [self getAdvertiserIdWithResult:result];
+        [self getAdvertiserId:result];
     } else if([@"setConsent" isEqualToString:call.method]) {
-        [self setConsentWithArgs:call.arguments result:result];
+        [self setConsent:call.arguments result:result];
     } else if([@"setSegment" isEqualToString:call.method]) {
-        [self setSegmentWithArgs:call.arguments result:result];
+        [self setSegment:call.arguments result:result];
     } else if([@"setMetaData" isEqualToString:call.method]) {
-        [self setMetaDataWithArgs:call.arguments result:result];
+        [self setMetaData:call.arguments result:result];
     } else if([@"setUserId" isEqualToString:call.method]) { /* Init API ========================*/
-        [self setUserIdWithArgs:call.arguments result:result];
+        [self setUserId:call.arguments result:result];
     } else if ([@"init" isEqualToString:call.method]) {
-        [self initWithArgs:call.arguments result:result];
-    } else if([@"showRewardedVideo" isEqualToString:call.method]) { /* RV API ==================*/
-        [self showRewardedVideoWithArgs:call.arguments result:result];
+        [self init:call.arguments result:result];
+    } else if ([@"launchTestSuite" isEqualToString:call.method]) {
+        [self launchTestSuite:result];
+    } else if([@"showRewardedVideo" isEqualToString:call.method]) { /* RewardedVideo API ==================*/
+        [self showRewardedVideo:call.arguments result:result];
     } else if([@"getRewardedVideoPlacementInfo" isEqualToString:call.method]) {
-        [self getRewardedVideoPlacementInfoWithArgs:call.arguments result:result];
+        [self getRewardedVideoPlacementInfo:call.arguments result:result];
     } else if([@"isRewardedVideoAvailable" isEqualToString:call.method]) {
-        [self isRewardedVideoAvailableWithResult:result];
+        [self isRewardedVideoAvailable:result];
     } else if([@"isRewardedVideoPlacementCapped" isEqualToString:call.method]) {
-        [self isRewardedVideoPlacementCappedWithArgs:call.arguments result:result];
+        [self isRewardedVideoPlacementCapped:call.arguments result:result];
     } else if([@"setRewardedVideoServerParams" isEqualToString:call.method]) {
-        [self setRewardedVideoServerParamsWithArgs:call.arguments result:result];
+        [self setRewardedVideoServerParams:call.arguments result:result];
     } else if([@"clearRewardedVideoServerParams" isEqualToString:call.method]) {
-        [self clearRewardedVideoServerParamsWithResult:result];
+        [self clearRewardedVideoServerParams:result];
     } else if([@"setManualLoadRewardedVideo" isEqualToString:call.method]) {
-        [self setManualLoadRewardedVideoWithResult:result];
+        [self setManualLoadRewardedVideo:result];
     } else if([@"loadRewardedVideo" isEqualToString:call.method]) {
-        [self loadRewardedVideoWithResult:result];
-    } else if([@"loadInterstitial" isEqualToString:call.method]) { /* IS API ===================*/
-        [self loadInterstitialWithResult:result];
+        [self loadRewardedVideo:result];
+    } else if([@"loadInterstitial" isEqualToString:call.method]) { /* Interstitial API ===================*/
+        [self loadInterstitial:result];
     } else if([@"showInterstitial" isEqualToString:call.method]) {
-        [self showInterstitialWithArgs:call.arguments result:result];
+        [self showInterstitial:call.arguments result:result];
     } else if([@"isInterstitialReady" isEqualToString:call.method]) {
-        [self isInterstitialReadyWithResult:result];
+        [self isInterstitialReady:result];
     } else if([@"isInterstitialPlacementCapped" isEqualToString:call.method]) {
-        [self isInterstitialPlacementCappedWithArgs:call.arguments result:result];
-    } else if([@"loadBanner" isEqualToString:call.method]) { /* BN API =========================*/
-        [self loadBannerWithArgs:call.arguments result:result];
+        [self isInterstitialPlacementCapped:call.arguments result:result];
+    } else if([@"loadBanner" isEqualToString:call.method]) { /* Banner API =========================*/
+        [self loadBanner:call.arguments result:result];
     } else if([@"destroyBanner" isEqualToString:call.method]) {
-        [self destroyBannerWithResult:result];
+        [self destroyBanner:result];
     } else if([@"displayBanner" isEqualToString:call.method]) {
-        [self displayBannerWithResult:result];
+        [self displayBanner:result];
     } else if([@"hideBanner" isEqualToString:call.method]) {
-        [self hideBannerWithResult:result];
+        [self hideBanner:result];
     } else if([@"isBannerPlacementCapped" isEqualToString:call.method]) {
-        [self isBannerPlacementCappedWithArgs:call.arguments result:result];
-    } else if([@"isOfferwallAvailable" isEqualToString:call.method]) { /* OW API ===============*/
-        [self isOfferwallAvailableWithResult:result];
+        [self isBannerPlacementCapped:call.arguments result:result];
+    } else if([@"isOfferwallAvailable" isEqualToString:call.method]) { /* OfferWall API ===============*/
+        [self isOfferwallAvailable:result];
     } else if([@"showOfferwall" isEqualToString:call.method]) {
-        [self showOfferwallWithArgs:call.arguments result:result];
+        [self showOfferwall:call.arguments result:result];
     } else if([@"getOfferwallCredits" isEqualToString:call.method]) {
-        [self getOfferwallCreditsWithResult:result];
+        [self getOfferwallCredits:result];
     } else if([@"setClientSideCallbacks" isEqualToString:call.method]) { /* Config API =========*/
-        [self setClientSideCallbacksWithArgs:call.arguments result:result];
+        [self setClientSideCallbacks:call.arguments result:result];
     } else if([@"setOfferwallCustomParams" isEqualToString:call.method]) {
-        [self setOfferwallCustomParamsWithArgs:call.arguments result:result];
+        [self setOfferwallCustomParams:call.arguments result:result];
     } else if([@"getConversionValue" isEqualToString:call.method]) { /* ConversionValue API ====*/
-        [self getConversionValueWithResult:result];
+        [self getConversionValue:result];
     } else if([@"loadConsentViewWithType" isEqualToString:call.method]) { /* ConsentView API ===*/
-        [self loadConsentViewWithTypeWithArgs:call.arguments result:result];
+        [self loadConsentViewWithType:call.arguments result:result];
     } else if([@"showConsentViewWithType" isEqualToString:call.method]) {
-        [self showConsentViewWithTypeWithArgs:call.arguments result:result];
+        [self showConsentViewWithType:call.arguments result:result];
     } else if([@"setPluginData" isEqualToString:call.method]) { /* Internal Config API =*/
-        [self setPluginDataWithArgs:call.arguments result:result];
+        [self setPluginData:call.arguments result:result];
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -139,12 +172,17 @@
 
 # pragma mark - Base API =========================================================================
 
-- (void)validateIntegrationWithResult:(nonnull FlutterResult)result {
+-(void)launchTestSuite:(nonnull FlutterResult)result{
+    [IronSource launchTestSuite:[self getRootViewController]];
+    return result(nil);
+}
+
+- (void)validateIntegration:(nonnull FlutterResult)result {
     [ISIntegrationHelper validateIntegration];
     return result(nil);
 }
 
-- (void)shouldTrackNetworkStateWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)shouldTrackNetworkState:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -157,7 +195,7 @@
     return result(nil);
 }
 
-- (void)setAdaptersDebugWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setAdaptersDebug:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -170,7 +208,7 @@
     return result(nil);
 }
 
-- (void)setDynamicUserIdWithArgs:(nullable id) args
+- (void)setDynamicUserId:(nullable id) args
                           result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
@@ -183,12 +221,12 @@
     return result(nil);
 }
 
-- (void)getAdvertiserIdWithResult:(nonnull FlutterResult)result {
+- (void)getAdvertiserId:(nonnull FlutterResult)result {
     NSString *advertiserId = [IronSource advertiserId];
     return result(advertiserId);
 }
 
-- (void)setConsentWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setConsent:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -201,7 +239,7 @@
     return result(nil);
 }
 
-- (void)setSegmentWithArgs:(nullable id) args result:(nonnull FlutterResult)result  {
+- (void)setSegment:(nullable id) args result:(nonnull FlutterResult)result  {
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -265,7 +303,7 @@
     return result(nil);
 }
 
-- (void)setMetaDataWithArgs:(nullable id) args
+- (void)setMetaData:(nullable id) args
                      result:(nonnull FlutterResult)result  {
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
@@ -289,7 +327,9 @@
 
 # pragma mark - Init API =========================================================================
 
-- (void)setUserIdWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+//TODO: implement with real error codes
+
+- (void)setUserId:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -302,7 +342,7 @@
 }
 
 //TODO: Use real error codes
-- (void)initWithArgs:(nullable id)args result:(nonnull FlutterResult)result {
+- (void)init:(nullable id)args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -326,16 +366,16 @@
                 [parsedAdUnits addObject:IS_BANNER];
             }
         }
-        [IronSource initWithAppKey:appKey adUnits:parsedAdUnits delegate:self];
+        [IronSource initWithAppKey:appKey adUnits:parsedAdUnits delegate:self.initializationDelegate];
     } else {
-        [IronSource initWithAppKey:appKey delegate:self];
+        [IronSource initWithAppKey:appKey delegate:self.initializationDelegate];
     }
     return result(nil);
 }
 
-# pragma mark - RV API ===========================================================================
+# pragma mark - RewardedVideo API ===========================================================================
 
-- (void)showRewardedVideoWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)showRewardedVideo:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -348,7 +388,7 @@
     return result(nil);
 }
 
-- (void)getRewardedVideoPlacementInfoWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)getRewardedVideoPlacementInfo:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -357,15 +397,15 @@
         return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
     }
     ISPlacementInfo *placementInfo = [IronSource rewardedVideoPlacementInfo:placementName];
-    return result(placementInfo != nil ? [self getDictWithPlacementInfo:placementInfo] : nil);
+    return result(placementInfo != nil ? [placementInfo toArgDictionary] : nil);
 }
 
-- (void)isRewardedVideoAvailableWithResult:(nonnull FlutterResult)result {
-    BOOL isRVAvailable = [IronSource hasRewardedVideo];
-    return result([NSNumber numberWithBool:isRVAvailable]);
+- (void)isRewardedVideoAvailable:(nonnull FlutterResult)result {
+    BOOL isRewardedVideoAvailable = [IronSource hasRewardedVideo];
+    return result([NSNumber numberWithBool:isRewardedVideoAvailable]);
 }
 
-- (void)isRewardedVideoPlacementCappedWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)isRewardedVideoPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -377,7 +417,7 @@
     return result([NSNumber numberWithBool:isCapped]);
 }
 
-- (void)setRewardedVideoServerParamsWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)setRewardedVideoServerParams:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -389,31 +429,32 @@
     return result(nil);
 }
 
-- (void)clearRewardedVideoServerParamsWithResult:(nonnull FlutterResult)result {
+- (void)clearRewardedVideoServerParams:(nonnull FlutterResult)result {
     [IronSource clearRewardedVideoServerParameters];
     return result(nil);
 }
 
-# pragma mark - Manual Load RV API ==============================================================
+# pragma mark - Manual Load RewardedVideo API ==============================================================
 
-- (void)setManualLoadRewardedVideoWithResult:(nonnull FlutterResult)result {
+- (void)setManualLoadRewardedVideo:(nonnull FlutterResult)result {
     [IronSource setRewardedVideoManualDelegate:self];
+    [IronSource setLevelPlayRewardedVideoManualDelegate:[[LevelPlayRewardedVideoDelegateMethodHandler alloc] initWithChannel:_channel]];
     return result(nil);
 }
 
-- (void)loadRewardedVideoWithResult:(nonnull FlutterResult)result {
+- (void)loadRewardedVideo:(nonnull FlutterResult)result {
     [IronSource loadRewardedVideo];
     return result(nil);
 }
 
-# pragma mark - IS API ===========================================================================
+# pragma mark - Interstitial API ===========================================================================
 
-- (void)loadInterstitialWithResult:(nonnull FlutterResult)result {
+- (void)loadInterstitial:(nonnull FlutterResult)result {
     [IronSource loadInterstitial];
     return result(nil);
 }
 
-- (void)showInterstitialWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)showInterstitial:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -426,12 +467,12 @@
     return result(nil);
 }
 
-- (void)isInterstitialReadyWithResult:(nonnull FlutterResult)result {
-    BOOL isISReady = [IronSource hasInterstitial];
-    return result([NSNumber numberWithBool:isISReady]);
+- (void)isInterstitialReady:(nonnull FlutterResult)result {
+    BOOL isInterstitialReady = [IronSource hasInterstitial];
+    return result([NSNumber numberWithBool:isInterstitialReady]);
 }
 
-- (void)isInterstitialPlacementCappedWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)isInterstitialPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -443,9 +484,9 @@
     return result([NSNumber numberWithBool:isCapped]);
 }
 
-# pragma mark - BN API ===========================================================================
+# pragma mark - Banner API ===========================================================================
 
-- (void)loadBannerWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)loadBanner:(nullable id) args result:(nonnull FlutterResult)result{
     @synchronized(self) {
         if(!args){
             return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
@@ -510,7 +551,7 @@
 // Fallback to BOTTOM in the case of an illegal position integer
 - (CGPoint)getBannerCenterWithPosition:(NSInteger)position
                               rootView:(UIView *)rootView
-                            bannerView:(ISBannerView*) bnView
+                            bannerView:(ISBannerView*) bannerView
                           bannerOffset:(NSNumber*) offset {
     // Positions
     const NSInteger BANNER_POSITION_TOP = 0;
@@ -519,7 +560,7 @@
     
     CGFloat y;
     if (position == BANNER_POSITION_TOP) {
-        y = (bnView.frame.size.height / 2);
+        y = (bannerView.frame.size.height / 2);
         // safe area
         if (@available(ios 11.0, *)) {
             y += rootView.safeAreaInsets.top;
@@ -529,11 +570,11 @@
             y += offset.floatValue;
         }
     } else if (position == BANNER_POSITION_CENTER) {
-        y = (rootView.frame.size.height / 2) - (bnView.frame.size.height / 2);
+        y = (rootView.frame.size.height / 2) - (bannerView.frame.size.height / 2);
         // vertical offset
         y += offset.floatValue;
     } else { // BANNER_POSITION_BOTTOM
-        y = rootView.frame.size.height - (bnView.frame.size.height / 2);
+        y = rootView.frame.size.height - (bannerView.frame.size.height / 2);
         // safe area
         if (@available(ios 11.0, *)) {
             y -= rootView.safeAreaInsets.bottom;
@@ -546,7 +587,7 @@
     return CGPointMake(rootView.frame.size.width / 2, y);
 }
 
-- (void)destroyBannerWithResult:(nonnull FlutterResult)result {
+- (void)destroyBanner:(nonnull FlutterResult)result {
     dispatch_async(dispatch_get_main_queue(), ^{
         @synchronized(self) {
             if (self.bannerView != nil) {
@@ -561,7 +602,7 @@
     });
 }
 
-- (void)displayBannerWithResult:(nonnull FlutterResult)result {
+- (void)displayBanner:(nonnull FlutterResult)result {
     dispatch_async(dispatch_get_main_queue(), ^{
         @synchronized(self) {
             if (self.bannerView != nil) {
@@ -573,7 +614,7 @@
     });
 }
 
-- (void)hideBannerWithResult:(nonnull FlutterResult)result {
+- (void)hideBanner:(nonnull FlutterResult)result {
     self.shouldHideBanner = YES;
     dispatch_async(dispatch_get_main_queue(), ^{
         @synchronized(self) {
@@ -585,7 +626,7 @@
     });
 }
 
-- (void)isBannerPlacementCappedWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)isBannerPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -608,14 +649,14 @@
     });
 }
 
-# pragma mark - OW API ===========================================================================
+# pragma mark - OfferWall API ===========================================================================
 
-- (void)getOfferwallCreditsWithResult:(nonnull FlutterResult)result {
+- (void)getOfferwallCredits:(nonnull FlutterResult)result {
     [IronSource offerwallCredits];
     return result(nil);
 }
 
-- (void)showOfferwallWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)showOfferwall:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -628,14 +669,14 @@
     return result(nil);
 }
 
-- (void)isOfferwallAvailableWithResult:(nonnull FlutterResult)result {
+- (void)isOfferwallAvailable:(nonnull FlutterResult)result {
     BOOL isAvailable = [IronSource hasOfferwall];
     return result([NSNumber numberWithBool:isAvailable]);
 }
 
 # pragma mark - Config API ===========================================================================
 
-- (void)setClientSideCallbacksWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setClientSideCallbacks:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -647,7 +688,7 @@
     return result(nil);
 }
 
-- (void)setOfferwallCustomParamsWithArgs:(nullable id) args result:(nonnull FlutterResult)result{
+- (void)setOfferwallCustomParams:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -663,7 +704,7 @@
 
 /// Only called internally in the process of init on the Flutter plugin
 /// pluginType and pluginVersion are required
-- (void)setPluginDataWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setPluginData:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -690,14 +731,14 @@
 
 # pragma mark - ConversionValue API ==================================================================
 
-- (void)getConversionValueWithResult:(nonnull FlutterResult)result {
+- (void)getConversionValue:(nonnull FlutterResult)result {
     NSNumber *conversionValue = [IronSource getConversionValue];
     return result(conversionValue);
 }
 
 # pragma mark - ConsentView API ======================================================================
 
-- (void)loadConsentViewWithTypeWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)loadConsentViewWithType:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -709,7 +750,7 @@
     return result(nil);
 }
 
-- (void)showConsentViewWithTypeWithArgs:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)showConsentViewWithType:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -721,7 +762,55 @@
     return result(nil);
 }
 
-# pragma mark - Rewarded Video Delegate Functions =================================================
+#pragma mark - BannerLoadSuccessDelegate ===========================================================
+
+- (void)bannerDidLoad:(ISBannerView *)bannerView {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @synchronized(self) {
+            self.bannerView = bannerView;
+            [self.bannerView setAccessibilityLabel:@"bannerContainer"];
+            [self.bannerView setHidden:self.shouldHideBanner];
+            self.bannerView.center = [self getBannerCenterWithPosition:self.bannerPosition
+                                                              rootView:self.bannerViewController.view
+                                                            bannerView:self.bannerView
+                                                          bannerOffset:self.bannerOffset];
+            [self.bannerViewController.view addSubview:self.bannerView];
+        }
+    });
+}
+
+- (void)bannerDidFailToLoadWithError:(NSError *)error {
+    NSDictionary *args = [self getDictWithIronSourceError:error];
+    [self invokeChannelMethodWithName:@"onBannerAdLoadFailed" args:args];
+}
+
+- (void)didClickBanner {
+    [self invokeChannelMethodWithName:@"onBannerAdClicked" args:nil];
+}
+
+- (void)bannerWillPresentScreen {
+    // Not called by every network
+    [self invokeChannelMethodWithName:@"onBannerAdScreenPresented" args:nil];
+}
+
+- (void)bannerDidDismissScreen {
+    // Not called by every network
+    [self invokeChannelMethodWithName:@"onBannerAdScreenDismissed" args:nil];
+}
+
+- (void)bannerWillLeaveApplication {
+    [self invokeChannelMethodWithName:@"onBannerAdLeftApplication" args:nil];
+}
+
+
+#pragma mark - Utils ===============================================================================
+
+- (UIViewController *)getRootViewController {
+    return [UIApplication sharedApplication].keyWindow.rootViewController;
+}
+
+#pragma mark - Rewarded VideoDelegate ==============================================================
+
 
 - (void)rewardedVideoHasChangedAvailability:(BOOL)isAvailable {
     NSDictionary *args = @{ @"isAvailable": [NSNumber numberWithBool:isAvailable] };
@@ -729,7 +818,7 @@
 }
 
 - (void)didReceiveRewardForPlacement:(ISPlacementInfo *)placementInfo {
-    NSDictionary *args = [self getDictWithPlacementInfo:placementInfo];
+    NSDictionary *args = [placementInfo toArgDictionary];
     [self invokeChannelMethodWithName:@"onRewardedVideoAdRewarded" args:args];
 }
 
@@ -755,11 +844,11 @@
 }
 
 - (void)didClickRewardedVideo:(ISPlacementInfo *)placementInfo {
-    NSDictionary *args = [self getDictWithPlacementInfo:placementInfo];
+    NSDictionary *args = [placementInfo toArgDictionary];
     [self invokeChannelMethodWithName:@"onRewardedVideoAdClicked" args:args];
 }
 
-# pragma mark - Rewarded Video Manual Load Delegate Functions ======================================
+#pragma mark - ISRewardedVideoManualDelegate
 
 - (void)rewardedVideoDidFailToLoadWithError:(NSError *)error {
     NSDictionary *args = [self getDictWithIronSourceError:error];
@@ -771,7 +860,8 @@
 }
 
 
-# pragma mark - Interstitial Delegate Functions ====================================================
+#pragma mark - Interstitial Delegate ===============================================================================
+
 
 - (void)interstitialDidLoad {
     [self invokeChannelMethodWithName:@"onInterstitialAdReady" args:nil];
@@ -803,48 +893,8 @@
     [self invokeChannelMethodWithName:@"onInterstitialAdClicked" args:nil];
 }
 
-# pragma mark - Banner Delegate Functions ===========================================================
+#pragma mark - Offerwall Delegate ===============================================================================
 
-- (void)bannerDidLoad:(ISBannerView *)bannerView {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        @synchronized(self) {
-            self.bannerView = bannerView;
-            [self.bannerView setAccessibilityLabel:@"bannerContainer"];
-            [self.bannerView setHidden:self.shouldHideBanner];
-            self.bannerView.center = [self getBannerCenterWithPosition:self.bannerPosition
-                                                              rootView:self.bannerViewController.view
-                                                            bannerView:self.bannerView
-                                                          bannerOffset:self.bannerOffset];
-            [self.bannerViewController.view addSubview:self.bannerView];
-        }
-    });
-    [self invokeChannelMethodWithName:@"onBannerAdLoaded" args:nil];
-}
-
-- (void)bannerDidFailToLoadWithError:(NSError *)error {
-    NSDictionary *args = [self getDictWithIronSourceError:error];
-    [self invokeChannelMethodWithName:@"onBannerAdLoadFailed" args:args];
-}
-
-- (void)didClickBanner {
-    [self invokeChannelMethodWithName:@"onBannerAdClicked" args:nil];
-}
-
-- (void)bannerWillPresentScreen {
-    // Not called by every network
-    [self invokeChannelMethodWithName:@"onBannerAdScreenPresented" args:nil];
-}
-
-- (void)bannerDidDismissScreen {
-    // Not called by every network
-    [self invokeChannelMethodWithName:@"onBannerAdScreenDismissed" args:nil];
-}
-
-- (void)bannerWillLeaveApplication {
-    [self invokeChannelMethodWithName:@"onBannerAdLeftApplication" args:nil];
-}
-
-# pragma mark - Offerwall Delegate Functions ========================================================
 
 - (void)offerwallHasChangedAvailability:(BOOL)available {
     NSDictionary *args = @{ @"isAvailable": [NSNumber numberWithBool:available] };
@@ -890,126 +940,8 @@
     [self invokeChannelMethodWithName:@"onOfferwallClosed" args:nil];
 }
 
-# pragma mark - Initialization Delegate Functions ===================================================
+#pragma mark - Helper Functions ===============================================================================
 
-- (void)initializationDidComplete {
-    [self invokeChannelMethodWithName:@"onInitializationComplete" args:nil];
-}
-
-# pragma mark - ImpressionData Delegate Functions ===================================================
-
-- (void)impressionDataDidSucceed:(ISImpressionData *)impressionData {
-    if(impressionData == nil){
-        [self invokeChannelMethodWithName:@"onImpressionSuccess" args:nil];
-    } else {
-        NSMutableDictionary *args = [[NSMutableDictionary alloc] init];
-        if(impressionData.auction_id != nil){
-            args[@"auctionId"] = impressionData.auction_id;
-        }
-        if(impressionData.ad_unit != nil){
-            args[@"adUnit"] = impressionData.ad_unit;
-        }
-        if(impressionData.country != nil){
-            args[@"country"] = impressionData.country;
-        }
-        if(impressionData.ab != nil){
-            args[@"ab"] = impressionData.ab;
-        }
-        if(impressionData.segment_name != nil){
-            args[@"segmentName"] = impressionData.segment_name;
-        }
-        if(impressionData.placement != nil){
-            args[@"placement"] = impressionData.placement;
-        }
-        if(impressionData.ad_network != nil){
-            args[@"adNetwork"] = impressionData.ad_network;
-        }
-        if(impressionData.instance_name != nil){
-            args[@"instanceName"] = impressionData.instance_name;
-        }
-        if(impressionData.ad_unit != nil){
-            args[@"instanceId"] = impressionData.instance_id;
-        }
-        if(impressionData.revenue != nil){
-            args[@"revenue"] = impressionData.revenue;
-        }
-        if(impressionData.precision != nil){
-            args[@"precision"] = impressionData.precision;
-        }
-        if(impressionData.lifetime_revenue != nil){
-            args[@"lifetimeRevenue"] = impressionData.lifetime_revenue;
-        }
-        if(impressionData.encrypted_cpm != nil){
-            args[@"encryptedCPM"] = impressionData.encrypted_cpm;
-        }
-        [self invokeChannelMethodWithName:@"onImpressionSuccess" args:args];
-    }
-}
-
-# pragma mark - ConsentView Delegate Functions =======================================================
-
-- (void)consentViewDidLoadSuccess:(NSString *)consentViewType {
-    NSDictionary *args = [self getDictWithConsentViewType:consentViewType andError:nil];
-    [self invokeChannelMethodWithName:@"consentViewDidLoadSuccess" args:args];
-}
-
-- (void)consentViewDidFailToLoadWithError:(NSError *)error consentViewType:(NSString *)consentViewType {
-    NSDictionary *args = [self getDictWithConsentViewType:consentViewType andError:error];
-    [self invokeChannelMethodWithName:@"consentViewDidFailToLoad" args:args];
-}
-
-- (void)consentViewDidShowSuccess:(NSString *)consentViewType {
-    NSDictionary *args = [self getDictWithConsentViewType:consentViewType andError:nil];
-    [self invokeChannelMethodWithName:@"consentViewDidShowSuccess" args:args];
-}
-
-- (void)consentViewDidFailToShowWithError:(NSError *)error consentViewType:(NSString *)consentViewType {
-    NSDictionary *args = [self getDictWithConsentViewType:consentViewType andError:error];
-    [self invokeChannelMethodWithName:@"consentViewDidFailToShow" args:args];
-}
-
-- (void)consentViewDidAccept:(NSString *)consentViewType {
-    NSDictionary *args = [self getDictWithConsentViewType:consentViewType andError:nil];
-    [self invokeChannelMethodWithName:@"consentViewDidAccept" args:args];
-}
-
-- (void)consentViewDidDismiss:(NSString *)consentViewType {
-    // Deprecated: Never will be called by the SDK.
-}
-
-# pragma mark - Utils ===============================================================================
-
-- (UIViewController *)getRootViewController {
-    return [UIApplication sharedApplication].keyWindow.rootViewController;
-}
-
-- (NSDictionary *)getDictWithPlacementInfo:(ISPlacementInfo *)placementInfo {
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    if(placementInfo.placementName != nil){
-        dict[@"placementName"] = placementInfo.placementName;
-    }
-    if(placementInfo.rewardName != nil){
-        dict[@"rewardName"] = placementInfo.rewardName;
-    }
-    if(placementInfo.rewardAmount != nil){
-        dict[@"rewardAmount"] = placementInfo.rewardAmount;
-    }
-    return dict;
-}
-
-- (NSMutableDictionary *)getDictWithIronSourceError:(NSError *)error{
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    if(error != nil){
-        dict[@"errorCode"] = [NSNumber numberWithInteger: error.code];
-    }
-    if(error != nil && error.userInfo != nil){
-        dict[@"message"] = error.userInfo[NSLocalizedDescriptionKey];
-    }
-    return dict;
-}
-
-// thin wrapper for UI thread execution of invokeMethod
-// No success result handling expected for now.
 - (void)invokeChannelMethodWithName:(NSString *) methodName args:(id _Nullable) args {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.channel invokeMethod:methodName arguments:args result:^(id _Nullable result){
@@ -1024,12 +956,8 @@
     });
 }
 
-- (NSMutableDictionary *)getDictWithConsentViewType:(NSString *)consentViewType
-                                           andError:(nullable NSError *)error {
+- (NSMutableDictionary *)getDictWithIronSourceError:(NSError *)error{
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    if(consentViewType != nil){
-        dict[@"consentViewType"] = consentViewType;
-    }
     if(error != nil){
         dict[@"errorCode"] = [NSNumber numberWithInteger: error.code];
     }

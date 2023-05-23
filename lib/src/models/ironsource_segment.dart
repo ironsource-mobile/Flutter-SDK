@@ -6,11 +6,11 @@ final logger = Logger();
 /// Interface for "female" & "male" string values
 enum IronSourceUserGender { Female, Male }
 
-/// Segment wrapper
+/// Segment
 /// - Default values are all null except custom params 
-/// and only non null values will be passed to native segments
+/// and only non null values will be passed to native segments.
 /// - No restriction other than basic types,
-/// validations happen on the native level except for the Gender type
+/// validations happen on the native level except for the Gender type.
 class IronSourceSegment {
   // initial values
   String? segmentName;

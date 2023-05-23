@@ -12,35 +12,37 @@ class RewardedVideoSection extends StatefulWidget {
 
 class _RewardedVideoSectionState extends State<RewardedVideoSection>
     with IronSourceRewardedVideoListener {
-  bool _isRVAvailable = false;
+  bool _isRewardedVideoAvailable = false;
   bool _isVideoAdVisible = false;
-  IronSourceRVPlacement? _placement;
+  IronSourceRewardedVideoPlacement? _placement;
 
   @override
   void initState() {
     super.initState();
     IronSource.setRVListener(this);
+    IronSource.setRewardedVideoListener(this);
   }
 
-  /// Sample RV Custom Params - current DateTime milliseconds
-  Future<void> setRVCustomParams() async {
+  // Sample RewardedVideo Custom Params - current DateTime milliseconds
+  Future<void> setRewardedVideoCustomParams() async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     await IronSource.setRewardedVideoServerParams({'dateTimeMillSec': time});
-    Utils.showTextDialog(context, "RV Custom Param Set", time);
+    Utils.showTextDialog(context, "RewardedVideo Custom Param Set", time);
   }
 
-  /// Solely for debug/testing purpose
-  Future<void> checkRVPlacement() async {
-    final placement =
-        await IronSource.getRewardedVideoPlacementInfo(placementName: 'DefaultRewardedVideo');
+  // Solely for debug/testing purpose
+  Future<void> checkRewardedVideoPlacement() async {
+    final placement = await IronSource.getRewardedVideoPlacementInfo(
+        placementName: 'DefaultRewardedVideo');
     print('DefaultRewardedVideo info $placement');
 
     // this falls back to the default placement, not null
-    final noSuchPlacement = await IronSource.getRewardedVideoPlacementInfo(placementName: 'NoSuch');
+    final noSuchPlacement =
+        await IronSource.getRewardedVideoPlacementInfo(placementName: 'NoSuch');
     print('NoSuchPlacement info $noSuchPlacement');
 
-    final isPlacementCapped =
-        await IronSource.isRewardedVideoPlacementCapped(placementName: 'CAPPED_PLACEMENT');
+    final isPlacementCapped = await IronSource.isRewardedVideoPlacementCapped(
+        placementName: 'CAPPED_PLACEMENT');
     print('CAPPED_PLACEMENT isPlacementCapped: $isPlacementCapped');
   }
 
@@ -51,14 +53,14 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
       HorizontalButtons([
         ButtonInfo(
             "Show RewardedVideo",
-            _isRVAvailable
+            _isRewardedVideoAvailable
                 ? () async {
-                    // checkRVPlacement();
+                    // checkRewardedVideoPlacement();
                     if (await IronSource.isRewardedVideoAvailable()) {
-                      /// for the RV server-to-server callback param
+                      // for the RewardedVideo server-to-server callback param
                       // await IronSource.setDynamicUserId('some-dynamic-user-id');
 
-                      /// for placement capping test
+                      // for placement capping test
                       // IronSource.showRewardedVideo(placementName: 'CAPPED_PLACEMENT');
                       IronSource.showRewardedVideo();
                     }
@@ -66,16 +68,20 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
                 : null),
       ]),
       HorizontalButtons([
-        ButtonInfo("SetRVServerParams", () => setRVCustomParams()),
+        ButtonInfo("SetRewardedVideoServerParams",
+            () => setRewardedVideoCustomParams()),
       ]),
-      HorizontalButtons(
-          [ButtonInfo("ClearRVServerParams", () => IronSource.clearRewardedVideoServerParams())]),
+      HorizontalButtons([
+        ButtonInfo("ClearRewardedVideoServerParams",
+            () => IronSource.clearRewardedVideoServerParams())
+      ]),
     ]);
   }
 
-  /// RV listener ==================================================================================
+  // RewardedVideo listener
+
   @override
-  void onRewardedVideoAdClicked(IronSourceRVPlacement placement) {
+  void onRewardedVideoAdClicked(IronSourceRewardedVideoPlacement placement) {
     print('onRewardedVideoAdClicked Placement:$placement');
   }
 
@@ -86,7 +92,8 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
       _isVideoAdVisible = false;
     });
     if (mounted && _placement != null && !_isVideoAdVisible) {
-      Utils.showTextDialog(context, 'Video Reward', _placement?.toString() ?? '');
+      Utils.showTextDialog(
+          context, 'Video Reward', _placement?.toString() ?? '');
       setState(() {
         _placement = null;
       });
@@ -109,13 +116,14 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
   }
 
   @override
-  void onRewardedVideoAdRewarded(IronSourceRVPlacement placement) {
+  void onRewardedVideoAdRewarded(IronSourceRewardedVideoPlacement placement) {
     print("onRewardedVideoAdRewarded Placement: $placement");
     setState(() {
       _placement = placement;
     });
     if (mounted && _placement != null && !_isVideoAdVisible) {
-      Utils.showTextDialog(context, 'Video Reward', _placement?.toString() ?? '');
+      Utils.showTextDialog(
+          context, 'Video Reward', _placement?.toString() ?? '');
       setState(() {
         _placement = null;
       });
@@ -125,7 +133,12 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
   @override
   void onRewardedVideoAdShowFailed(IronSourceError error) {
     print("onRewardedVideoAdShowFailed Error:$error");
-    _isVideoAdVisible = false;
+    if (mounted) {
+      setState(() {
+        _isVideoAdVisible = true;
+        _isVideoAdVisible = false;
+      });
+    }
   }
 
   @override
@@ -138,7 +151,7 @@ class _RewardedVideoSectionState extends State<RewardedVideoSection>
     print('onRewardedVideoAvailabilityChanged: $isAvailable');
     if (mounted) {
       setState(() {
-        _isRVAvailable = isAvailable;
+        _isRewardedVideoAvailable = isAvailable;
       });
     }
   }

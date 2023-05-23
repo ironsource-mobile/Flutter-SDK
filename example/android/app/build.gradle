@@ -69,6 +69,8 @@ dependencies {
     // Play Services
     implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-    implementation 'com.google.android.gms:play-services-basement:18.0.0'
+    implementation 'com.google.android.gms:play-services-basement:18.2.0'
 
+    // Add Adapters and Network SDKs here
+    // https://developers.is.com/ironsource-mobile/flutter/mediation-networks-flutter/
 }
