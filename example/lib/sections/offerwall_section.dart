@@ -5,26 +5,27 @@ import '../utils.dart';
 
 class OfferwallSection extends StatefulWidget {
   const OfferwallSection({Key? key}) : super(key: key);
-  
+
   @override
   _OfferwallSectionState createState() => _OfferwallSectionState();
 }
 
-class _OfferwallSectionState extends State<OfferwallSection> with IronSourceOfferwallListener {
-  bool _isOWAvailable = false;
+class _OfferwallSectionState extends State<OfferwallSection>
+    with IronSourceOfferwallListener {
+  bool _isOfferWallAvailable = false;
 
   @override
   void initState() {
     super.initState();
-    IronSource.setOWListener(this);
+    IronSource.setOfferWallListener(this);
   }
 
-  /// Sample OW Custom Params - current DateTime milliseconds
+  /// Sample OfferWall Custom Params - current DateTime milliseconds\
   /// Must be called before show
-  Future<void> setOWCustomParams() async {
+  Future<void> setOfferWallCustomParams() async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     await IronSource.setOfferwallCustomParams({'dateTimeMillSec': time});
-    Utils.showTextDialog(context, "OW Custom Param Set", time);
+    Utils.showTextDialog(context, "OfferWall Custom Param Set", time);
   }
 
   @override
@@ -34,7 +35,7 @@ class _OfferwallSectionState extends State<OfferwallSection> with IronSourceOffe
       HorizontalButtons([
         ButtonInfo(
             "ShowOfferwall",
-            _isOWAvailable
+            _isOfferWallAvailable
                 ? () async {
                     if (await IronSource.isOfferwallAvailable()) {
                       // IronSource.showOfferwall(placementName: 'DefaultOfferwall');
@@ -49,21 +50,21 @@ class _OfferwallSectionState extends State<OfferwallSection> with IronSourceOffe
         })
       ]),
       HorizontalButtons([
-        ButtonInfo("SetOWCustomParams", () {
-          setOWCustomParams();
+        ButtonInfo("SetOfferWallCustomParams", () {
+          setOfferWallCustomParams();
         })
       ]),
     ]);
   }
 
-  /// OW listener ==================================================================================
+  // OfferWall listener
 
   @override
   void onOfferwallAvailabilityChanged(bool isAvailable) {
     print("onOfferwallAvailabilityChanged isAvailable:$isAvailable");
     if (mounted) {
       setState(() {
-        _isOWAvailable = isAvailable;
+        _isOfferWallAvailable = isAvailable;
       });
     }
   }
@@ -84,10 +85,11 @@ class _OfferwallSectionState extends State<OfferwallSection> with IronSourceOffe
   }
 
   @override
-  void onOfferwallAdCredited(IronSourceOWCreditInfo creditInfo) {
+  void onOfferwallAdCredited(IronSourceOfferWallCreditInfo creditInfo) {
     print("onOfferwallAdCredited creditInfo:$creditInfo");
     if (mounted) {
-      Utils.showTextDialog(context, 'Offerwall Credited', creditInfo.toString());
+      Utils.showTextDialog(
+          context, 'Offerwall Credited', creditInfo.toString());
     }
   }
 

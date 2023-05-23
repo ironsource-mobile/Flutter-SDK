@@ -1,4 +1,8 @@
+import 'package:ironsource_mediation/ironsource_mediation.dart';
+
 /// Offerwall credit info wrapper
+@Deprecated(
+    "This class has been deprecated as of SDK 7.3.0. Please use IronSourceOfferWallCreditInfo instead.")
 class IronSourceOWCreditInfo {
   final int credits;
   final int totalCredits;
@@ -16,9 +20,11 @@ class IronSourceOWCreditInfo {
 
   @override
   String toString() {
-    return 'credits: $credits,'
+    return 'IronSourceOfferWallCreditInfo{'
+        'credits: $credits,'
         ' totalCredits:$totalCredits,'
-        ' totalCreditsFlag:$totalCreditsFlag';
+        ' totalCreditsFlag:$totalCreditsFlag'
+        '}';
   }
 
   /// Equality overrides
@@ -31,5 +37,6 @@ class IronSourceOWCreditInfo {
   }
 
   @override
-  int get hashCode => credits.hashCode ^ totalCredits.hashCode ^ totalCreditsFlag.hashCode;
+  int get hashCode =>
+      credits.hashCode ^ totalCredits.hashCode ^ totalCreditsFlag.hashCode;
 }

@@ -1,18 +1,18 @@
 /// For ILR data
 class IronSourceImpressionData {
-  String? auctionId;
-  String? adUnit;
-  String? country;
-  String? ab;
-  String? segmentName;
-  String? placement;
-  String? adNetwork;
-  String? instanceName;
-  String? instanceId;
-  double? revenue;
-  String? precision;
-  double? lifetimeRevenue;
-  String? encryptedCPM;
+  final String? auctionId;
+  final String? adUnit;
+  final String? country;
+  final String? ab;
+  final String? segmentName;
+  final String? placement;
+  final String? adNetwork;
+  final String? instanceName;
+  final String? instanceId;
+  final double? revenue;
+  final String? precision;
+  final double? lifetimeRevenue;
+  final String? encryptedCPM;
 
   IronSourceImpressionData(
       {this.auctionId,

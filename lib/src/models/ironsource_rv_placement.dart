@@ -1,4 +1,6 @@
 /// Placement for RV
+@Deprecated(
+    "This class has been deprecated as of SDK 7.3.0. Please use IronSourceRewardedVideoPlacement instead.")
 class IronSourceRVPlacement {
   final String placementName;
   final String rewardName;
@@ -27,5 +29,6 @@ class IronSourceRVPlacement {
   }
 
   @override
-  int get hashCode => placementName.hashCode ^ rewardName.hashCode ^ rewardAmount.hashCode;
+  int get hashCode =>
+      placementName.hashCode ^ rewardName.hashCode ^ rewardAmount.hashCode;
 }

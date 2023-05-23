@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import './ironsource_method_call_handler.dart';
+import './parsers/incoming_value_parser.dart';
+import './parsers/outgoing_value_parser.dart';
 import './ironsource_constants.dart';
-import './ironsource_arg_parser.dart';
 import './models/models.dart';
 
 class IronSource {
-  static final MethodChannel _channel = const MethodChannel(IronConst.METHOD_CHANNEL)
-    ..setMethodCallHandler(handleMethodCall);
+  static final MethodChannel _channel =
+      const MethodChannel(IronConst.METHOD_CHANNEL)
+        ..setMethodCallHandler(IronSourceMethodCallHandler.handleMethodCall);
   static String? _flutterVersion;
 
   /** Utils ======================================================================================*/
@@ -52,7 +54,7 @@ class IronSource {
   /// - Android: shouldTrackNetworkState
   /// -     iOS: shouldTrackReachability
   static Future<void> shouldTrackNetworkState(bool isEnabled) async {
-    final args = IronSourceArgParser.shouldTrackNetworkState(isEnabled);
+    final args = OutgoingValueParser.shouldTrackNetworkState(isEnabled);
     return _channel.invokeMethod('shouldTrackNetworkState', args);
   }
 
@@ -62,7 +64,7 @@ class IronSource {
   /// - Android: setAdaptersDebug
   /// -     iOS: setAdaptersDebug
   static Future<void> setAdaptersDebug(bool isEnabled) async {
-    final args = IronSourceArgParser.setAdaptersDebug(isEnabled);
+    final args = OutgoingValueParser.setAdaptersDebug(isEnabled);
     return _channel.invokeMethod('setAdaptersDebug', args);
   }
 
@@ -73,7 +75,7 @@ class IronSource {
   /// - Android: setDynamicUserId
   /// -     iOS: setDynamicUserId
   static Future<void> setDynamicUserId(String dynamicUserId) async {
-    final args = IronSourceArgParser.setDynamicUserId(dynamicUserId);
+    final args = OutgoingValueParser.setDynamicUserId(dynamicUserId);
     return _channel.invokeMethod('setDynamicUserId', args);
   }
 
@@ -94,7 +96,7 @@ class IronSource {
   /// - Android: setConsent
   /// -     iOS: setConsent
   static Future<void> setConsent(bool isConsent) async {
-    final args = IronSourceArgParser.setConsent(isConsent);
+    final args = OutgoingValueParser.setConsent(isConsent);
     return _channel.invokeMethod('setConsent', args);
   }
 
@@ -104,7 +106,7 @@ class IronSource {
   /// - Android: setSegment
   /// -     iOS: setSegment
   static Future<void> setSegment(IronSourceSegment segment) async {
-    final args = IronSourceArgParser.setSegment(segment);
+    final args = OutgoingValueParser.setSegment(segment);
     return _channel.invokeMethod('setSegment', args);
   }
 
@@ -116,7 +118,7 @@ class IronSource {
   /// - Android: setMetaData
   /// -     iOS: setMetaDataWithKey
   static Future<void> setMetaData(Map<String, List<String>> metaData) async {
-    final args = IronSourceArgParser.setMetaData(metaData);
+    final args = OutgoingValueParser.setMetaData(metaData);
     return _channel.invokeMethod('setMetaData', args);
   }
 
@@ -130,7 +132,7 @@ class IronSource {
   /// - Android: setUserId
   /// -     iOS: setUserId
   static Future<void> setUserId(String userId) async {
-    final args = IronSourceArgParser.setUserId(userId);
+    final args = OutgoingValueParser.setUserId(userId);
     return _channel.invokeMethod('setUserId', args);
   }
 
@@ -147,20 +149,24 @@ class IronSource {
       List<IronSourceAdUnit>? adUnits,
       IronSourceInitializationListener? initListener}) async {
     /// set the plugin data first
-    final pluginData = IronSourceArgParser.setPluginData(
+    final pluginData = OutgoingValueParser.setPluginData(
         IronConst.PLUGIN_TYPE, IronConst.PLUGIN_VERSION, _flutterVersion);
     await _channel.invokeMethod('setPluginData', pluginData);
 
     if (initListener != null) {
-      initializationListener = initListener;
+      IronSourceMethodCallHandler.setInitListener(initListener);
     }
 
     // init
-    final args = IronSourceArgParser.init(appKey: appKey, adUnits: adUnits);
+    final args = OutgoingValueParser.init(appKey: appKey, adUnits: adUnits);
     return _channel.invokeMethod('init', args);
   }
 
-  /** RV API =====================================================================================*/
+  static Future<void> launchTestSuite() {
+    return _channel.invokeMethod('launchTestSuite');
+  }
+
+  /** RewardedVideo API =====================================================================================*/
 
   /// Shows an Rewarded Video ad.
   /// - The Ad Placement could be specified by [placementName].
@@ -169,8 +175,8 @@ class IronSource {
   /// - Android: showRewardedVideo
   /// -     iOS: showRewardedVideoWithViewController
   static Future<void> showRewardedVideo({String? placementName}) async {
-    return _channel.invokeMethod(
-        'showRewardedVideo', IronSourceArgParser.showRewardedVideo(placementName));
+    return _channel.invokeMethod('showRewardedVideo',
+        OutgoingValueParser.showRewardedVideo(placementName));
   }
 
   /// Returns an [IronSourceRVPlacement] instance if [placementName] matches.
@@ -180,20 +186,25 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getRewardedVideoPlacementInfo
   /// -     iOS: rewardedVideoPlacementInfo
-  static Future<IronSourceRVPlacement?> getRewardedVideoPlacementInfo(
-      {required String placementName}) async {
-    final args = IronSourceArgParser.getRewardedVideoPlacementInfo(placementName);
-    final placementInfo = await _channel.invokeMethod('getRewardedVideoPlacementInfo', args);
-    return placementInfo != null ? ParserUtil.getRVPlacementFromArguments(placementInfo) : null;
+  static Future<IronSourceRewardedVideoPlacement?>
+      getRewardedVideoPlacementInfo({required String placementName}) async {
+    final args =
+        OutgoingValueParser.getRewardedVideoPlacementInfo(placementName);
+    final placementInfo =
+        await _channel.invokeMethod('getRewardedVideoPlacementInfo', args);
+    return placementInfo != null
+        ? IncomingValueParser.getRewardedVideoPlacement(placementInfo)
+        : null;
   }
 
-  /// Returns the RV availability.
+  /// Returns the RewardedVideo availability.
   ///
   /// Native SDK Reference
   /// - Android: isRewardedVideoAvailable
   /// -     iOS: hasRewardedVideo
   static Future<bool> isRewardedVideoAvailable() async {
-    final bool isAvailable = await _channel.invokeMethod('isRewardedVideoAvailable');
+    final bool isAvailable =
+        await _channel.invokeMethod('isRewardedVideoAvailable');
     return isAvailable;
   }
 
@@ -202,9 +213,12 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isRewardedVideoPlacementCapped
   /// -     iOS: isRewardedVideoCappedForPlacement
-  static Future<bool> isRewardedVideoPlacementCapped({required String placementName}) async {
-    final args = IronSourceArgParser.isRewardedVideoPlacementCapped(placementName);
-    final bool isCapped = await _channel.invokeMethod('isRewardedVideoPlacementCapped', args);
+  static Future<bool> isRewardedVideoPlacementCapped(
+      {required String placementName}) async {
+    final args =
+        OutgoingValueParser.isRewardedVideoPlacementCapped(placementName);
+    final bool isCapped =
+        await _channel.invokeMethod('isRewardedVideoPlacementCapped', args);
     return isCapped;
   }
 
@@ -215,8 +229,9 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setRewardedVideoServerParameters
   /// -     iOS: setRewardedVideoServerParameters
-  static Future<void> setRewardedVideoServerParams(Map<String, String> parameters) async {
-    final args = IronSourceArgParser.setRewardedVideoServerParams(parameters);
+  static Future<void> setRewardedVideoServerParams(
+      Map<String, String> parameters) async {
+    final args = OutgoingValueParser.setRewardedVideoServerParams(parameters);
     return _channel.invokeMethod('setRewardedVideoServerParams', args);
   }
 
@@ -229,7 +244,7 @@ class IronSource {
     return _channel.invokeMethod('clearRewardedVideoServerParams');
   }
 
-  /// Sets the RV Manual Load mode.
+  /// Sets the RewardedVideo Manual Load mode.
   /// - [listener] will receive ad load status updates.
   /// - __Note__: Must be called before [init].
   ///
@@ -237,12 +252,12 @@ class IronSource {
   /// - Android: setManualLoadRewardedVideo
   /// -     iOS: setRewardedVideoManualDelegate
   static Future<void> setManualLoadRewardedVideo(
-      IronSourceRewardedVideoManualListener listener) async {
-    rewardedVideoManualListener = listener;
+      IronSourceRewardedVideoManualListener? listener) async {
+    IronSourceMethodCallHandler.setRewardedVideoManualListener(listener);
     return _channel.invokeMethod('setManualLoadRewardedVideo');
   }
 
-  /// Starts the RV load process.
+  /// Starts the RewardedVideo load process.
   /// - The RV Manual Load mode must be enabled via [setManualLoadRewardedVideo].
   ///
   /// Native SDK Reference
@@ -252,9 +267,9 @@ class IronSource {
     return _channel.invokeMethod('loadRewardedVideo');
   }
 
-  /** IS API =====================================================================================*/
+  /** Interstitial API =====================================================================================*/
 
-  /// Starts the IS load process.
+  /// Starts the Iinterstitial load process.
   /// - Load status updates will be notified to [IronSourceInterstitialListener]
   ///
   /// Native SDK Reference
@@ -271,11 +286,11 @@ class IronSource {
   /// - Android: showInterstitial
   /// -     iOS: showInterstitialWithViewController
   static Future<void> showInterstitial({String? placementName}) async {
-    final args = IronSourceArgParser.showInterstitial(placementName);
+    final args = OutgoingValueParser.showInterstitial(placementName);
     return _channel.invokeMethod('showInterstitial', args);
   }
 
-  /// Returns the IS availability.
+  /// Returns the Interstitial availability.
   ///
   /// Native SDK Reference
   /// - Android: isInterstitialReady
@@ -290,15 +305,18 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isInterstitialPlacementCapped
   /// -     iOS: isInterstitialCappedForPlacement
-  static Future<bool> isInterstitialPlacementCapped({required String placementName}) async {
-    final args = IronSourceArgParser.isInterstitialPlacementCapped(placementName);
-    final bool isCapped = await _channel.invokeMethod('isInterstitialPlacementCapped', args);
+  static Future<bool> isInterstitialPlacementCapped(
+      {required String placementName}) async {
+    final args =
+        OutgoingValueParser.isInterstitialPlacementCapped(placementName);
+    final bool isCapped =
+        await _channel.invokeMethod('isInterstitialPlacementCapped', args);
     return isCapped;
   }
 
-  /** BN API =====================================================================================*/
+  /** Banner API =====================================================================================*/
 
-  /// Starts the BN load process for [size] and [position].
+  /// Starts the Banner load process for [size] and [position].
   /// - Once it's successfully loaded, it keeps reloading until getting explicitly destroyed.
   /// - [verticalOffset] could be configured as Upward < 0 < Downward in Android:dp and iOS:point.
   /// - An ad placement could be specified with [placementName].
@@ -313,7 +331,7 @@ class IronSource {
     int? verticalOffset,
     String? placementName,
   }) async {
-    final args = IronSourceArgParser.loadBanner(size, position,
+    final args = OutgoingValueParser.loadBanner(size, position,
         offset: verticalOffset, placementName: placementName);
     return _channel.invokeMethod('loadBanner', args);
   }
@@ -344,12 +362,13 @@ class IronSource {
   /// - Android: isBannerPlacementCapped
   /// -     iOS: isBannerCappedForPlacement
   static Future<bool> isBannerPlacementCapped(String placementName) async {
-    final args = IronSourceArgParser.isBannerPlacementCapped(placementName);
-    final bool isCapped = await _channel.invokeMethod('isBannerPlacementCapped', args);
+    final args = OutgoingValueParser.isBannerPlacementCapped(placementName);
+    final bool isCapped =
+        await _channel.invokeMethod('isBannerPlacementCapped', args);
     return isCapped;
   }
 
-  /** OW API =====================================================================================*/
+  /** OfferWall API =====================================================================================*/
 
   /// Shows an Offerwall.
   /// - The Placement could be specified by [placementName].
@@ -358,11 +377,11 @@ class IronSource {
   /// - Android: showOfferwall
   /// -     iOS: showOfferwallWithViewController
   static Future<void> showOfferwall({String? placementName}) async {
-    final args = IronSourceArgParser.showOfferwall(placementName);
+    final args = OutgoingValueParser.showOfferwall(placementName);
     return _channel.invokeMethod('showOfferwall', args);
   }
 
-  /// Start fetching the current OW credits.
+  /// Start fetching the current OfferWall credits.
   /// - The fetched credit info will be passed to [IronSourceOfferwallListener]
   ///
   /// Native SDK Reference
@@ -372,17 +391,18 @@ class IronSource {
     return _channel.invokeMethod('getOfferwallCredits');
   }
 
-  /// Returns the OW availability.
+  /// Returns the OfferWall availability.
   ///
   /// Native SDK Reference
   /// - Android: isOfferwallAvailable
   /// -     iOS: hasOfferwall
   static Future<bool> isOfferwallAvailable() async {
-    final bool isAvailable = await _channel.invokeMethod('isOfferwallAvailable');
+    final bool isAvailable =
+        await _channel.invokeMethod('isOfferwallAvailable');
     return isAvailable;
   }
 
-  /** OW Config API ==============================================================================*/
+  /** OfferWall Config API ==============================================================================*/
 
   /// Sets the OW client side automatic polling mode.
   /// - __Note__: Must be called before [init].
@@ -391,18 +411,19 @@ class IronSource {
   /// - Android: setClientSideCallbacks
   /// -     iOS: setUseClientSideCallbacks
   static Future<void> setClientSideCallbacks(bool isEnabled) async {
-    final args = IronSourceArgParser.setClientSideCallbacks(isEnabled);
+    final args = OutgoingValueParser.setClientSideCallbacks(isEnabled);
     return _channel.invokeMethod('setClientSideCallbacks', args);
   }
 
-  /// Registers the custom [parameters] that will be passed in OW server-to-server callbacks.
+  /// Registers the custom [parameters] that will be passed in OfferWall server-to-server callbacks.
   /// - __Note__: Must be called before [init].
   ///
   /// Native SDK Reference
   /// - Android: setOfferwallCustomParams
   /// -     iOS: setOfferwallCustomParameters
-  static Future<void> setOfferwallCustomParams(Map<String, String> parameters) async {
-    final args = IronSourceArgParser.setOfferwallCustomParams(parameters);
+  static Future<void> setOfferwallCustomParams(
+      Map<String, String> parameters) async {
+    final args = OutgoingValueParser.setOfferwallCustomParams(parameters);
     return _channel.invokeMethod('setOfferwallCustomParams', args);
   }
 
@@ -417,7 +438,8 @@ class IronSource {
     if (!Platform.isIOS) {
       return null;
     }
-    final int? conversionValue = await _channel.invokeMethod('getConversionValue');
+    final int? conversionValue =
+        await _channel.invokeMethod('getConversionValue');
     return conversionValue;
   }
 
@@ -432,7 +454,7 @@ class IronSource {
     if (!Platform.isIOS) {
       return;
     }
-    final args = IronSourceArgParser.loadConsentViewWithType(consentViewType);
+    final args = OutgoingValueParser.loadConsentViewWithType(consentViewType);
     return _channel.invokeMethod('loadConsentViewWithType', args);
   }
 
@@ -445,197 +467,80 @@ class IronSource {
     if (!Platform.isIOS) {
       return;
     }
-    final args = IronSourceArgParser.showConsentViewWithType(consentViewType);
+    final args = OutgoingValueParser.showConsentViewWithType(consentViewType);
     return _channel.invokeMethod('showConsentViewWithType', args);
   }
 
-  /** ---------------------------------------------------------------------------------------------/
-   - Listeners and MethodCall handling                                                             /
-   -----------------------------------------------------------------------------------------------*/
+  // Listener setters
 
-  /// Init listener
-  @visibleForTesting
-  static IronSourceInitializationListener? initializationListener;
+  static void setRewardedVideoListener(
+      IronSourceRewardedVideoListener? listener) {
+    IronSourceMethodCallHandler.setRewardedVideoListener(listener);
+  }
 
-  /// RV listener
-  static IronSourceRewardedVideoListener? _rewardedVideoListener;
-
+  @Deprecated(
+      "'setRVListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayRewardedVideoListener instead")
   static void setRVListener(IronSourceRewardedVideoListener? listener) {
-    _rewardedVideoListener = listener;
+    IronSourceMethodCallHandler.setRVListener(listener);
   }
 
-  /// RV Manual Load mode listener
-  @visibleForTesting
-  static IronSourceRewardedVideoManualListener? rewardedVideoManualListener;
+  static void setInterstitialListener(
+      IronSourceInterstitialListener? listener) {
+    IronSourceMethodCallHandler.setInterstitialListener(listener);
+  }
 
-  /// IS listener
-  static IronSourceInterstitialListener? _interstitialListener;
-
+  @Deprecated(
+      "'setISListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayInterstitialListener instead")
   static void setISListener(IronSourceInterstitialListener? listener) {
-    _interstitialListener = listener;
+    IronSourceMethodCallHandler.setISListener(listener);
   }
 
-  /// BN listener
-  static IronSourceBannerListener? _bannerListener;
+  static void setBannerListener(IronSourceBannerListener? listener) {
+    IronSourceMethodCallHandler.setBannerListener(listener);
+  }
 
+  @Deprecated(
+      "'setBNListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayBannerListener instead")
   static void setBNListener(IronSourceBannerListener? listener) {
-    _bannerListener = listener;
+    IronSourceMethodCallHandler.setBNListener(listener);
   }
 
-  /// OW listener
-  static IronSourceOfferwallListener? _offerwallListener;
+  static void setOfferWallListener(IronSourceOfferwallListener? listener) {
+    IronSourceMethodCallHandler.setOfferWallListener(listener);
+  }
 
+  @Deprecated(
+      "'setOWListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayOfferWallListener instead")
   static void setOWListener(IronSourceOfferwallListener? listener) {
-    _offerwallListener = listener;
+    IronSourceMethodCallHandler.setOWListener(listener);
   }
 
-  /// ILR listener
-  static IronSourceImpressionDataListener? _impressionDataListener;
-
-  static void setImpressionDataListener(IronSourceImpressionDataListener? listener) {
-    _impressionDataListener = listener;
+  static void setImpressionDataListener(
+      IronSourceImpressionDataListener? listener) {
+    IronSourceMethodCallHandler.setImpressionDataListener(listener);
   }
-
-  /// iOS Consent View listener
-  static IronSourceConsentViewListener? _consentViewListener;
 
   static void setConsentViewListener(IronSourceConsentViewListener? listener) {
-    _consentViewListener = listener;
+    IronSourceMethodCallHandler.setConsentViewListener(listener);
   }
 
-  /// Handles method calls from the native platform.
-  /// - Triggers corresponding listener functions.
-  @visibleForTesting
-  static Future<dynamic> handleMethodCall(MethodCall call) async {
-    switch (call.method) {
-      /** Init completion ========================================================================*/
-      case 'onInitializationComplete':
-        return initializationListener?.onInitializationComplete();
+  static void setLevelPlayRewardedVideoListener(
+      LevelPlayRewardedVideoListener? listener) {
+    IronSourceMethodCallHandler.setLevelPlayRewardedVideoListener(listener);
+  }
 
-      /** RV events ==============================================================================*/
-      case 'onRewardedVideoAdOpened':
-        _rewardedVideoListener?.onRewardedVideoAdOpened();
-        rewardedVideoManualListener?.onRewardedVideoAdOpened();
-        return;
-      case 'onRewardedVideoAdClosed':
-        _rewardedVideoListener?.onRewardedVideoAdClosed();
-        rewardedVideoManualListener?.onRewardedVideoAdClosed();
-        return;
-      case 'onRewardedVideoAvailabilityChanged':
-        _rewardedVideoListener?.onRewardedVideoAvailabilityChanged(
-            IronSourceArgParser.onRewardedVideoAvailabilityChanged(call.arguments));
-        rewardedVideoManualListener?.onRewardedVideoAvailabilityChanged(
-            IronSourceArgParser.onRewardedVideoAvailabilityChanged(call.arguments));
-        return;
-      case 'onRewardedVideoAdRewarded':
-        _rewardedVideoListener?.onRewardedVideoAdRewarded(
-            IronSourceArgParser.onRewardedVideoAdRewarded(call.arguments));
-        rewardedVideoManualListener?.onRewardedVideoAdRewarded(
-            IronSourceArgParser.onRewardedVideoAdRewarded(call.arguments));
-        return;
-      case 'onRewardedVideoAdShowFailed':
-        _rewardedVideoListener?.onRewardedVideoAdShowFailed(
-            IronSourceArgParser.onRewardedVideoAdShowFailed(call.arguments));
-        rewardedVideoManualListener?.onRewardedVideoAdShowFailed(
-            IronSourceArgParser.onRewardedVideoAdShowFailed(call.arguments));
-        return;
-      case 'onRewardedVideoAdClicked':
-        _rewardedVideoListener?.onRewardedVideoAdClicked(
-            IronSourceArgParser.onRewardedVideoAdClicked(call.arguments));
-        rewardedVideoManualListener?.onRewardedVideoAdClicked(
-            IronSourceArgParser.onRewardedVideoAdClicked(call.arguments));
-        return;
-      case 'onRewardedVideoAdStarted':
-        _rewardedVideoListener?.onRewardedVideoAdStarted();
-        rewardedVideoManualListener?.onRewardedVideoAdStarted();
-        return;
-      case 'onRewardedVideoAdEnded':
-        _rewardedVideoListener?.onRewardedVideoAdEnded();
-        rewardedVideoManualListener?.onRewardedVideoAdEnded();
-        return;
+  static void setLevelPlayRewardedVideoManualListener(
+      LevelPlayRewardedVideoManualListener? listener) {
+    IronSourceMethodCallHandler.setLevelPlayRewardedVideoManualListener(
+        listener);
+  }
 
-      /** Manual Load RV events ==================================================================*/
-      case 'onRewardedVideoAdReady':
-        return rewardedVideoManualListener?.onRewardedVideoAdReady();
-      case 'onRewardedVideoAdLoadFailed':
-        return rewardedVideoManualListener?.onRewardedVideoAdLoadFailed(
-            IronSourceArgParser.onRewardedVideoAdLoadFailed(call.arguments));
+  static void setLevelPlayInterstitialListener(
+      LevelPlayInterstitialListener? listener) {
+    IronSourceMethodCallHandler.setLevelPlayInterstitialListener(listener);
+  }
 
-      /** IS Events ==============================================================================*/
-      case 'onInterstitialAdReady':
-        return _interstitialListener?.onInterstitialAdReady();
-      case 'onInterstitialAdLoadFailed':
-        return _interstitialListener?.onInterstitialAdLoadFailed(
-            IronSourceArgParser.onInterstitialAdLoadFailed(call.arguments));
-      case 'onInterstitialAdOpened':
-        return _interstitialListener?.onInterstitialAdOpened();
-      case 'onInterstitialAdClosed':
-        return _interstitialListener?.onInterstitialAdClosed();
-      case 'onInterstitialAdShowSucceeded':
-        return _interstitialListener?.onInterstitialAdShowSucceeded();
-      case 'onInterstitialAdShowFailed':
-        return _interstitialListener?.onInterstitialAdShowFailed(
-            IronSourceArgParser.onInterstitialAdShowFailed(call.arguments));
-      case 'onInterstitialAdClicked':
-        return _interstitialListener?.onInterstitialAdClicked();
-
-      /** BN Events ==============================================================================*/
-      case 'onBannerAdLoaded':
-        return _bannerListener?.onBannerAdLoaded();
-      case 'onBannerAdLoadFailed':
-        return _bannerListener
-            ?.onBannerAdLoadFailed(IronSourceArgParser.onBannerAdLoadFailed(call.arguments));
-      case 'onBannerAdClicked':
-        return _bannerListener?.onBannerAdClicked();
-      case 'onBannerAdScreenPresented':
-        return _bannerListener?.onBannerAdScreenPresented();
-      case 'onBannerAdScreenDismissed':
-        return _bannerListener?.onBannerAdScreenDismissed();
-      case 'onBannerAdLeftApplication':
-        return _bannerListener?.onBannerAdLeftApplication();
-
-      /** OW Events ==============================================================================*/
-      case 'onOfferwallAvailabilityChanged':
-        return _offerwallListener?.onOfferwallAvailabilityChanged(
-            IronSourceArgParser.onOfferwallAvailabilityChanged(call.arguments));
-      case 'onOfferwallOpened':
-        return _offerwallListener?.onOfferwallOpened();
-      case 'onOfferwallShowFailed':
-        return _offerwallListener
-            ?.onOfferwallShowFailed(IronSourceArgParser.onOfferwallShowFailed(call.arguments));
-      case 'onOfferwallAdCredited':
-        return _offerwallListener
-            ?.onOfferwallAdCredited(IronSourceArgParser.onOfferwallAdCredited(call.arguments));
-      case 'onGetOfferwallCreditsFailed':
-        return _offerwallListener?.onGetOfferwallCreditsFailed(
-            IronSourceArgParser.onGetOfferwallCreditsFailed(call.arguments));
-      case 'onOfferwallClosed':
-        return _offerwallListener?.onOfferwallClosed();
-
-      /** ImpressionData Event ===================================================================*/
-      case 'onImpressionSuccess':
-        return _impressionDataListener
-            ?.onImpressionSuccess(IronSourceArgParser.onImpressionSuccess(call.arguments));
-
-      /** iOS14 ConsentView Event ================================================================*/
-      case 'consentViewDidLoadSuccess':
-        return _consentViewListener?.consentViewDidLoadSuccess(
-            IronSourceArgParser.consentViewDidLoadSuccess(call.arguments));
-      case 'consentViewDidFailToLoad':
-        return _consentViewListener?.consentViewDidFailToLoad(
-            IronSourceArgParser.consentViewDidFailToLoad(call.arguments));
-      case 'consentViewDidShowSuccess':
-        return _consentViewListener?.consentViewDidShowSuccess(
-            IronSourceArgParser.consentViewDidShowSuccess(call.arguments));
-      case 'consentViewDidFailToShow':
-        return _consentViewListener?.consentViewDidFailToShow(
-            IronSourceArgParser.consentViewDidFailToShow(call.arguments));
-      case 'consentViewDidAccept':
-        return _consentViewListener
-            ?.consentViewDidAccept(IronSourceArgParser.consentViewDidAccept(call.arguments));
-
-      default:
-        throw UnimplementedError("Method not implemented: ${call.method}");
-    }
+  static void setLevelPlayBannerListener(LevelPlayBannerListener? listener) {
+    IronSourceMethodCallHandler.setLevelPlayBannerListener(listener);
   }
 }

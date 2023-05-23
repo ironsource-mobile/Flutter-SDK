@@ -10,13 +10,14 @@ class BannerSection extends StatefulWidget {
   _BannerSectionState createState() => _BannerSectionState();
 }
 
-class _BannerSectionState extends State<BannerSection> with IronSourceBannerListener {
-  bool _isBNLoaded = false;
+class _BannerSectionState extends State<BannerSection>
+    with IronSourceBannerListener {
+  bool _isBannerLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    IronSource.setBNListener(this);
+    IronSource.setBannerListener(this);
   }
 
   @override
@@ -25,8 +26,9 @@ class _BannerSectionState extends State<BannerSection> with IronSourceBannerList
       const Text("Banner", style: Utils.headingStyle),
       HorizontalButtons([
         ButtonInfo("Load Banner", () async {
-          final isCapped = await IronSource.isBannerPlacementCapped('DefaultBanner');
-          print('BN DefaultBanner capped: $isCapped');
+          final isCapped =
+              await IronSource.isBannerPlacementCapped('DefaultBanner');
+          print('Banner DefaultBanner capped: $isCapped');
           if (!isCapped) {
             final size = IronSourceBannerSize.BANNER;
             // size.isAdaptive = true; // Adaptive Banner
@@ -39,11 +41,11 @@ class _BannerSectionState extends State<BannerSection> with IronSourceBannerList
         }),
         ButtonInfo(
             "Destroy Banner",
-            _isBNLoaded
+            _isBannerLoaded
                 ? () {
                     IronSource.destroyBanner();
                     setState(() {
-                      _isBNLoaded = false;
+                      _isBannerLoaded = false;
                     });
                   }
                 : null)
@@ -59,7 +61,7 @@ class _BannerSectionState extends State<BannerSection> with IronSourceBannerList
     ]);
   }
 
-  /// BN listener ==================================================================================
+  /// Banner listener ==================================================================================
   @override
   void onBannerAdClicked() {
     print("onBannerAdClicked");
@@ -70,7 +72,7 @@ class _BannerSectionState extends State<BannerSection> with IronSourceBannerList
     print("onBannerAdLoadFailed Error:$error");
     if (mounted) {
       setState(() {
-        _isBNLoaded = false;
+        _isBannerLoaded = false;
       });
     }
   }
@@ -80,7 +82,7 @@ class _BannerSectionState extends State<BannerSection> with IronSourceBannerList
     print("onBannerAdLoaded");
     if (mounted) {
       setState(() {
-        _isBNLoaded = true;
+        _isBannerLoaded = true;
       });
     }
   }

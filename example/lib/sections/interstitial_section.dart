@@ -5,19 +5,19 @@ import '../widgets/horizontal_buttons.dart';
 
 class InterstitialSection extends StatefulWidget {
   const InterstitialSection({Key? key}) : super(key: key);
-  
+
   @override
   _InterstitialSectionState createState() => _InterstitialSectionState();
 }
 
 class _InterstitialSectionState extends State<InterstitialSection>
     with IronSourceInterstitialListener {
-  bool _isISAvailable = false;
+  bool _isInterstitialAvailable = false;
 
   @override
   void initState() {
     super.initState();
-    IronSource.setISListener(this);
+    IronSource.setInterstitialListener(this);
   }
 
   @override
@@ -25,16 +25,20 @@ class _InterstitialSectionState extends State<InterstitialSection>
     return Column(children: [
       const Text("Interstitial", style: Utils.headingStyle),
       HorizontalButtons([
+        ButtonInfo("Test Suite", () {
+          IronSource.launchTestSuite();
+        }),
         ButtonInfo("Load Interstitial", () {
           IronSource.loadInterstitial();
         }),
         ButtonInfo(
             "Show Interstitial",
-            _isISAvailable
+            _isInterstitialAvailable
                 ? () async {
                     final isCapped =
-                        await IronSource.isInterstitialPlacementCapped(placementName: "Default");
-                    print('IS Default placement capped: $isCapped');
+                        await IronSource.isInterstitialPlacementCapped(
+                            placementName: "Default");
+                    print('Interstitial Default placement capped: $isCapped');
                     if (!isCapped && await IronSource.isInterstitialReady()) {
                       IronSource.showInterstitial();
                     }
@@ -44,7 +48,8 @@ class _InterstitialSectionState extends State<InterstitialSection>
     ]);
   }
 
-  /// IS listener ==================================================================================
+  // Interstitial listener
+
   @override
   void onInterstitialAdClicked() {
     print("onInterstitialAdClicked");
@@ -55,7 +60,7 @@ class _InterstitialSectionState extends State<InterstitialSection>
     print("onInterstitialAdClosed");
     if (mounted) {
       setState(() {
-        _isISAvailable = false;
+        _isInterstitialAvailable = false;
       });
     }
   }
@@ -65,7 +70,7 @@ class _InterstitialSectionState extends State<InterstitialSection>
     print("onInterstitialAdLoadFailed Error:$error");
     if (mounted) {
       setState(() {
-        _isISAvailable = false;
+        _isInterstitialAvailable = false;
       });
     }
   }
@@ -80,7 +85,7 @@ class _InterstitialSectionState extends State<InterstitialSection>
     print("onInterstitialAdReady");
     if (mounted) {
       setState(() {
-        _isISAvailable = true;
+        _isInterstitialAvailable = true;
       });
     }
   }
@@ -90,7 +95,7 @@ class _InterstitialSectionState extends State<InterstitialSection>
     print("onInterstitialAdShowFailed Error:$error");
     if (mounted) {
       setState(() {
-        _isISAvailable = false;
+        _isInterstitialAvailable = false;
       });
     }
   }

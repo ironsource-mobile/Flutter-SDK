@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 /// Utils
 class Utils {
-  /// spacers
+  // spacers
   static const spacerSmall = SizedBox(height: 5);
   static const spacerLarge = SizedBox(height: 23);
 
-  /// styles
+  // styles
   static const headingStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
 
-  /// Dialog
+  // Dialog
   static void showTextDialog(BuildContext context, String title, String content) {
     showDialog(
         context: context,
