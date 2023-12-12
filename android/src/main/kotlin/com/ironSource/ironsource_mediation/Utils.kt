@@ -24,7 +24,12 @@ class Utils {
           }
 
           override fun notImplemented() {
-            throw Error("Critical Error: invokeMethod $methodName notImplemented ")
+            try{
+              throw Error("Critical Error: invokeMethod $methodName notImplemented ")
+            }catch(e: Error){
+              Log.e(IronSourceMediationPlugin.TAG, "Error: invokeMethod $methodName failed "
+                + "errorCode: $errorCode, message: $errorMessage, details: $errorDetails")
+            }
           }
         })
       }
