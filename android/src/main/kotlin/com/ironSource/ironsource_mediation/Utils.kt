@@ -27,8 +27,7 @@ class Utils {
             try{
               throw Error("Critical Error: invokeMethod $methodName notImplemented ")
             }catch(e: Error){
-              Log.e(IronSourceMediationPlugin.TAG, "Error: invokeMethod $methodName failed "
-                + "errorCode: $errorCode, message: $errorMessage, details: $errorDetails")
+              Log.e(IronSourceMediationPlugin.TAG, "Critical Error: invokeMethod $methodName notImplemented ")
             }
           }
         })
