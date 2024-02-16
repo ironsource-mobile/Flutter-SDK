@@ -75,7 +75,10 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     isPluginAttached=false
-    channel.setMethodCallHandler(null)
+    // channel.setMethodCallHandler(null)
+    if (::channel.isInitialized) {
+        channel.setMethodCallHandler(null)
+    }
     detachListeners()
   }
 

@@ -201,9 +201,9 @@
     },
     {
       "name": "js",
-      "rootUri": "file:///Users/shim/.pub-cache/hosted/pub.dev/js-0.7.0",
+      "rootUri": "file:///Users/shim/.pub-cache/hosted/pub.dev/js-0.6.7",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "2.19"
     },
     {
       "name": "json_annotation",
@@ -404,7 +404,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2024-02-15T04:42:54.048111Z",
+  "generated": "2024-02-15T06:23:09.352674Z",
   "generator": "pub",
   "generatorVersion": "3.2.3"
 }
