@@ -65,6 +65,8 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    Log.d("IronSourceMediationPlugin", "onAttachedToEngine");
+
     if (!isPluginAttached) {
       channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
       channel.setMethodCallHandler(this)
@@ -74,13 +76,15 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    isPluginAttached=false
+    Log.d("IronSourceMediationPlugin", "onDetachedFromEngine");
+
+    // isPluginAttached=false
     // channel.setMethodCallHandler(null)
     // detachListeners()
-    if (::channel.isInitialized) {
-        channel.setMethodCallHandler(null)
-        detachListeners()
-    }
+    // if (::channel.isInitialized) {
+    //     channel.setMethodCallHandler(null)
+    //     detachListeners()
+    // }
   }
 
   /**
