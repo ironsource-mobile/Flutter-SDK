@@ -76,10 +76,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     isPluginAttached=false
     // channel.setMethodCallHandler(null)
+    // detachListeners()
     if (::channel.isInitialized) {
         channel.setMethodCallHandler(null)
+        detachListeners()
     }
-    detachListeners()
   }
 
   /**
@@ -137,6 +138,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * Listener Reference Clean Up
    */
   private fun detachListeners() {
+    print("detachListeners");
     // RewardedVideo
     mRewardedVideoListener?.let { IronSource.removeRewardedVideoListener() }
     mRewardedVideoListener = null
