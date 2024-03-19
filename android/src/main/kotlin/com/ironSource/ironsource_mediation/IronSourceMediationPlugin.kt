@@ -64,10 +64,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
+  private var isPluginAttached: Boolean=false
+  
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("IronSourceMediationPlugin", "onAttachedToEngine");
 
     if (!isPluginAttached) {
+      isPluginAttached = true
       channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
       channel.setMethodCallHandler(this)
       context=flutterPluginBinding.getApplicationContext()
@@ -78,9 +81,9 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("IronSourceMediationPlugin", "onDetachedFromEngine");
 
-    // isPluginAttached=false
-    // channel.setMethodCallHandler(null)
-    // detachListeners()
+    isPluginAttached=false
+    channel.setMethodCallHandler(null)
+    detachListeners()
     // if (::channel.isInitialized) {
     //     channel.setMethodCallHandler(null)
     //     detachListeners()
@@ -684,7 +687,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region ActivityAware =======================================================================*/
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-    isPluginAttached=true
+    // isPluginAttached=true
     activity = binding.activity
     if (activity is FlutterActivity)
     {
@@ -711,7 +714,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    isPluginAttached=true
+    // isPluginAttached=true
     if (activity is FlutterActivity)
     {
       activity = binding.activity as FlutterActivity
@@ -768,7 +771,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   companion object {
     val TAG = IronSourceMediationPlugin::class.java.simpleName
-    var isPluginAttached: Boolean=false
   }
 
   enum class BannerPosition(val value: Int) {
