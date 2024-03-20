@@ -33,7 +33,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.BinaryMessenger
 import java.util.concurrent.Executors
 import kotlin.math.abs
-import java.util.concurrent.atomic.AtomicBoolean
 
 /** IronSourceMediationPlugin */
 class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, LifecycleObserver {
@@ -86,8 +85,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
          channel.setMethodCallHandler(null)
          detachListeners()
      }
-    binaryMessenger = null
-    context = null
   }
 
   /**
