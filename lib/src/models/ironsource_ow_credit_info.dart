@@ -1,4 +1,3 @@
-import 'package:ironsource_mediation/ironsource_mediation.dart';
 
 /// Offerwall credit info wrapper
 @Deprecated(

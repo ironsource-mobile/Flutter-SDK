@@ -1,7 +1,6 @@
 import '../ironsource_rewardedvideo_placement.dart';
 import '../ironsource_error.dart';
 import '../ironsource_ad_info.dart';
-import '../ironsource_rv_placement.dart';
 
 abstract class LevelPlayRewardedVideoBaseListener {
   /// The Rewarded Video ad view has opened.

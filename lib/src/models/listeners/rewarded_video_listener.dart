@@ -1,6 +1,5 @@
 import '../ironsource_error.dart';
 import '../ironsource_rewardedvideo_placement.dart';
-import '../ironsource_rv_placement.dart';
 
 /// Rewarded Video
 @Deprecated(
