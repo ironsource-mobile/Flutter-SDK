@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '1.2.0';
-  static const String ANDROID_SDK_VERSION = '7.3.0.1';
-  static const String IOS_SDK_VERSION = '7.3.0';
+  static const String PLUGIN_VERSION = '1.2.1';
+  static const String ANDROID_SDK_VERSION = '7.9.0';
+  static const String IOS_SDK_VERSION = '7.9.1';
 }
 
 /// Argument Keys
@@ -22,6 +22,7 @@ class IronConstKey {
   static const String IS_CONSENT = 'isConsent';
   static const String SEGMENT = 'segment';
   static const String META_DATA = 'metaData';
+  static const String WATERFALL_CONFIGURATION = 'waterfallConfiguration';
   static const String DESCRIPTION = 'description';
   static const String WIDTH = 'width';
   static const String HEIGHT = 'height';
@@ -34,6 +35,8 @@ class IronConstKey {
   static const String OFFSET = 'offset';
   static const String ERROR = 'error';
   static const String AD_INFO = 'adInfo';
+  static const String CONTAINER_WIDTH = 'containerWidth';
+  static const String CONTAINER_HEIGHT = 'containerHeight';
 
   // ImpressionData
   static const String AUCTION_ID = 'auctionId';

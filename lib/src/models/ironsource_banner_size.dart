@@ -1,5 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'ironsource_container_params.dart';
+
 /// Banner Size
 class IronSourceBannerSize {
   late final int _width;
@@ -9,6 +11,8 @@ class IronSourceBannerSize {
   late final String _description;
   get description => _description;
   bool isAdaptive = false;
+  IronSourceContainerParams isContainerParams = IronSourceContainerParams();
+
 
   /// private constructor to prevent description - WH conflicts
   IronSourceBannerSize._({width = 0, height = 0, required String description}) {

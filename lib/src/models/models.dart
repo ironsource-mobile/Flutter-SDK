@@ -10,3 +10,5 @@ export './ironsource_ow_credit_info.dart';
 export './ironsource_rewardedvideo_placement.dart';
 export './ironsource_rv_placement.dart';
 export './ironsource_segment.dart';
+export './ironsource_container_params.dart';
+

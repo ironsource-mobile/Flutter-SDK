@@ -122,6 +122,19 @@ class IronSource {
     return _channel.invokeMethod('setMetaData', args);
   }
 
+  /// Registers [waterfallConfiguration].
+  /// - Can be used for regulation settings, mediated networks' config, etc.
+  /// - Read more at: https://developers.is.com/ironsource-mobile/android/regulation-advanced-settings/
+  ///
+  /// Native SDK Reference
+  /// - Android: setWaterfallConfiguration
+  /// -     iOS: setWaterfallConfiguration
+  static Future<void> setWaterfallConfiguration(double? ceiling, double? floor, IronSourceAdUnit adUnit) async {
+    final args = OutgoingValueParser.setWaterfallConfiguration(ceiling, floor, adUnit);
+    return _channel.invokeMethod('setWaterfallConfiguration', args);
+  }
+
+
   /** SDK Init API ===============================================================================*/
 
   /// Registers the [userId] for the session.
@@ -366,6 +379,17 @@ class IronSource {
     final bool isCapped =
         await _channel.invokeMethod('isBannerPlacementCapped', args);
     return isCapped;
+  }
+
+  /// Returns the maximal adaptive height of given width.
+  ///
+  /// Native SDK Reference
+  /// - Android: getMaximalAdaptiveHeight
+  /// -     iOS: getMaximalAdaptiveHeight
+  static Future<double> getMaximalAdaptiveHeight(int width) async {
+    final args = OutgoingValueParser.getMaximalAdaptiveHeight(width);
+    final double adaptiveHeight = await _channel.invokeMethod('getMaximalAdaptiveHeight', args);
+    return adaptiveHeight;
   }
 
   /** OfferWall API =====================================================================================*/

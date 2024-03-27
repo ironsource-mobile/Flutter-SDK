@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
@@ -81,9 +82,9 @@ class _AppScreenState extends State<AppScreen>
 
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
-        ? "85460dcd"
+        ? "1dc3db545"
         : Platform.isIOS
-            ? "8545d445"
+            ? "1dc3deecd"
             : throw Exception("Unsupported Platform");
     try {
       IronSource.setFlutterVersion('3.3.0'); // fetch automatically

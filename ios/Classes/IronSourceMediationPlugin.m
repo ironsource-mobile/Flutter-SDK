@@ -52,7 +52,7 @@ ISOfferwallDelegate>
                                      binaryMessenger:[registrar messenger]];
     IronSourceMediationPlugin* instance = [[IronSourceMediationPlugin alloc] initWithChannel:channel];
     [registrar addMethodCallDelegate:instance channel:channel];
-    
+
     // Set ironSource delegates
     // Init
     instance.initializationDelegate = [[InitDelegateMethodHandler alloc] initWithChannel:channel];
@@ -68,7 +68,7 @@ ISOfferwallDelegate>
     [IronSource setOfferwallDelegate:instance];
     // Imp Data
     [IronSource addImpressionDataDelegate:[[ImpressionDataDelegateMethodHandler alloc] initWithChannel:channel]];
-    
+
 # pragma mark - LevelPlay Delegates=========================================================================
     // LevelPlay RewardedVideo
      [IronSource setLevelPlayRewardedVideoDelegate:[[LevelPlayRewardedVideoDelegateMethodHandler alloc] initWithChannel:channel]];
@@ -76,7 +76,7 @@ ISOfferwallDelegate>
     [IronSource setLevelPlayInterstitialDelegate:[[LevelPlayInterstitialDelegateMethodHandler alloc] initWithChannel:channel]];
     // LevelPlay Banner
     [IronSource setLevelPlayBannerDelegate:[[LevelPlayBannerDelegateMethodHandler alloc] initWithChannel:channel]];
-    
+
     // ATT Brigde
     [ATTrackingManagerChannel registerWithMessenger:[registrar messenger]];
 }
@@ -107,6 +107,8 @@ ISOfferwallDelegate>
         [self setSegment:call.arguments result:result];
     } else if([@"setMetaData" isEqualToString:call.method]) {
         [self setMetaData:call.arguments result:result];
+    } else if([@"setWaterfallConfiguration" isEqualToString:call.method]) {
+        [self setWaterfallConfiguration:call.arguments result:result];
     } else if([@"setUserId" isEqualToString:call.method]) { /* Init API ========================*/
         [self setUserId:call.arguments result:result];
     } else if ([@"init" isEqualToString:call.method]) {
@@ -147,6 +149,8 @@ ISOfferwallDelegate>
         [self hideBanner:result];
     } else if([@"isBannerPlacementCapped" isEqualToString:call.method]) {
         [self isBannerPlacementCapped:call.arguments result:result];
+    } else if([@"getMaximalAdaptiveHeight" isEqualToString:call.method]) {
+        [self getMaximalAdaptiveHeight:call.arguments result:result];
     } else if([@"isOfferwallAvailable" isEqualToString:call.method]) { /* OfferWall API ===============*/
         [self isOfferwallAvailable:result];
     } else if([@"showOfferwall" isEqualToString:call.method]) {
@@ -243,12 +247,12 @@ ISOfferwallDelegate>
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
-    
+
     NSDictionary *segmentDict = [args valueForKey:@"segment"];
     if (segmentDict == nil || [[NSNull null] isEqual:segmentDict]){
         return result([FlutterError errorWithCode:@"ERROR" message:@"segment is missing" details:nil]);
     }
-    
+
     ISSegment *segment = [[ISSegment alloc] init];
     NSMutableArray<NSString*> *allKeys = [[segmentDict allKeys] mutableCopy];
     for (NSString *key in allKeys)
@@ -308,12 +312,12 @@ ISOfferwallDelegate>
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
-    
+
     NSDictionary<NSString*, NSArray<NSString*>*> *metaDataDict = [args valueForKey:@"metaData"];
     if (metaDataDict == nil || [[NSNull null] isEqual:metaDataDict]){
         return result([FlutterError errorWithCode:@"ERROR" message:@"metaData is missing" details:nil]);
     }
-    
+
     NSMutableArray<NSString*> *allKeys = [[metaDataDict allKeys] mutableCopy];
     for (NSString* key in allKeys)
     {
@@ -323,6 +327,52 @@ ISOfferwallDelegate>
         }
     }
     return result(nil);
+}
+
+- (void)setWaterfallConfiguration:(nullable id) args
+                           result:(FlutterResult)result {
+    if (!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+    NSDictionary *waterfallConfigurationDataMap = [args objectForKey:@"waterfallConfiguration"];
+    if (waterfallConfigurationDataMap == nil || [[NSNull null] isEqual:waterfallConfigurationDataMap]){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"waterfallConfiguration is missing" details:nil]);
+    }
+
+    NSNumber *ceiling = waterfallConfigurationDataMap[@"ceiling"] ?: [NSNull null];
+    NSNumber *floor = waterfallConfigurationDataMap[@"floor"] ?: [NSNull null];
+    NSString *adUnitString = waterfallConfigurationDataMap[@"adUnit"] ?: [NSNull null];
+
+    ISAdUnit *adUnit = [self getAdUnit:adUnitString];
+
+    if (adUnit) {
+        if (ceiling && floor) {
+            ISWaterfallConfigurationBuilder *builder = [ISWaterfallConfiguration builder];
+            [builder setCeiling:ceiling];
+            [builder setFloor:floor];
+            ISWaterfallConfiguration *configuration = [builder build];
+            [IronSource setWaterfallConfiguration:configuration forAdUnit:adUnit];
+        } else {
+            ISWaterfallConfiguration *clearConfiguration = [ISWaterfallConfiguration clear];
+            [IronSource setWaterfallConfiguration:clearConfiguration forAdUnit:adUnit];
+        }
+    }
+
+    return result(nil);
+}
+
+-(ISAdUnit *)getAdUnit:(NSString *)adUnitString {
+    if ([adUnitString isEqualToString:@"REWARDED_VIDEO"]) {
+        return ISAdUnit.IS_AD_UNIT_REWARDED_VIDEO;
+    } else if ([adUnitString isEqualToString:@"INTERSTITIAL"]) {
+        return ISAdUnit.IS_AD_UNIT_INTERSTITIAL;
+    } else if ([adUnitString isEqualToString:@"BANNER"]) {
+        return ISAdUnit.IS_AD_UNIT_BANNER;
+    } else if ([adUnitString isEqualToString:@"OFFERWALL"]) {
+        return ISAdUnit.IS_AD_UNIT_OFFERWALL;
+    } else {
+        return nil;
+    }
 }
 
 # pragma mark - Init API =========================================================================
@@ -346,13 +396,13 @@ ISOfferwallDelegate>
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
-    
+
     NSString *appKey = [args valueForKey:@"appKey"];
     NSArray<NSString*> *adUnits = [args valueForKey:@"adUnits"];
     if(appKey == nil || [[NSNull null] isEqual:appKey]){
         return result([FlutterError errorWithCode:@"ERROR" message:@"appKey is missing" details:nil]);
     }
-    
+
     if(adUnits != nil && adUnits.count){
         NSMutableArray<NSString*> *parsedAdUnits = [[NSMutableArray alloc]init];
         for(NSString *unit in adUnits){
@@ -508,18 +558,36 @@ ISOfferwallDelegate>
         if(isAdaptive == nil || [[NSNull null] isEqual:isAdaptive]){
             return result([FlutterError errorWithCode:@"ERROR" message:@"isAdaptive is missing" details:nil]);
         }
+        NSNumber *containerWidth = [args valueForKey:@"containerWidth"];
+               if(containerWidth == nil || [[NSNull null] isEqual:containerWidth]){
+                   return result([FlutterError errorWithCode:@"ERROR" message:@"containerWidth is missing" details:nil]);
+               }
+       NSNumber *containerHeight = [args valueForKey:@"containerHeight"];
+       if(containerHeight == nil || [[NSNull null] isEqual:containerHeight]){
+           return result([FlutterError errorWithCode:@"ERROR" message:@"containerHeight is missing" details:nil]);
+        }
         NSNumber *position = [args valueForKey:@"position"];
         if(position == nil || [[NSNull null] isEqual:position]){
             return result([FlutterError errorWithCode:@"ERROR" message:@"position is missing" details:nil]);
         }
         NSNumber *offset = [args valueForKey:@"offset"];
         NSString *placementName = [args valueForKey:@"placementName"];
-        
+
         self.bannerOffset = (offset != nil || [[NSNull null] isEqual:offset]) ? offset : [NSNumber numberWithInt:0];
         self.bannerViewController = [self getRootViewController];
         self.bannerPosition = [position integerValue];
         ISBannerSize* size = [self getBannerSize:description width:[width integerValue] height:[height integerValue]];
         size.adaptive = [isAdaptive boolValue];
+        // Handle banner properties according to isAdaptive value
+       if (isAdaptive) {
+           // isAdaptive is true
+           // Convert NSNumber to CGFloat
+           CGFloat containerWidthFloat = [containerWidth doubleValue];
+           CGFloat containerHeightFloat = [containerHeight doubleValue];
+           // Set container params with width and adaptiveHeight
+           ISContainerParams *containerParams = [[ISContainerParams alloc] initWithWidth:containerWidthFloat height:containerHeightFloat];
+           [size setContainerParams:containerParams];
+       }
         // Load banner view
         // if already loaded, console error would be shown by iS SDK
         if(placementName == nil || [[NSNull null] isEqual:placementName]){
@@ -557,7 +625,7 @@ ISOfferwallDelegate>
     const NSInteger BANNER_POSITION_TOP = 0;
     const NSInteger BANNER_POSITION_CENTER = 1;
     // const NSInteger BANNER_POSITION_BOTTOM = 2;
-    
+
     CGFloat y;
     if (position == BANNER_POSITION_TOP) {
         y = (bannerView.frame.size.height / 2);
@@ -649,6 +717,29 @@ ISOfferwallDelegate>
     });
 }
 
+/**
+ * Returns maximal adaptive height for given width.
+ *
+ * @param args   The arguments containing the placement name.
+ * @param result The result to be returned after checking the placement cap.
+ */
+- (void)getMaximalAdaptiveHeight:(nullable id) args result:(nonnull FlutterResult)result{
+    if(!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+    NSNumber *width = [args valueForKey:@"width"];
+    if(width == nil || [[NSNull null] isEqual:width]){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"width is missing" details:nil]);
+    }
+    // Extract the CGFloat value from the NSNumber object
+    CGFloat widthFloat = [width doubleValue];
+
+    CGFloat adaptiveHeight = [ISBannerSize getMaximalAdaptiveHeightWithWidth: widthFloat];
+
+    // Wrap the CGFloat value in an NSNumber before returning it
+    return result([NSNumber numberWithDouble:adaptiveHeight]);
+}
+
 # pragma mark - OfferWall API ===========================================================================
 
 - (void)getOfferwallCredits:(nonnull FlutterResult)result {
@@ -717,15 +808,15 @@ ISOfferwallDelegate>
         return result([FlutterError errorWithCode:@"ERROR" message:@"pluginVersion is missing" details:nil]);
     }
     NSString *pluginFrameworkVersion = [args valueForKey:@"pluginFrameworkVersion"];
-    
+
     [ISConfigurations getConfigurations].plugin = pluginType;
     [ISConfigurations getConfigurations].pluginVersion = pluginVersion;
-    
+
     /// Double check if the value is not nil or null. If null is passed, the ironSource SDK would throw since it only checks nil and not null.
     if(pluginFrameworkVersion == nil || [[NSNull null] isEqual:pluginFrameworkVersion]){
         [ISConfigurations getConfigurations].pluginFrameworkVersion = pluginFrameworkVersion;
     }
-    
+
     return result(nil);
 }
 
