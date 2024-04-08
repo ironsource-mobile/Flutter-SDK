@@ -31,9 +31,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.BinaryMessenger
 import java.util.concurrent.Executors
 import kotlin.math.abs
+
 
 /** IronSourceMediationPlugin */
 class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, LifecycleObserver {
@@ -44,6 +44,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var channel: MethodChannel? = null
   private var activity: Activity? = null
   private var context: Context? = null
+
 
   // Banner related
   private var mBannerContainer: FrameLayout? = null
@@ -63,9 +64,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayRewardedVideoListener: LevelPlayRewardedVideoListener? = null
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
-
-  private lateinit var binaryMessenger: BinaryMessenger
-  private val CHANNEL_NAME = "ironsource_mediation"
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
@@ -751,9 +749,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   /** region ActivityAware =======================================================================*/
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     activity = binding.activity
-    if (!::channel.isInitialized) {
-      init()
-    }
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.addObserver(this)
@@ -766,7 +761,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
-    Log.d(TAG, "onDetachedFromActivityForConfigChanges: ${activity}")
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.removeObserver(this)
@@ -794,7 +788,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onDetachedFromActivity() {
-    Log.d(TAG, "onDetachedFromActivity: ${activity}")
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.removeObserver(this)
@@ -812,7 +805,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * Set FlutterActivity to listener instances
    */
   private fun setActivityToListeners(activity: Activity?) {
-    Log.d(TAG, "setActivityToListeners: $activity")
     mRewardedVideoListener?.activity = activity
     mInterstitialListener?.activity = activity
     mOfferWallListener?.activity = activity
@@ -827,13 +819,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   /** region LifeCycleObserver  ==================================================================*/
   @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
   fun onResume() {
-    Log.d(TAG, "onResume: ${activity}")
     activity?.apply { IronSource.onResume(this) }
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
   fun onPause() {
-    Log.d(TAG, "onPause: ${activity}")
     activity?.apply { IronSource.onPause(this) }
   }
   // endregion
@@ -842,6 +832,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     val TAG = IronSourceMediationPlugin::class.java.simpleName
     var isPluginAttached: Boolean = false
   }
+
   enum class BannerPosition(val value: Int) {
     Top(0),
     Center(1),
