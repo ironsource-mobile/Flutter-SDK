@@ -1,5 +1,6 @@
 import '../models/models.dart';
 import '../ironsource_constants.dart';
+import '../models/waterfall_configuration.dart';
 
 /// To parse values to be passed from Flutter to the native side via [MethodChannel]
 class OutgoingValueParser {
@@ -51,6 +52,18 @@ class OutgoingValueParser {
   /// ```
   static Map<String, dynamic> setMetaData(Map<String, List<String>> metaData) {
     return {IronConstKey.META_DATA: metaData};
+  }
+
+  /// Maps [waterfallConfiguration] to the key and returns the [Map].
+  /// ```
+  /// { 'waterfallConfiguration': Map<String, double> }
+  /// ```
+  static Map<String, dynamic> setWaterfallConfiguration(double? ceiling, double? floor, IronSourceAdUnit adUnit) {
+    return {IronConstKey.WATERFALL_CONFIGURATION: <String, dynamic>{
+      'ceiling': ceiling,
+      'floor': floor,
+      'adUnit': adUnit.parse()
+    }};
   }
 
   // Init API //////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +152,7 @@ class OutgoingValueParser {
 
   // BN API ////////////////////////////////////////////////////////////////////////////////////////
 
-  /// Maps [size], [position], [offset], and [placementName] to the keys and returns the [Map].
+  /// Maps [size], [position], [offset], [placementName], [containerWidth], [containerHeight] to the keys and returns the [Map].
   /// ```
   /// {
   ///   'description': String,
@@ -149,6 +162,8 @@ class OutgoingValueParser {
   ///   'position': int,
   ///   'offset': int?
   ///   'placementName': String?
+  ///   'containerWidth': int,
+  ///   'containerHeight': int
   /// }
   /// ```
   static Map<String, dynamic> loadBanner(
@@ -160,10 +175,13 @@ class OutgoingValueParser {
       IronConstKey.HEIGHT: size.height,
       IronConstKey.IS_ADAPTIVE: size.isAdaptive,
       IronConstKey.POSITION: position.toInt(),
+      IronConstKey.CONTAINER_WIDTH: size.isContainerParams.width,
+      IronConstKey.CONTAINER_HEIGHT: size.isContainerParams.height,
     };
     if (offset != null) params[IronConstKey.OFFSET] = offset;
-    if (placementName != null)
+    if (placementName != null) {
       params[IronConstKey.PLACEMENT_NAME] = placementName;
+    }
     return params;
   }
 
@@ -173,6 +191,14 @@ class OutgoingValueParser {
   /// ```
   static Map<String, dynamic> isBannerPlacementCapped(String placementName) {
     return {IronConstKey.PLACEMENT_NAME: placementName};
+  }
+
+  /// Maps [width] to the key and returns the [Map].
+  /// ```
+  /// { 'width': Int }
+  /// ```
+  static Map<String, dynamic> getMaximalAdaptiveHeight(int width) {
+    return {IronConstKey.WIDTH: width};
   }
 
   // OfferWall

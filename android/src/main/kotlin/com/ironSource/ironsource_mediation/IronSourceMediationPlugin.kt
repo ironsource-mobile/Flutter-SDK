@@ -1,7 +1,7 @@
 package com.ironSource.ironsource_mediation
 
-import android.content.Context
 import android.app.Activity
+import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.Gravity
@@ -12,11 +12,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.ironsource.adapters.supersonicads.SupersonicConfig
-import com.ironsource.mediationsdk.IronSource.launchTestSuite
 import com.ironsource.mediationsdk.ISBannerSize
+import com.ironsource.mediationsdk.ISContainerParams
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.IronSourceBannerLayout
 import com.ironsource.mediationsdk.IronSourceSegment
+import com.ironsource.mediationsdk.WaterfallConfiguration
 import com.ironsource.mediationsdk.config.ConfigFile
 import com.ironsource.mediationsdk.integration.IntegrationHelper
 import com.ironsource.mediationsdk.logger.IronSourceError
@@ -40,9 +41,9 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
-  private lateinit var channel: MethodChannel
+  private var channel: MethodChannel? = null
   private var activity: Activity? = null
-  private lateinit var context: Context
+  private var context: Context? = null
 
   // Banner related
   private var mBannerContainer: FrameLayout? = null
@@ -67,24 +68,19 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private val CHANNEL_NAME = "ironsource_mediation"
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    Log.d("IronSourceMediationPlugin", "onAttachedToEngine: Thread: ${Thread.currentThread().getName()}");
-    binaryMessenger = flutterPluginBinding.binaryMessenger
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
     context = flutterPluginBinding.applicationContext
-  }
-
-  fun init() {
-    Log.d("IronSourceMediationPlugin", "init: Thread: ${Thread.currentThread().getName()}");
-    channel = MethodChannel(binaryMessenger, CHANNEL_NAME)
-    channel.setMethodCallHandler(this)
-    initListeners()
+    if (!isPluginAttached) {
+      isPluginAttached = true
+      channel!!.setMethodCallHandler(this)
+      initListeners()
+    }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    Log.d("IronSourceMediationPlugin", "onDetachedFromEngine: Thread: ${Thread.currentThread().getName()}");
-     if (::channel.isInitialized) {
-         channel.setMethodCallHandler(null)
-         detachListeners()
-     }
+    isPluginAttached = false
+    channel!!.setMethodCallHandler(null)
+    detachListeners()
   }
 
   /**
@@ -93,45 +89,45 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private fun initListeners() {
     // RewardedVideo
     if (mRewardedVideoListener == null) {
-      mRewardedVideoListener = RewardedVideoListener(channel)
+      mRewardedVideoListener = channel?.let { RewardedVideoListener(it) }
       IronSource.setRewardedVideoListener(mRewardedVideoListener)
     }
     // Interstitial
     if (mInterstitialListener == null) {
-      mInterstitialListener = InterstitialListener(channel)
+      mInterstitialListener = channel?.let { InterstitialListener(it) }
       IronSource.setInterstitialListener(mInterstitialListener)
     }
     // OfferWall
     if (mOfferWallListener == null) {
-      mOfferWallListener = OfferWallListener(channel)
+      mOfferWallListener = channel?.let { OfferWallListener(it) }
       IronSource.setOfferwallListener(mOfferWallListener)
     }
     // Banner
     if (mBannerListener == null) {
-      mBannerListener = BannerListener(channel, ::onBannerAdLoadFailed)
+      mBannerListener = channel?.let { BannerListener(it, ::onBannerAdLoadFailed) }
     }
     // ImpressionData Listener
     if (mImpressionDataListener == null) {
-      mImpressionDataListener = ImpressionDataListener(channel)
+      mImpressionDataListener = channel?.let { ImpressionDataListener(it) }
       IronSource.addImpressionDataListener(mImpressionDataListener!!)
     }
     // Initialization Listener
     if (mInitializationListener == null) {
-      mInitializationListener = InitializationListener(channel)
+      mInitializationListener = channel?.let { InitializationListener(it) }
     }
     // LevelPlay RewardedVideo
     if (mLevelPlayRewardedVideoListener == null) {
-      mLevelPlayRewardedVideoListener = LevelPlayRewardedVideoListener(channel)
+      mLevelPlayRewardedVideoListener = channel?.let { LevelPlayRewardedVideoListener(it) }
       IronSource.setLevelPlayRewardedVideoListener(mLevelPlayRewardedVideoListener)
     }
     // LevelPlay Interstitial
     if (mLevelPlayInterstitialListener == null) {
-      mLevelPlayInterstitialListener = LevelPlayInterstitialListener(channel)
+      mLevelPlayInterstitialListener = channel?.let { LevelPlayInterstitialListener(it) }
       IronSource.setLevelPlayInterstitialListener(mLevelPlayInterstitialListener)
     }
     // LevelPlay Banner
     if (mLevelPlayBannerListener == null) {
-      mLevelPlayBannerListener = LevelPlayBannerListener(channel)
+      mLevelPlayBannerListener = channel?.let { LevelPlayBannerListener(it) }
     }
 
     // Set FlutterActivity
@@ -178,6 +174,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       "setConsent" -> setConsent(call, result)
       "setSegment" -> setSegment(call, result)
       "setMetaData" -> setMetaData(call, result)
+      "setWaterfallConfiguration" -> setWaterfallConfiguration(call, result)
       /**Test Suite API ==========================================================================*/
       "launchTestSuite" -> launchTestSuite(result)
       /** Init API ===============================================================================*/
@@ -203,6 +200,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       "displayBanner" -> displayBanner(result)
       "hideBanner" -> hideBanner(result)
       "isBannerPlacementCapped" -> isBannerPlacementCapped(call, result)
+      "getMaximalAdaptiveHeight" -> getMaximalAdaptiveHeight(call, result)
       /** OfferWall API =================================================================================*/
       "showOfferwall" -> showOfferwall(call, result)
       "isOfferwallAvailable" -> isOfferwallAvailable(result)
@@ -305,8 +303,38 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(null)
   }
 
-  private fun launchTestSuite( @NonNull result: Result) {
-    IronSource.launchTestSuite(context)
+  private fun setWaterfallConfiguration(@NonNull call: MethodCall, @NonNull result: Result) {
+    val waterfallConfigurationDataMap = call.argument("waterfallConfiguration") as HashMap<String, Any>?
+            ?: return result.error("ERROR", "waterfallConfiguration is null", null)
+    val ceiling = waterfallConfigurationDataMap["ceiling"] as Double?
+    val floor = waterfallConfigurationDataMap["floor"] as Double?
+    val adUnit = Utils.getAdUnit(waterfallConfigurationDataMap["adUnit"] as String?)
+    if (adUnit != null) {
+      if (ceiling != null && floor != null) {
+        IronSource.setWaterfallConfiguration(
+                WaterfallConfiguration.builder()
+                        .setFloor(floor)
+                        .setCeiling(ceiling)
+                        .build(),
+                adUnit
+        )
+      } else {
+        // Empty waterfall
+        IronSource.setWaterfallConfiguration(WaterfallConfiguration.empty(), adUnit)
+      }
+    }
+    return result.success(null)
+  }
+
+
+  /**
+   * Launches the IronSource test suite.
+   *
+   * @param result The result to be returned after processing.
+   */
+  private fun launchTestSuite(@NonNull result: Result) {
+    context?.let { IronSource.launchTestSuite(it) }
+    return result.success(null)
   }
   // endregion
 
@@ -477,6 +505,10 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
           ?: return result.error("ERROR", "height is null", null)
       val isAdaptive = call.argument("isAdaptive") as Boolean?
           ?: return result.error("ERROR", "isAdaptive is null", null)
+      val containerWidth = (call.argument("containerWidth") as Any?)?.let { if (it is Int) it else (it as Long).toInt() }
+        ?: return result.error("ERROR", "containerWidth is null", null)
+      val containerHeight = (call.argument("containerHeight") as Any?)?.let { if (it is Int) it else (it as Long).toInt() }
+        ?: return result.error("ERROR", "containerHeight is null", null)
       val position = (call.argument("position") as Any?)?.let { if (it is Int) it else (it as Long).toInt() }
           ?: return result.error("ERROR", "position is null", null)
       val offset = (call.argument("offset") as Any?)?.let { if (it is Int) it else (it as Long).toInt() }
@@ -493,16 +525,36 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
                 setBackgroundColor(Color.TRANSPARENT)
               }
               mBannerContainer?.visibility = mBannerVisibility
-              this.addContentView(mBannerContainer, FrameLayout.LayoutParams(
-                  FrameLayout.LayoutParams.MATCH_PARENT,
-                  FrameLayout.LayoutParams.MATCH_PARENT
-              ))
+              val params = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+              )
+              // set container position
+              params.gravity = when (position) {
+                BannerPosition.Top.value -> Gravity.TOP
+                BannerPosition.Center.value -> Gravity.CENTER
+                BannerPosition.Bottom.value -> Gravity.BOTTOM
+                else -> throw IllegalArgumentException("BannerPosition: $position is not supported.")
+              }
+              this.addContentView(mBannerContainer, params)
             }
+
 
             // Create banner if not exists yet
             if (mBanner == null) {
               val size = getBannerSize(description, width, height)
-              size.isAdaptive = isAdaptive // Adaptive banners
+              // Set isAdaptive
+              size.isAdaptive = isAdaptive
+              // Handle banner properties according to isAdaptive value
+              if (isAdaptive) {
+                // isAdaptive is true
+                // Create container params
+                val isContainerParams = ISContainerParams(containerWidth, containerHeight)
+                // Set container params with width and adaptiveHeight
+                size.setContainerParams(isContainerParams)
+              }
+              // Create the banner layout with/without the adaptive settings
+
               mBanner = IronSource.createBanner(this, size)
 
               val gravity = when (position) {
@@ -559,6 +611,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       runOnUiThread {
         synchronized(this@IronSourceMediationPlugin) {
           mBannerContainer?.removeAllViews()
+          mBannerContainer=null
           if (mBanner != null) {
             IronSource.destroyBanner(mBanner)
             mBanner = null
@@ -616,6 +669,20 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
         }
       }
     }
+  }
+
+
+  /**
+   * Return maximal adaptive height according to given width.
+   *
+   * @param call   The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+  private fun getMaximalAdaptiveHeight(call: MethodCall, result: Result) {
+    val width = (call.argument("width") as Any?)?.let { if (it is Int) it else (it as Long).toInt() }
+      ?: return result.error("ERROR", "width is null", null)
+    val adaptiveHeight = ISBannerSize.getMaximalAdaptiveHeight(width).toFloat()
+    return result.success(adaptiveHeight)
   }
   // endregion
 
@@ -683,7 +750,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region ActivityAware =======================================================================*/
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-    Log.d(TAG, "onAttachedToActivity: ${binding.activity}")
     activity = binding.activity
     if (!::channel.isInitialized) {
       init()
@@ -714,7 +780,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    Log.d(TAG, "onReattachedToActivityForConfigChanges: ${binding.activity}")
     if (activity is FlutterActivity)
     {
       activity = binding.activity as FlutterActivity
@@ -775,6 +840,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   companion object {
     val TAG = IronSourceMediationPlugin::class.java.simpleName
+    var isPluginAttached: Boolean = false
   }
   enum class BannerPosition(val value: Int) {
     Top(0),

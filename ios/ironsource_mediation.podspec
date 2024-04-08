@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'ironsource_mediation'
-  s.version          = '1.2.0'
+  s.version          = '1.2.1'
   s.summary          = 'The Leading Mobile Advertising Technology Platform'
   s.description      = <<-DESC
 Monetize & Promote Your Apps
@@ -23,5 +23,5 @@ Mobile sdk for IronSource
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
 
   # ironSource
-  s.dependency 'IronSourceSDK','7.3.0'
+  s.dependency 'IronSourceSDK','7.9.1.0'
 end

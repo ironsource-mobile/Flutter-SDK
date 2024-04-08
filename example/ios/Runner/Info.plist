@@ -29,6 +29,13 @@
 	</dict>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This will be used to deliver personalized ads.</string>
+    <key>SKAdNetworkItems</key>
+    <array>
+       <dict>
+          <key>SKAdNetworkIdentifier</key>
+          <string>su67r6k2v3.skadnetwork</string>
+       </dict>
+    </array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -48,5 +55,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>
