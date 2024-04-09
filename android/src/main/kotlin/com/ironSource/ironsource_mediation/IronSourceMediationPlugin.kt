@@ -33,6 +33,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.util.concurrent.Executors
 import kotlin.math.abs
+import io.flutter.plugin.common.BinaryMessenger
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 /** IronSourceMediationPlugin */
@@ -65,20 +67,27 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
+  fun init() {
+    Log.d("IronSourceMediationPlugin", "init: Thread: ${Thread.currentThread().getName()}");
+    channel = MethodChannel(binaryMessenger, CHANNEL_NAME)
+    channel.setMethodCallHandler(this)
+    initListeners()
+  }
+
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
+    Log.d("IronSourceMediationPlugin", "onAttachedToEngine: Thread: ${Thread.currentThread().getName()}");
+    binaryMessenger = flutterPluginBinding.binaryMessenger
     context = flutterPluginBinding.applicationContext
-    if (!isPluginAttached) {
-      isPluginAttached = true
-      channel!!.setMethodCallHandler(this)
-      initListeners()
-    }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    isPluginAttached = false
-    channel!!.setMethodCallHandler(null)
-    detachListeners()
+    Log.d("IronSourceMediationPlugin", "onDetachedFromEngine: Thread: ${Thread.currentThread().getName()}");
+     if (::channel.isInitialized) {
+         channel.setMethodCallHandler(null)
+         detachListeners()
+     }
+    binaryMessenger = null
+    context = null
   }
 
   /**
@@ -748,7 +757,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region ActivityAware =======================================================================*/
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    Log.d(TAG, "onAttachedToActivity: ${binding.activity}")
     activity = binding.activity
+    if (!::channel.isInitialized) {
+      init()
+    }
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.addObserver(this)
@@ -761,6 +774,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
+    Log.d(TAG, "onDetachedFromActivityForConfigChanges: ${activity}")
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.removeObserver(this)
@@ -774,6 +788,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    Log.d(TAG, "onReattachedToActivityForConfigChanges: ${binding.activity}")
     if (activity is FlutterActivity)
     {
       activity = binding.activity as FlutterActivity
@@ -788,6 +803,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   override fun onDetachedFromActivity() {
+    Log.d(TAG, "onDetachedFromActivity: ${activity}")
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.removeObserver(this)
@@ -805,6 +821,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * Set FlutterActivity to listener instances
    */
   private fun setActivityToListeners(activity: Activity?) {
+    Log.d(TAG, "setActivityToListeners: $activity")
     mRewardedVideoListener?.activity = activity
     mInterstitialListener?.activity = activity
     mOfferWallListener?.activity = activity
@@ -819,18 +836,19 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   /** region LifeCycleObserver  ==================================================================*/
   @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
   fun onResume() {
+    Log.d(TAG, "onResume: ${activity}")
     activity?.apply { IronSource.onResume(this) }
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
   fun onPause() {
+    Log.d(TAG, "onPause: ${activity}")
     activity?.apply { IronSource.onPause(this) }
   }
   // endregion
 
   companion object {
     val TAG = IronSourceMediationPlugin::class.java.simpleName
-    var isPluginAttached: Boolean = false
   }
 
   enum class BannerPosition(val value: Int) {
