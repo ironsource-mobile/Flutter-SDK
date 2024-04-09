@@ -67,13 +67,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
-  private lateinit var binaryMessenger: BinaryMessenger
+  private lateinit var binaryMessenger: BinaryMessenger?
   private val CHANNEL_NAME = "ironsource_mediation"
 
   fun init() {
     Log.d("IronSourceMediationPlugin", "init: Thread: ${Thread.currentThread().getName()}");
     channel = MethodChannel(binaryMessenger, CHANNEL_NAME)
-    channel.setMethodCallHandler(this)
+    channel!!.setMethodCallHandler(this)
     initListeners()
   }
 
@@ -86,7 +86,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("IronSourceMediationPlugin", "onDetachedFromEngine: Thread: ${Thread.currentThread().getName()}");
      if (::channel.isInitialized) {
-         channel.setMethodCallHandler(null)
+         channel!!.setMethodCallHandler(null)
          detachListeners()
      }
     binaryMessenger = null
