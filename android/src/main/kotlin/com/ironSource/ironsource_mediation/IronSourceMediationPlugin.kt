@@ -67,7 +67,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
-  private var binaryMessenger: BinaryMessenger? = null
+  private var binaryMessenger: BinaryMessenger = null
   private val CHANNEL_NAME = "ironsource_mediation"
 
   fun init() {
