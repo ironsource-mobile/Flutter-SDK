@@ -43,7 +43,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
-  private var channel: MethodChannel? = null
+  
   private var activity: Activity? = null
   private var context: Context? = null
 
@@ -67,13 +67,14 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
 
+  private lateinit var channel: MethodChannel
   private var binaryMessenger: BinaryMessenger? = null
   private val CHANNEL_NAME = "ironsource_mediation"
 
   fun init() {
     Log.d("IronSourceMediationPlugin", "init: Thread: ${Thread.currentThread().getName()}");
     channel = MethodChannel(binaryMessenger!!, CHANNEL_NAME)
-    channel!!.setMethodCallHandler(this)
+    channel.setMethodCallHandler(this)
     initListeners()
   }
 
@@ -85,8 +86,10 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("IronSourceMediationPlugin", "onDetachedFromEngine: Thread: ${Thread.currentThread().getName()}");
-    channel!!.setMethodCallHandler(null)
-    detachListeners()
+    if (::channel.isInitialized) {
+      channel.setMethodCallHandler(null)
+      detachListeners()
+    }
     binaryMessenger = null
     context = null
   }
@@ -760,7 +763,9 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     Log.d(TAG, "onAttachedToActivity: ${binding.activity}")
     activity = binding.activity
-    init()
+    if (!::channel.isInitialized) {
+      init()
+    }
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.addObserver(this)
