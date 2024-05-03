@@ -43,7 +43,7 @@ Attribute application@label value=(your_app_label) from AndroidManifest.xml:11:9
 
 To prevent this, do the following:
 
-- Add `xmls:tools` to AndroidManifest.xml of your project.
+- Add `xmlns:tools` to AndroidManifest.xml of your project.
 - Add `tools:replace="android:label"` to the `application` tag.
 
 ## iOS Configuration
