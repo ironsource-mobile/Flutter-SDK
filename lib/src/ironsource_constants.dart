@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '1.2.1';
-  static const String ANDROID_SDK_VERSION = '7.9.0';
-  static const String IOS_SDK_VERSION = '7.9.1';
+  static const String PLUGIN_VERSION = '2.0.0';
+  static const String ANDROID_SDK_VERSION = '8.1.0';
+  static const String IOS_SDK_VERSION = '8.1.0';
 }
 
 /// Argument Keys
@@ -37,6 +37,14 @@ class IronConstKey {
   static const String AD_INFO = 'adInfo';
   static const String CONTAINER_WIDTH = 'containerWidth';
   static const String CONTAINER_HEIGHT = 'containerHeight';
+  // Native Ad
+  static const String NATIVE_AD = 'nativeAd';
+  static const String TITLE = 'title';
+  static const String BODY = 'body';
+  static const String ADVERTISER = 'advertiser';
+  static const String CALL_TO_ACTION = 'callToAction';
+  static const String ICON_URI = 'iconUri';
+  static const String ICON_IMAGE_DATA = 'iconImageData';
 
   // ImpressionData
   static const String AUCTION_ID = 'auctionId';

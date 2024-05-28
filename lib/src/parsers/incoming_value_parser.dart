@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../models/models.dart';
 import '../ironsource_constants.dart';
 
@@ -36,20 +38,6 @@ class IncomingValueParser {
     return IronSourceError(errorCode: errorCode, message: message);
   }
 
-  /// [arguments] to [IronSourceOWCreditInfo]
-  static IronSourceOfferWallCreditInfo getOfferWallCreditInfo(
-      dynamic arguments) {
-    final credits = getValueForKey<int>(IronConstKey.CREDITS, arguments);
-    final totalCredits =
-        getValueForKey<int>(IronConstKey.TOTAL_CREDITS, arguments);
-    final totalCreditsFlag =
-        getValueForKey<bool>(IronConstKey.TOTAL_CREDITS_FLAG, arguments);
-    return IronSourceOfferWallCreditInfo(
-        credits: credits,
-        totalCredits: totalCredits,
-        totalCreditsFlag: totalCreditsFlag);
-  }
-
   /// [arguments] to [IronSourceAdInfo]
   static IronSourceAdInfo getAdInfo(dynamic arguments) {
     final String? auctionId =
@@ -86,6 +74,25 @@ class IncomingValueParser {
         revenue: revenue,
         precision: precision,
         encryptedCPM: encryptedCPM);
+  }
+
+  // For [LevelPlayNativeAdListener] //////////////////////////////////////////////////////////////
+  /// [arguments] to [LevelPlayNativeAd]
+  static LevelPlayNativeAd getLevelPlayNativeAd(dynamic arguments) {
+    final String? title = getValueForKey<String?>(IronConstKey.TITLE, arguments);
+    final String? body = getValueForKey<String?>(IronConstKey.BODY, arguments);
+    final String? advertiser = getValueForKey<String?>(IronConstKey.ADVERTISER, arguments);
+    final String? callToAction = getValueForKey<String?>(IronConstKey.CALL_TO_ACTION, arguments);
+    final String? iconUri = getValueForKey<String?>(IronConstKey.ICON_URI, arguments);
+    final Uint8List? iconImageData = getValueForKey<Uint8List?>(IronConstKey.ICON_IMAGE_DATA, arguments);
+
+    return LevelPlayNativeAd(
+        title: title,
+        body: body,
+        advertiser: advertiser,
+        callToAction: callToAction,
+        icon: LevelPlayNativeAdIcon(iconUri, iconImageData)
+    );
   }
 
   // For [IronSourceConsentViewListener] ///////////////////////////////////////////////////////////

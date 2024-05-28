@@ -4,9 +4,22 @@
 
 @implementation LevelPlayBannerDelegateMethodHandler
 
+
+- (instancetype)initWithChannel:(FlutterMethodChannel *)channel onDidLoadLevelPlayBanner:(void (^)(ISBannerView *bannerView, ISAdInfo *adInfo))onDidLoadLevelPlayBanner {
+    self = [super initWithChannel:channel];
+    if (self) {
+        _onDidLoadLevelPlayBanner = onDidLoadLevelPlayBanner;
+        [IronSource setLevelPlayBannerDelegate:self];
+    }
+    return self;
+}
+
 #pragma mark - LevelPlayBannerDelegate
 
 - (void)didLoad:(ISBannerView *)bannerView withAdInfo:(ISAdInfo *)adInfo {
+    if (self.onDidLoadLevelPlayBanner) {
+            self.onDidLoadLevelPlayBanner(bannerView, adInfo);
+        }
     [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLoaded" args:[adInfo toArgDictionary]];
 }
 

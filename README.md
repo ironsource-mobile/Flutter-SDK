@@ -26,25 +26,11 @@ flutter pub get ironsource_mediation
 // PROJECT_ROOT/android/app/build.gradle
 dependencies {
   ...
-  implementation 'com.google.android.gms:play-services-ads-identifier:18.0.0'
-  implementation 'com.google.android.gms:play-services-basement:18.0.0'
-  implementation 'com.google.android.gms:play-services-appset:16.0.1'
+    implementation 'com.google.android.gms:play-services-appset:16.0.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+    implementation 'com.google.android.gms:play-services-basement:18.3.0'
 }
 ```
-
-### AndroidManifest.xml
-
-After adding the plugin to the pubspec.yml, Android build fails with the error below:
-
-```
-Attribute application@label value=(your_app_label) from AndroidManifest.xml:11:9-40
-  is also present at [com.ironsource.sdk:mediationsdk:7.2.1] AndroidManifest.xml:15:9-41 value=(@string/app_name).
-```
-
-To prevent this, do the following:
-
-- Add `xmls:tools` to AndroidManifest.xml of your project.
-- Add `tools:replace="android:label"` to the `application` tag.
 
 ## iOS Configuration
 
@@ -106,51 +92,143 @@ Read more about Apple's ATT and user privacy guideline [here](https://developer.
 
 ### Implement Listeners
 
+#### LevelPlayRewardedVideoListener
 ```dart
-class YourDartClass with IronSourceRewardedVideoListener {
-  /// RV listener
+class LevelPlayRewardedVideoListenerClass with LevelPlayRewardedVideoListener {
   @override
-  void onRewardedVideoAdClicked(IronSourceRVPlacement placement) {
-    print('onRewardedVideoAdClicked Placement:$placement');
+  void onAdAvailable(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdAvailable
   }
 
   @override
-  void onRewardedVideoAdClosed() {
-    print("onRewardedVideoAdClosed");
+  void onAdClicked(IronSourceRewardedVideoPlacement? placement, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClicked
   }
 
   @override
-  void onRewardedVideoAdEnded() {
-    print("onRewardedVideoAdClosed");
+  void onAdClosed(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClosed
   }
 
   @override
-  void onRewardedVideoAdOpened() {
-    print("onRewardedVideoAdOpened");
+  void onAdOpened(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdOpened
   }
 
   @override
-  void onRewardedVideoAdRewarded(IronSourceRVPlacement placement) {
-    print("onRewardedVideoAdRewarded Placement: $placement");
+  void onAdRewarded(IronSourceRewardedVideoPlacement? placement, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdRewarded
   }
 
   @override
-  void onRewardedVideoAdShowFailed(IronSourceError error) {
-    print("onRewardedVideoAdShowFailed Error:$error");
+  void onAdShowFailed(IronSourceError? error, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdShowFailed
   }
 
   @override
-  void onRewardedVideoAdStarted() {
-    print("onRewardedVideoAdStarted");
+  void onAdUnavailable() {
+    // TODO: implement onAdUnavailable
+  }
+}
+```
+
+#### LevelPlayInterstitialListener
+```dart
+class LevelPlayInterstitialListenerClass with LevelPlayInterstitialListener {
+  @override
+  void onAdClicked(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClicked
   }
 
   @override
-  void onRewardedVideoAvailabilityChanged(bool isAvailable) {
-    print('onRewardedVideoAvailabilityChanged: $isAvailable');
-    // Change the RV show button active state here
-    setState((){
-      _isRVAvailable = isAvailable;
-    })
+  void onAdClosed(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClosed
+  }
+
+  @override
+  void onAdLoadFailed(IronSourceError? error) {
+    // TODO: implement onAdLoadFailed
+  }
+
+  @override
+  void onAdOpened(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdOpened
+  }
+
+  @override
+  void onAdReady(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdReady
+  }
+
+  @override
+  void onAdShowFailed(IronSourceError? error, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdShowFailed
+  }
+
+  @override
+  void onAdShowSucceeded(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdShowSucceeded
+  }
+}
+```
+
+#### LevelPlayBannerListener
+```dart
+class LevelPlayBannerListenerClass with LevelPlayBannerListener {
+
+  @override
+  void onAdClicked(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClicked
+  }
+
+  @override
+  void onAdLeftApplication(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdLeftApplication
+  }
+
+  @override
+  void onAdLoadFailed(IronSourceError? error) {
+    // TODO: implement onAdLoadFailed
+  }
+
+  @override
+  void onAdLoaded(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdLoaded
+  }
+
+  @override
+  void onAdScreenDismissed(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdScreenDismissed
+  }
+
+  @override
+  void onAdScreenPresented(IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdScreenPresented
+  }
+}
+```
+
+#### LevelPlayNativeAdListener
+```dart
+class LevelPlayNativeAdListenerClass with LevelPlayNativeAdListener {
+  @override
+  void onAdClicked(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdClicked
+  }
+
+  @override
+  void onAdImpression(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdImpression
+  }
+
+  @override
+  void onAdLoadFailed(LevelPlayNativeAd? nativeAd, IronSourceError? error) {
+    // TODO: implement onAdLoadFailed
+  }
+
+  @override
+  void onAdLoaded(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+    // TODO: implement onAdLoaded
   }
 }
 ```
@@ -165,9 +243,13 @@ Future<void> initIronSource() async {
           ? IOS_APP_KEY
           : throw Exception("Unsupported Platform");
   try {
-    IronSource.setFlutterVersion('2.8.1'); // must be called before init
+    IronSource.setFlutterVersion('YOUR_FLUTTER_VERSION'); // must be called before init
     IronSource.validateIntegration();
-    IronSource.setRVListener(this);
+    // Set listeners
+    IronSource.setLevelPlayRewardedVideoListener(LevelPlayRewardedVideoListenerClass());
+    IronSource.setLevelPlayInterstitialListener(LevelPlayInterstitialListenerClass());
+    IronSource.setLevelPlayBannerListener(LevelPlayBannerListenerClass());
+    
     await IronSource.setAdaptersDebug(true);
     await IronSource.shouldTrackNetworkState(true);
 
@@ -180,14 +262,85 @@ Future<void> initIronSource() async {
 }
 ```
 
-### Show Ads
+### Show Ads Example
 
+#### LevelPlayRewardedVideo
 ```dart
-Future<void> _showRVOnClick() async {
+Future<void> _showRewardedVideoOnClick() async {
   if (await IronSource.isRewardedVideoAvailable()) {
     IronSource.showRewardedVideo();
   }
 }
+```
+
+#### LevelPlayInterstitial
+```dart
+void _loadInterstitialOnClick() {
+  IronSource.loadInterstitial();
+}
+
+Future<void> _showInterstitialOnClick() async {
+  if (await IronSource.isInterstitialReady()) {
+    IronSource.showInterstitial();
+  }
+}
+```
+
+#### LevelPlayBanner
+```dart
+Future<void> _loadBanner() async { // load will automatically show the ad
+  await IronSource.loadBanner(
+      size: size,
+      position: IronSourceBannerPosition.Bottom,
+      verticalOffset: -50,
+      placementName: 'YOUR_PLACEMENT');
+}
+```
+
+#### LevelPlayNativeAd
+```dart
+class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdsSection> with LevelPlayNativeAdListener {
+  LevelPlayNativeAd? _nativeAd;
+  LevelPlayNativeAdView? _nativeAdView;
+
+  @override
+  void initState() {
+    super.initState();
+    _createNativeAd();
+    _createNativeAdView();
+  }
+
+  /// Initialize native ad object
+  void _createNativeAd() {
+    _nativeAd = LevelPlayNativeAd.builder()
+        .withPlacementName('YOUR_PLACEMENT_NAME') // Your placement name string
+        .withListener(LevelPlayNativeAdListenerClass()) // Your level play native ad listener
+        .build();
+  }
+
+  /// Initialize native ad view widget with native ad
+  void _createNativeAdView() {
+    _nativeAdView = LevelPlayNativeAdView(
+      key: GlobalKey(), // Unique key to force recreation of widget
+      height: 150, // Your chosen height
+      width: double.infinity, // Your chosen width
+      nativeAd: _nativeAd, // Native ad object
+      templateType: LevelPlayTemplateType.SMALL, // Built-in native ad template(not required when implementing custom template)
+      templateStyle: LevelPlayNativeAdTemplateStyle( // Level play native ad styling(optional)
+          callToActionStyle: LevelPlayNativeAdElementStyle(
+              backgroundColor: Colors.white,
+              textColor: Colors.lightBlue
+          )
+      ),
+    );
+  }
+
+  /// Load native ad
+  void _loadAd() {
+    _nativeAd?.loadAd();
+  }
+  
+  // Rest of the class
 ```
 
 Refer to the [example app](./example) for the more detailed implementation sample.

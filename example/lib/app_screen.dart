@@ -1,13 +1,12 @@
 import 'dart:io' show Platform;
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
-import './sections/rewarded_video_section.dart';
-import './sections/rewarded_video_manual_load_section.dart';
-import './sections/interstitial_section.dart';
-import './sections/banner_section.dart';
-import './sections/offerwall_section.dart';
+import './sections/level_play_listener_examples/level_play_native_ads_section.dart';
+import './sections/level_play_listener_examples/level_play_banner_section.dart';
+import './sections/level_play_listener_examples/level_play_interstitial_section.dart';
+import './sections/level_play_listener_examples/level_play_rewarded_video_manual_load_section.dart';
+import './sections/level_play_listener_examples/level_play_rewarded_video_section.dart';
 import './sections/ios_section.dart';
 import './utils.dart';
 
@@ -47,13 +46,15 @@ class _AppScreenState extends State<AppScreen>
     return;
   }
 
+  /// Enables debug mode for IronSource adapters.
+  /// Validates integration.
   Future<void> enableDebug() async {
     await IronSource.setAdaptersDebug(true);
     // this function doesn't have to be awaited
     IronSource.validateIntegration();
   }
 
-  // Sample Segment Params
+  /// Sets user segment params sample information for IronSource.
   Future<void> setSegment() {
     final segment = IronSourceSegment();
     segment.age = 20;
@@ -66,6 +67,7 @@ class _AppScreenState extends State<AppScreen>
     return IronSource.setSegment(segment);
   }
 
+  /// Sets regulation parameters for IronSource.
   Future<void> setRegulationParams() async {
     // GDPR
     await IronSource.setConsent(true);
@@ -80,6 +82,7 @@ class _AppScreenState extends State<AppScreen>
     return;
   }
 
+  /// Initialize iron source SDK.
   Future<void> initIronSource() async {
     final appKey = Platform.isAndroid
         ? "1dc3db545"
@@ -97,10 +100,6 @@ class _AppScreenState extends State<AppScreen>
 
       // Segment info
       // await setSegment();
-
-      // For Offerwall
-      // Must be called before init
-      // await IronSource.setClientSideCallbacks(true);
 
       // GAID, IDFA, IDFV
       String id = await IronSource.getAdvertiserId();
@@ -121,16 +120,12 @@ class _AppScreenState extends State<AppScreen>
             IronSourceAdUnit.RewardedVideo,
             IronSourceAdUnit.Interstitial,
             IronSourceAdUnit.Banner,
-            IronSourceAdUnit.Offerwall
+            IronSourceAdUnit.NativeAd
           ],
           initListener: this);
     } on PlatformException catch (e) {
       print(e);
     }
-  }
-
-  Widget _getRewardedVideoSection() {
-    return const RewardedVideoManualLoadSection();
   }
 
   @override
@@ -145,16 +140,15 @@ class _AppScreenState extends State<AppScreen>
               Image.asset('assets/images/iS_logo.png'),
               Utils.spacerLarge,
               // RewardedVideo
-              _getRewardedVideoSection(),
+              const LevelPlayRewardedVideoManualLoadSection(),
               Utils.spacerLarge,
               // Interstitial
-              const InterstitialSection(),
+              const LevelPlayInterstitialSection(),
               Utils.spacerLarge,
               // Banner
-              const BannerSection(),
+              const LevelPlayBannerSection(),
               Utils.spacerLarge,
-              // OfferWall
-              const OfferwallSection(),
+              const LevelPlayNativeAdsSection(),
               Utils.spacerLarge,
               // iOS14
               if (Platform.isIOS) const IOSSection()

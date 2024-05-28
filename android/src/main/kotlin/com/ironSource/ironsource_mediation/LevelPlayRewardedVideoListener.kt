@@ -30,15 +30,15 @@ class LevelPlayRewardedVideoListener(channel: MethodChannel) : IronSourceListene
   }
 
   override fun onAdRewarded(placement: Placement, adInfo: AdInfo) {
-    invokeMethod("LevelPlay_RewardedVideo:onAdRewarded", Utils.hashMapOfRewardedVideoPlacementAdInfo(placement, adInfo))
+    invokeMethod("LevelPlay_RewardedVideo:onAdRewarded", LevelPlayUtils.hashMapOfRewardedVideoPlacementAdInfo(placement, adInfo))
   }
 
   override fun onAdShowFailed(error: IronSourceError, adInfo: AdInfo) {
-    invokeMethod("LevelPlay_RewardedVideo:onAdShowFailed", Utils.hashMapOfIronSourceErrorAdInfo(error, adInfo))
+    invokeMethod("LevelPlay_RewardedVideo:onAdShowFailed", LevelPlayUtils.hashMapOfIronSourceErrorAdInfo(error, adInfo))
   }
 
   override fun onAdClicked(placement: Placement, adInfo: AdInfo) {
-    invokeMethod("LevelPlay_RewardedVideo:onAdClicked", Utils.hashMapOfRewardedVideoPlacementAdInfo(placement, adInfo))
+    invokeMethod("LevelPlay_RewardedVideo:onAdClicked", LevelPlayUtils.hashMapOfRewardedVideoPlacementAdInfo(placement, adInfo))
   }
 
   /** Manual RewardedVideo Events ========================================================================**/

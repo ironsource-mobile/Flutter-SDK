@@ -1,6 +1,5 @@
 import '../models/models.dart';
 import '../ironsource_constants.dart';
-import '../models/waterfall_configuration.dart';
 
 /// To parse values to be passed from Flutter to the native side via [MethodChannel]
 class OutgoingValueParser {
@@ -58,10 +57,10 @@ class OutgoingValueParser {
   /// ```
   /// { 'waterfallConfiguration': Map<String, double> }
   /// ```
-  static Map<String, dynamic> setWaterfallConfiguration(double? ceiling, double? floor, IronSourceAdUnit adUnit) {
+  static Map<String, dynamic> setWaterfallConfiguration(WaterfallConfiguration waterfallConfiguration, IronSourceAdUnit adUnit) {
     return {IronConstKey.WATERFALL_CONFIGURATION: <String, dynamic>{
-      'ceiling': ceiling,
-      'floor': floor,
+      'ceiling': waterfallConfiguration.ceiling,
+      'floor': waterfallConfiguration.floor,
       'adUnit': adUnit.parse()
     }};
   }

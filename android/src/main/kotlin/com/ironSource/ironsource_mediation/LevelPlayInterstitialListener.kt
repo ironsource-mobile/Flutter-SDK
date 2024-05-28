@@ -28,7 +28,7 @@ class LevelPlayInterstitialListener(channel: MethodChannel) : IronSourceListener
   }
 
   override fun onAdShowFailed(error: IronSourceError, adInfo: AdInfo) {
-    invokeMethod("LevelPlay_Interstitial:onAdShowFailed", Utils.hashMapOfIronSourceErrorAdInfo(error, adInfo))
+    invokeMethod("LevelPlay_Interstitial:onAdShowFailed", LevelPlayUtils.hashMapOfIronSourceErrorAdInfo(error, adInfo))
   }
 
   override fun onAdClicked(adInfo: AdInfo) {

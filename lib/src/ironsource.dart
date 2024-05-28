@@ -122,6 +122,15 @@ class IronSource {
     return _channel.invokeMethod('setMetaData', args);
   }
 
+  /// Launches the test suite.
+  ///
+  /// Native SDK Reference
+  /// - Android: launchTestSuite
+  /// -     iOS: launchTestSuite
+  static Future<void> launchTestSuite() {
+    return _channel.invokeMethod('launchTestSuite');
+  }
+
   /// Registers [waterfallConfiguration].
   /// - Can be used for regulation settings, mediated networks' config, etc.
   /// - Read more at: https://developers.is.com/ironsource-mobile/android/regulation-advanced-settings/
@@ -129,11 +138,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setWaterfallConfiguration
   /// -     iOS: setWaterfallConfiguration
-  static Future<void> setWaterfallConfiguration(double? ceiling, double? floor, IronSourceAdUnit adUnit) async {
-    final args = OutgoingValueParser.setWaterfallConfiguration(ceiling, floor, adUnit);
+  static Future<void> setWaterfallConfiguration(WaterfallConfiguration waterfallConfiguration, IronSourceAdUnit adUnit) async {
+    final args = OutgoingValueParser.setWaterfallConfiguration(waterfallConfiguration, adUnit);
     return _channel.invokeMethod('setWaterfallConfiguration', args);
   }
-
 
   /** SDK Init API ===============================================================================*/
 
@@ -173,10 +181,6 @@ class IronSource {
     // init
     final args = OutgoingValueParser.init(appKey: appKey, adUnits: adUnits);
     return _channel.invokeMethod('init', args);
-  }
-
-  static Future<void> launchTestSuite() {
-    return _channel.invokeMethod('launchTestSuite');
   }
 
   /** RewardedVideo API =====================================================================================*/
@@ -257,17 +261,17 @@ class IronSource {
     return _channel.invokeMethod('clearRewardedVideoServerParams');
   }
 
-  /// Sets the RewardedVideo Manual Load mode.
+  /// Sets the LevelPlay RewardedVideo Manual Load mode.
   /// - [listener] will receive ad load status updates.
   /// - __Note__: Must be called before [init].
   ///
   /// Native SDK Reference
-  /// - Android: setManualLoadRewardedVideo
-  /// -     iOS: setRewardedVideoManualDelegate
-  static Future<void> setManualLoadRewardedVideo(
-      IronSourceRewardedVideoManualListener? listener) async {
-    IronSourceMethodCallHandler.setRewardedVideoManualListener(listener);
-    return _channel.invokeMethod('setManualLoadRewardedVideo');
+  /// - Android: setLevelPlayRewardedVideoManualListener
+  /// -     iOS: setLevelPlayRewardedVideoManualDelegate
+  static Future<void> setLevelPlayRewardedVideoManualListener(
+      LevelPlayRewardedVideoManualListener? listener) async {
+    IronSourceMethodCallHandler.setLevelPlayRewardedVideoManualListener(listener);
+    return _channel.invokeMethod('setLevelPlayRewardedVideoManual');
   }
 
   /// Starts the RewardedVideo load process.
@@ -386,44 +390,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getMaximalAdaptiveHeight
   /// -     iOS: getMaximalAdaptiveHeight
-  static Future<double> getMaximalAdaptiveHeight(int width) async {
+  static Future<int> getMaximalAdaptiveHeight(int width) async {
     final args = OutgoingValueParser.getMaximalAdaptiveHeight(width);
-    final double adaptiveHeight = await _channel.invokeMethod('getMaximalAdaptiveHeight', args);
+    final int adaptiveHeight = await _channel.invokeMethod('getMaximalAdaptiveHeight', args);
     return adaptiveHeight;
-  }
-
-  /** OfferWall API =====================================================================================*/
-
-  /// Shows an Offerwall.
-  /// - The Placement could be specified by [placementName].
-  ///
-  /// Native SDK Reference
-  /// - Android: showOfferwall
-  /// -     iOS: showOfferwallWithViewController
-  static Future<void> showOfferwall({String? placementName}) async {
-    final args = OutgoingValueParser.showOfferwall(placementName);
-    return _channel.invokeMethod('showOfferwall', args);
-  }
-
-  /// Start fetching the current OfferWall credits.
-  /// - The fetched credit info will be passed to [IronSourceOfferwallListener]
-  ///
-  /// Native SDK Reference
-  /// - Android: getOfferwallCredits
-  /// -     iOS: offerwallCredits
-  static Future<void> getOfferwallCredits() async {
-    return _channel.invokeMethod('getOfferwallCredits');
-  }
-
-  /// Returns the OfferWall availability.
-  ///
-  /// Native SDK Reference
-  /// - Android: isOfferwallAvailable
-  /// -     iOS: hasOfferwall
-  static Future<bool> isOfferwallAvailable() async {
-    final bool isAvailable =
-        await _channel.invokeMethod('isOfferwallAvailable');
-    return isAvailable;
   }
 
   /** OfferWall Config API ==============================================================================*/
@@ -437,18 +407,6 @@ class IronSource {
   static Future<void> setClientSideCallbacks(bool isEnabled) async {
     final args = OutgoingValueParser.setClientSideCallbacks(isEnabled);
     return _channel.invokeMethod('setClientSideCallbacks', args);
-  }
-
-  /// Registers the custom [parameters] that will be passed in OfferWall server-to-server callbacks.
-  /// - __Note__: Must be called before [init].
-  ///
-  /// Native SDK Reference
-  /// - Android: setOfferwallCustomParams
-  /// -     iOS: setOfferwallCustomParameters
-  static Future<void> setOfferwallCustomParams(
-      Map<String, String> parameters) async {
-    final args = OutgoingValueParser.setOfferwallCustomParams(parameters);
-    return _channel.invokeMethod('setOfferwallCustomParams', args);
   }
 
   /** iOS ConversionValue API ====================================================================*/
@@ -497,48 +455,6 @@ class IronSource {
 
   // Listener setters
 
-  static void setRewardedVideoListener(
-      IronSourceRewardedVideoListener? listener) {
-    IronSourceMethodCallHandler.setRewardedVideoListener(listener);
-  }
-
-  @Deprecated(
-      "'setRVListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayRewardedVideoListener instead")
-  static void setRVListener(IronSourceRewardedVideoListener? listener) {
-    IronSourceMethodCallHandler.setRVListener(listener);
-  }
-
-  static void setInterstitialListener(
-      IronSourceInterstitialListener? listener) {
-    IronSourceMethodCallHandler.setInterstitialListener(listener);
-  }
-
-  @Deprecated(
-      "'setISListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayInterstitialListener instead")
-  static void setISListener(IronSourceInterstitialListener? listener) {
-    IronSourceMethodCallHandler.setISListener(listener);
-  }
-
-  static void setBannerListener(IronSourceBannerListener? listener) {
-    IronSourceMethodCallHandler.setBannerListener(listener);
-  }
-
-  @Deprecated(
-      "'setBNListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayBannerListener instead")
-  static void setBNListener(IronSourceBannerListener? listener) {
-    IronSourceMethodCallHandler.setBNListener(listener);
-  }
-
-  static void setOfferWallListener(IronSourceOfferwallListener? listener) {
-    IronSourceMethodCallHandler.setOfferWallListener(listener);
-  }
-
-  @Deprecated(
-      "'setOWListener' is deprecated and shouldn't be used. This API has been deprecated as of SDK 7.3.0. Please use setLevelPlayOfferWallListener instead")
-  static void setOWListener(IronSourceOfferwallListener? listener) {
-    IronSourceMethodCallHandler.setOWListener(listener);
-  }
-
   static void setImpressionDataListener(
       IronSourceImpressionDataListener? listener) {
     IronSourceMethodCallHandler.setImpressionDataListener(listener);
@@ -551,12 +467,6 @@ class IronSource {
   static void setLevelPlayRewardedVideoListener(
       LevelPlayRewardedVideoListener? listener) {
     IronSourceMethodCallHandler.setLevelPlayRewardedVideoListener(listener);
-  }
-
-  static void setLevelPlayRewardedVideoManualListener(
-      LevelPlayRewardedVideoManualListener? listener) {
-    IronSourceMethodCallHandler.setLevelPlayRewardedVideoManualListener(
-        listener);
   }
 
   static void setLevelPlayInterstitialListener(

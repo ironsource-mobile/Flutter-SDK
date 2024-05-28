@@ -11,55 +11,6 @@ class IronSourceMethodCallHandler {
     _initializationListener = listener;
   }
 
-  // RV listener
-  static IronSourceRewardedVideoListener? _rewardedVideoListener;
-  static void setRewardedVideoListener(
-      IronSourceRewardedVideoListener? listener) {
-    _rewardedVideoListener = listener;
-  }
-
-  static void setRVListener(IronSourceRewardedVideoListener? listener) {
-    _rewardedVideoListener = listener;
-  }
-
-  // RewardedVideo Manual Load mode listener
-  static IronSourceRewardedVideoManualListener? _rewardedVideoManualListener;
-  static void setRewardedVideoManualListener(
-      IronSourceRewardedVideoManualListener? listener) {
-    _rewardedVideoManualListener = listener;
-  }
-
-  // Interstitial listener
-  static IronSourceInterstitialListener? _interstitialListener;
-  static void setInterstitialListener(
-      IronSourceInterstitialListener? listener) {
-    _interstitialListener = listener;
-  }
-
-  static void setISListener(IronSourceInterstitialListener? listener) {
-    _interstitialListener = listener;
-  }
-
-  // Banner listener
-  static IronSourceBannerListener? _bannerListener;
-  static void setBannerListener(IronSourceBannerListener? listener) {
-    _bannerListener = listener;
-  }
-
-  static void setBNListener(IronSourceBannerListener? listener) {
-    _bannerListener = listener;
-  }
-
-  // OfferWall listener
-  static IronSourceOfferwallListener? _offerwallListener;
-  static void setOfferWallListener(IronSourceOfferwallListener? listener) {
-    _offerwallListener = listener;
-  }
-
-  static void setOWListener(IronSourceOfferwallListener? listener) {
-    _offerwallListener = listener;
-  }
-
   // ILR listener
   static IronSourceImpressionDataListener? _impressionDataListener;
   static void setImpressionDataListener(
@@ -81,8 +32,7 @@ class IronSourceMethodCallHandler {
   }
 
   // LevelPlay Manual Load RewardedVideo
-  static LevelPlayRewardedVideoManualListener?
-      _levelPlayRewardedVideoManualListener;
+  static LevelPlayRewardedVideoManualListener? _levelPlayRewardedVideoManualListener;
   static void setLevelPlayRewardedVideoManualListener(
       LevelPlayRewardedVideoManualListener? listener) {
     _levelPlayRewardedVideoManualListener = listener;
@@ -108,112 +58,6 @@ class IronSourceMethodCallHandler {
       // Init completion ///////////////////////////////////////////////////////////////////////////
       case 'onInitializationComplete':
         return _initializationListener?.onInitializationComplete();
-
-      // RewardedVideo events /////////////////////////////////////////////////////////////////////////////////
-      case 'onRewardedVideoAdOpened':
-        _rewardedVideoListener?.onRewardedVideoAdOpened();
-        _rewardedVideoManualListener?.onRewardedVideoAdOpened();
-        return;
-      case 'onRewardedVideoAdClosed':
-        _rewardedVideoListener?.onRewardedVideoAdClosed();
-        _rewardedVideoManualListener?.onRewardedVideoAdClosed();
-        return;
-      case 'onRewardedVideoAvailabilityChanged':
-        final isAvailable =
-            IncomingValueParser.getAvailabilityBool(call.arguments);
-        _rewardedVideoListener?.onRewardedVideoAvailabilityChanged(isAvailable);
-        _rewardedVideoManualListener
-            ?.onRewardedVideoAvailabilityChanged(isAvailable);
-        return;
-      case 'onRewardedVideoAdRewarded':
-        final rewardedvideoPlacement =
-            IncomingValueParser.getRewardedVideoPlacement(call.arguments);
-        _rewardedVideoListener
-            ?.onRewardedVideoAdRewarded(rewardedvideoPlacement);
-        _rewardedVideoManualListener
-            ?.onRewardedVideoAdRewarded(rewardedvideoPlacement);
-        return;
-      case 'onRewardedVideoAdShowFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        _rewardedVideoListener?.onRewardedVideoAdShowFailed(error);
-        _rewardedVideoManualListener?.onRewardedVideoAdShowFailed(error);
-        return;
-      case 'onRewardedVideoAdClicked':
-        final rewardedvideoPlacement =
-            IncomingValueParser.getRewardedVideoPlacement(call.arguments);
-        _rewardedVideoListener
-            ?.onRewardedVideoAdClicked(rewardedvideoPlacement);
-        _rewardedVideoManualListener
-            ?.onRewardedVideoAdClicked(rewardedvideoPlacement);
-        return;
-      case 'onRewardedVideoAdStarted':
-        _rewardedVideoListener?.onRewardedVideoAdStarted();
-        _rewardedVideoManualListener?.onRewardedVideoAdStarted();
-        return;
-      case 'onRewardedVideoAdEnded':
-        _rewardedVideoListener?.onRewardedVideoAdEnded();
-        _rewardedVideoManualListener?.onRewardedVideoAdEnded();
-        return;
-
-      // Manual Load RewardedVideo events
-      case 'onRewardedVideoAdReady':
-        return _rewardedVideoManualListener?.onRewardedVideoAdReady();
-      case 'onRewardedVideoAdLoadFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _rewardedVideoManualListener?.onRewardedVideoAdLoadFailed(error);
-
-      // Interstitial Events
-      case 'onInterstitialAdReady':
-        return _interstitialListener?.onInterstitialAdReady();
-      case 'onInterstitialAdLoadFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _interstitialListener?.onInterstitialAdLoadFailed(error);
-      case 'onInterstitialAdOpened':
-        return _interstitialListener?.onInterstitialAdOpened();
-      case 'onInterstitialAdClosed':
-        return _interstitialListener?.onInterstitialAdClosed();
-      case 'onInterstitialAdShowSucceeded':
-        return _interstitialListener?.onInterstitialAdShowSucceeded();
-      case 'onInterstitialAdShowFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _interstitialListener?.onInterstitialAdShowFailed(error);
-      case 'onInterstitialAdClicked':
-        return _interstitialListener?.onInterstitialAdClicked();
-
-      // Banner Events
-      case 'onBannerAdLoaded':
-        return _bannerListener?.onBannerAdLoaded();
-      case 'onBannerAdLoadFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _bannerListener?.onBannerAdLoadFailed(error);
-      case 'onBannerAdClicked':
-        return _bannerListener?.onBannerAdClicked();
-      case 'onBannerAdScreenPresented':
-        return _bannerListener?.onBannerAdScreenPresented();
-      case 'onBannerAdScreenDismissed':
-        return _bannerListener?.onBannerAdScreenDismissed();
-      case 'onBannerAdLeftApplication':
-        return _bannerListener?.onBannerAdLeftApplication();
-
-      // OfferWall Events
-      case 'onOfferwallAvailabilityChanged':
-        final isAvailable =
-            IncomingValueParser.getAvailabilityBool(call.arguments);
-        return _offerwallListener?.onOfferwallAvailabilityChanged(isAvailable);
-      case 'onOfferwallOpened':
-        return _offerwallListener?.onOfferwallOpened();
-      case 'onOfferwallShowFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _offerwallListener?.onOfferwallShowFailed(error);
-      case 'onOfferwallAdCredited':
-        final creditInfo =
-            IncomingValueParser.getOfferWallCreditInfo(call.arguments);
-        return _offerwallListener?.onOfferwallAdCredited(creditInfo);
-      case 'onGetOfferwallCreditsFailed':
-        final error = IncomingValueParser.getIronSourceError(call.arguments);
-        return _offerwallListener?.onGetOfferwallCreditsFailed(error);
-      case 'onOfferwallClosed':
-        return _offerwallListener?.onOfferwallClosed();
 
       // ImpressionData Event
       case 'onImpressionSuccess':
@@ -350,7 +194,6 @@ class IronSourceMethodCallHandler {
       case 'LevelPlay_Banner:onAdLeftApplication':
         final adInfo = IncomingValueParser.getAdInfo(call.arguments);
         return _levelPlayBannerListener?.onAdLeftApplication(adInfo);
-
       default:
         throw UnimplementedError("Method not implemented: ${call.method}");
     }

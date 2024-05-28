@@ -2,8 +2,8 @@
 enum IronSourceAdUnit {
   RewardedVideo,
   Interstitial,
-  Offerwall,
   Banner,
+  NativeAd
 }
 
 extension ParseToString on IronSourceAdUnit {
@@ -13,10 +13,10 @@ extension ParseToString on IronSourceAdUnit {
         return "REWARDED_VIDEO";
       case IronSourceAdUnit.Interstitial:
         return "INTERSTITIAL";
-      case IronSourceAdUnit.Offerwall:
-        return "OFFERWALL";
       case IronSourceAdUnit.Banner:
         return "BANNER";
+      case IronSourceAdUnit.NativeAd:
+        return "NATIVE_AD";
     }
   }
 }

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'ironsource_mediation'
-  s.version          = '1.2.1'
+  s.version          = '2.0.0'
   s.summary          = 'The Leading Mobile Advertising Technology Platform'
   s.description      = <<-DESC
 Monetize & Promote Your Apps
@@ -21,7 +21,10 @@ Mobile sdk for IronSource
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  s.resource_bundles = {
+      'ironsource_mediation' => ['Classes/**/*.xib']
+  }
 
   # ironSource
-  s.dependency 'IronSourceSDK','7.9.1.0'
+  s.dependency 'IronSourceSDK','8.1.0.0'
 end

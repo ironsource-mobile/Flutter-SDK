@@ -7,6 +7,6 @@ abstract class IronSourceListener(protected val channel: MethodChannel) {
   var activity: Activity? = null
 
   protected fun invokeMethod(methodName: String, args: Any? = null) {
-    Utils.invokeChannelMethod(activity, channel, methodName, args)
+    LevelPlayUtils.invokeChannelMethod(activity, channel, methodName, args)
   }
 }
