@@ -2,7 +2,7 @@
 
 A bridge plugin for ironSource SDKs.
 
-- [ironSource Knowledge Center](TODO:)
+- [ironSource Knowledge Center](https://developers.is.com/developer-docs/flutter/)
 - [Android SDK](https://developers.ironsrc.com/ironsource-mobile/android/android-sdk/)
 - [iOS SDK](https://developers.ironsrc.com/ironsource-mobile/ios/ios-sdk/)
 
@@ -418,3 +418,12 @@ Note:
 ```ruby
 use_frameworks! :linkage => :static
 ```
+
+## Version History
+You can find a summary of the ironSouce SDK version history [here](https://developers.is.com/ironsource-mobile/flutter/sdk-change-log/)
+
+## Contact US
+For any question please contact us [here](https://ironsrc.formtitan.com/knowledge-center#/)
+
+## License
+The license can be viewed [here](https://github.com/ironsource-mobile/Flutter-SDK/blob/master/LICENSE)
