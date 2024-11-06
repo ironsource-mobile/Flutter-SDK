@@ -31,12 +31,13 @@ abstract class LevelPlayNativeAdViewFactory(
         val viewType = if (creationParams?.containsKey("viewType") == true) creationParams["viewType"] as String else null
         val styleMap = creationParams?.get("templateStyle") as? Map<String, Any?>
         // Parse LevelPlayNativeAdElementStyle objects
+        val mainBackgroundColor = (styleMap?.get("mainBackgroundColor") as? Long)?.toInt()
         val titleElementStyle = parseElementStyle(styleMap?.get("titleStyle") as? Map<String, Any?>)
         val bodyElementStyle = parseElementStyle(styleMap?.get("bodyStyle") as? Map<String, Any?>)
         val advertiserElementStyle = parseElementStyle(styleMap?.get("advertiserStyle") as? Map<String, Any?>)
         val callToActionElementStyle = parseElementStyle(styleMap?.get("callToActionStyle") as? Map<String, Any?>)
         // Create the template style from parsed element styles(if exist)
-        val levelPlayNativeAdTemplateStyle = LevelPlayNativeAdTemplateStyle(titleElementStyle, bodyElementStyle, advertiserElementStyle, callToActionElementStyle)
+        val levelPlayNativeAdTemplateStyle = LevelPlayNativeAdTemplateStyle(mainBackgroundColor, titleElementStyle, bodyElementStyle, advertiserElementStyle, callToActionElementStyle)
         // Create the native ad layout
         val layoutInflater = LayoutInflater.from(context)
         val nativeAdLayout = if (layoutId != null && layoutId > 0) {

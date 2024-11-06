@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
-import './ironsource_method_call_handler.dart';
-import './parsers/incoming_value_parser.dart';
-import './parsers/outgoing_value_parser.dart';
-import './ironsource_constants.dart';
+import './utils/level_play_method_channel.dart';
+import './utils/ironsource_method_call_handler.dart';
+import './utils/incoming_value_parser.dart';
+import './utils/outgoing_value_parser.dart';
+import './utils/ironsource_constants.dart';
 import './models/models.dart';
 
 class IronSource {
-  static final MethodChannel _channel =
-      const MethodChannel(IronConst.METHOD_CHANNEL)
-        ..setMethodCallHandler(IronSourceMethodCallHandler.handleMethodCall);
+  static final MethodChannel _channel = LevelPlayMethodChannel().channel;
   static String? _flutterVersion;
 
   /** Utils ======================================================================================*/
@@ -196,7 +195,7 @@ class IronSource {
         OutgoingValueParser.showRewardedVideo(placementName));
   }
 
-  /// Returns an [IronSourceRVPlacement] instance if [placementName] matches.
+  /// Returns an IronSourceRewardedVideoPlacement instance if [placementName] matches.
   /// - Falls back to a Default placement when [placementName] matched with none.
   /// - Returns null if called before init finishes.
   ///
@@ -275,7 +274,7 @@ class IronSource {
   }
 
   /// Starts the RewardedVideo load process.
-  /// - The RV Manual Load mode must be enabled via [setManualLoadRewardedVideo].
+  /// - The RV Manual Load mode must be enabled via [setLevelPlayRewardedVideoManualListener].
   ///
   /// Native SDK Reference
   /// - Android: loadRewardedVideo
@@ -287,7 +286,7 @@ class IronSource {
   /** Interstitial API =====================================================================================*/
 
   /// Starts the Iinterstitial load process.
-  /// - Load status updates will be notified to [IronSourceInterstitialListener]
+  /// - Load status updates will be notified to [LevelPlayInterstitialListener]
   ///
   /// Native SDK Reference
   /// - Android: loadInterstitial
@@ -337,11 +336,12 @@ class IronSource {
   /// - Once it's successfully loaded, it keeps reloading until getting explicitly destroyed.
   /// - [verticalOffset] could be configured as Upward < 0 < Downward in Android:dp and iOS:point.
   /// - An ad placement could be specified with [placementName].
-  /// - Load status updates will be notified to [IronSourceBannerListener].
+  /// - Load status updates will be notified to [LevelPlayBannerListener].
   ///
   /// Native SDK Reference
   /// - Android: loadBanner
   /// -     iOS: loadBannerWithViewController
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static Future<void> loadBanner({
     required IronSourceBannerSize size,
     required IronSourceBannerPosition position,
@@ -358,17 +358,20 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: destroyBanner
   /// -     iOS: destroyBanner
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static Future<void> destroyBanner() async {
     return _channel.invokeMethod('destroyBanner');
   }
 
   /// Changes the visibility of loaded Banner to visible.
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static Future<void> displayBanner() async {
     return _channel.invokeMethod('displayBanner');
   }
 
   /// Changes the visibility of loaded Banner to invisible.
   /// - Reloading does not take place while it's hidden.
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static Future<void> hideBanner() async {
     return _channel.invokeMethod('hideBanner');
   }
@@ -378,6 +381,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isBannerPlacementCapped
   /// -     iOS: isBannerCappedForPlacement
+  @Deprecated("This method will be removed in future versions.")
   static Future<bool> isBannerPlacementCapped(String placementName) async {
     final args = OutgoingValueParser.isBannerPlacementCapped(placementName);
     final bool isCapped =
@@ -390,13 +394,14 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getMaximalAdaptiveHeight
   /// -     iOS: getMaximalAdaptiveHeight
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static Future<int> getMaximalAdaptiveHeight(int width) async {
     final args = OutgoingValueParser.getMaximalAdaptiveHeight(width);
     final int adaptiveHeight = await _channel.invokeMethod('getMaximalAdaptiveHeight', args);
     return adaptiveHeight;
   }
 
-  /** OfferWall Config API ==============================================================================*/
+  /** Config API ==============================================================================*/
 
   /// Sets the OW client side automatic polling mode.
   /// - __Note__: Must be called before [init].
@@ -455,9 +460,15 @@ class IronSource {
 
   // Listener setters
 
-  static void setImpressionDataListener(
-      IronSourceImpressionDataListener? listener) {
+  @Deprecated("This method will be removed in future versions. Please use addImpressionDataListener instead.")
+  static void setImpressionDataListener(IronSourceImpressionDataListener? listener) {
+    IronSourceMethodCallHandler.addImpressionDataListener(null); // Make sure only one listener is set
     IronSourceMethodCallHandler.setImpressionDataListener(listener);
+  }
+
+  static void addImpressionDataListener(ImpressionDataListener? listener) {
+    IronSourceMethodCallHandler.setImpressionDataListener(null); // Make sure only one listener is set
+    IronSourceMethodCallHandler.addImpressionDataListener(listener);
   }
 
   static void setConsentViewListener(IronSourceConsentViewListener? listener) {
@@ -474,6 +485,7 @@ class IronSource {
     IronSourceMethodCallHandler.setLevelPlayInterstitialListener(listener);
   }
 
+  @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static void setLevelPlayBannerListener(LevelPlayBannerListener? listener) {
     IronSourceMethodCallHandler.setLevelPlayBannerListener(listener);
   }

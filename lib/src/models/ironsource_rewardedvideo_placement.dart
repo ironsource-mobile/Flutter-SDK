@@ -1,7 +1,5 @@
-import 'ironsource_rv_placement.dart';
-
 /// Placement for RewardedVideo
-class IronSourceRewardedVideoPlacement implements IronSourceRVPlacement {
+class IronSourceRewardedVideoPlacement {
   final String placementName;
   final String rewardName;
   final int rewardAmount;

@@ -47,11 +47,8 @@
             [weakSelf handleMethodCall:call result:result];
         }];
 
-        // Apply styles before ad loaded
-        [self applyStylesWithTitleView:self.isNativeAdView.adTitleView
-                              bodyView:self.isNativeAdView.adBodyView
-                        advertiserView:self.isNativeAdView.adBodyView
-                      callToActionView:self.isNativeAdView.adCallToActionView];
+        // Hide the ad elements when its not loaded
+        self.isNativeAdView.hidden = YES;
     }
     return self;
 }
@@ -61,6 +58,13 @@
                 advertiserView:(UILabel *)advertiserView
               callToActionView:(UIButton *)callToActionView {
     if (self.templateStyle) {
+        if(self.templateStyle.mainBackgroundColor) {
+            UIColor *mainBackgroundColor = [UIColor colorWithRed:((CGFloat)(([self.templateStyle.mainBackgroundColor integerValue] >> 16) & 0xFF)) / 255.0
+                                                       green:((CGFloat)(([self.templateStyle.mainBackgroundColor integerValue] >> 8) & 0xFF)) / 255.0
+                                                        blue:((CGFloat)([self.templateStyle.mainBackgroundColor integerValue] & 0xFF)) / 255.0
+                                                       alpha:1.0];
+            self.isNativeAdView.backgroundColor = mainBackgroundColor;
+        }
         [self applyStyleToTextView:titleView style:self.templateStyle.titleStyle];
         [self applyStyleToTextView:bodyView style:self.templateStyle.bodyStyle];
         [self applyStyleToTextView:advertiserView style:self.templateStyle.advertiserStyle];
@@ -174,7 +178,7 @@
     // If the native ad is not initialized, create a new one
     if (_nativeAd == nil) {
         _nativeAd = [[[[LevelPlayNativeAdBuilder new]
-                withViewController:(UIViewController *)self]
+                withViewController:[LevelPlayUtils getRootViewController]]
                 withPlacementName:self.placement] // Replace with your placement or leave empty
                 withDelegate:self]    // We implement the delegate in step 2
                 .build;
@@ -263,7 +267,16 @@
             [LevelPlayUtils dictionaryForNativeAd:nativeAd], @"nativeAd",
             [LevelPlayUtils dictionaryForAdInfo:adInfo], @"adInfo",
             nil];
-    [self.methodChannel invokeMethod:@"onAdLoaded" arguments:args];
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdLoaded" args: args];
+
+    // Apply styles
+    [self applyStylesWithTitleView:self.isNativeAdView.adTitleView
+                          bodyView:self.isNativeAdView.adBodyView
+                    advertiserView:self.isNativeAdView.adBodyView
+                  callToActionView:self.isNativeAdView.adCallToActionView];
+
+    // Visible the ad
+    self.isNativeAdView.hidden = NO;
 }
 
 /**
@@ -277,7 +290,7 @@
             [LevelPlayUtils dictionaryForNativeAd:nativeAd], @"nativeAd",
             [LevelPlayUtils dictionaryForError:error], @"error",
             nil];
-    [self.methodChannel invokeMethod:@"onAdLoadFailed" arguments:args];
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdLoadFailed" args: args];
 }
 /**
  Called after a native ad impression has been recorded.
@@ -290,7 +303,7 @@
             [LevelPlayUtils dictionaryForNativeAd:nativeAd], @"nativeAd",
             [LevelPlayUtils dictionaryForAdInfo:adInfo], @"adInfo",
             nil];
-    [self.methodChannel invokeMethod:@"onAdImpression" arguments:args];
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdImpression" args: args];
 }
 
 /**
@@ -304,7 +317,7 @@
             [LevelPlayUtils dictionaryForNativeAd:nativeAd], @"nativeAd",
             [LevelPlayUtils dictionaryForAdInfo:adInfo], @"adInfo",
             nil];
-    [self.methodChannel invokeMethod:@"onAdClicked" arguments:args];
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdClicked" args: args];
 }
 
 @end

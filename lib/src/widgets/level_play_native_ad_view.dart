@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+
+import '../models/level_play_native_ad.dart';
+import '../models/level_play_native_ad_template_style.dart';
+import '../models/level_play_template_type.dart';
 
 /// [LevelPlayNativeAdView] is the widget that contains the native ad elements
 ///  and must be created in order view native ad
@@ -31,15 +34,16 @@ class LevelPlayNativeAdView extends StatefulWidget {
   final String viewType;
 
   /// Constructs an instance of [LevelPlayNativeAdView].
-  const LevelPlayNativeAdView({Key? key,
+  const LevelPlayNativeAdView({
+    super.key,
     required this.nativeAd,
     this.templateType = LevelPlayTemplateType.SMALL,
     this.width,
     this.height,
     this.templateStyle,
     this.onPlatformViewCreated,
-    this.viewType = 'levelPlayNativeAdViewType'
-  }) : super(key: key);
+    this.viewType = 'levelPlayNativeAdView'
+  });
 
   @override
   State<LevelPlayNativeAdView> createState() => _LevelPlayNativeAdViewState();
@@ -58,28 +62,25 @@ class _LevelPlayNativeAdViewState extends State<LevelPlayNativeAdView> {
 
   @override
   Widget build(BuildContext context) {
+    final creationParams = <String, dynamic>{
+      "placement": widget.nativeAd?.placementName ?? '',
+      "templateType": widget.templateType.value,
+      "templateStyle": widget.templateStyle?.toMap(),
+      "viewType": widget.viewType
+    };
+
     return SizedBox(
       width: widget.width,
       height: widget.height,
       child: Platform.isAndroid ? AndroidView(
         viewType: widget.viewType,
-        creationParams: <String, dynamic>{
-          "placement": widget.nativeAd?.placementName ?? '',
-          "templateType": widget.templateType.value,
-          "templateStyle": widget.templateStyle?.toMap(),
-          "viewType": widget.viewType
-        },
+        creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
         onPlatformViewCreated: _onPlatformViewCreated,
         ) :
         Platform.isIOS ? UiKitView(
             viewType: widget.viewType,
-            creationParams: <String, dynamic>{
-              "placement": widget.nativeAd?.placementName ?? '',
-              "templateType": widget.templateType.value,
-              "templateStyle": widget.templateStyle?.toMap(),
-              "viewType": widget.viewType
-            },
+            creationParams: creationParams,
             creationParamsCodec: const StandardMessageCodec(),
             onPlatformViewCreated: _onPlatformViewCreated) : Container(),
     );

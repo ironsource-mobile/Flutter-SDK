@@ -5,11 +5,7 @@ import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener
 import io.flutter.plugin.common.MethodChannel
 
-/**
- * LevelPlay Banner Listener
- */
-class LevelPlayBannerListener(channel: MethodChannel) : IronSourceListener(channel),
-    LevelPlayBannerListener {
+class LevelPlayBannerListener(channel: MethodChannel) : LevelPlayListener(channel), LevelPlayBannerListener {
 
   override fun onAdLoaded(adInfo: AdInfo) {
     invokeMethod("LevelPlay_Banner:onAdLoaded", adInfo.toMap())

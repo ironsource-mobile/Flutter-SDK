@@ -1,4 +1,5 @@
 /// Banner Position
+@Deprecated("This class will be removed in future versions. Please use LevelPlayBannerAdView instead.")
 enum IronSourceBannerPosition {
   Top,
   Center,

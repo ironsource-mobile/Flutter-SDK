@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -21,6 +20,10 @@ import com.ironsource.mediationsdk.WaterfallConfiguration
 import com.ironsource.mediationsdk.config.ConfigFile
 import com.ironsource.mediationsdk.integration.IntegrationHelper
 import com.ironsource.mediationsdk.model.Placement
+import com.unity3d.mediation.LevelPlay
+import com.unity3d.mediation.LevelPlayAdSize
+import com.unity3d.mediation.LevelPlayInitRequest
+import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -33,7 +36,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.platform.PlatformViewFactory
-import java.lang.IllegalStateException
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
@@ -57,6 +59,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var mInitializationListener: InitializationListener? = null
 
   // LevelPlay Listeners
+  private var mLevelPlayInitListener: LevelPlayInitListener? = null
   private var mLevelPlayRewardedVideoListener: LevelPlayRewardedVideoListener? = null
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
@@ -65,22 +68,32 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   private var nativeAdViewFactories = hashMapOf<String, PlatformViewFactory>()
   private var pluginBinding: FlutterPluginBinding? = null
 
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPluginBinding) {
+  // LevelPlay Ad Object Manager
+  private lateinit var levelPlayAdObjectManager: LevelPlayAdObjectManager
+
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ironsource_mediation")
     context = flutterPluginBinding.applicationContext
     pluginBinding = flutterPluginBinding
 
-    isPluginAttached = true
     channel?.setMethodCallHandler(this)
     initListeners()
 
+    // Banner ad view registry
+    val bannerAdViewFactory = LevelPlayBannerAdViewFactory(pluginBinding!!.binaryMessenger)
+    pluginBinding
+      ?.platformViewRegistry
+      ?.registerViewFactory("levelPlayBannerAdView", bannerAdViewFactory)
+
     // Native ad view registry
     val nativeAdViewFactory = LevelPlayNativeAdViewFactoryTemplate(pluginBinding!!.binaryMessenger)
-    addNativeAdViewFactory("levelPlayNativeAdViewType", nativeAdViewFactory)
+    addNativeAdViewFactory("levelPlayNativeAdView", nativeAdViewFactory)
+
+    // Ad object manager registry
+    levelPlayAdObjectManager = LevelPlayAdObjectManager(activity, channel!!)
   }
 
-  override fun onDetachedFromEngine(@NonNull binding: FlutterPluginBinding) {
-    isPluginAttached = false
+  override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
     channel?.setMethodCallHandler(null)
     channel = null
     detachListeners()
@@ -100,6 +113,10 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       if (mInitializationListener == null) {
         mInitializationListener = InitializationListener(channel)
       }
+      // LevelPlay Init Listener
+      if (mLevelPlayInitListener == null) {
+        mLevelPlayInitListener = LevelPlayInitListener(channel)
+      }
       // LevelPlay RewardedVideo
       if (mLevelPlayRewardedVideoListener == null) {
         mLevelPlayRewardedVideoListener = LevelPlayRewardedVideoListener(channel)
@@ -115,9 +132,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
         mLevelPlayBannerListener = LevelPlayBannerListener(channel)
       }
     }
-
-    // Set FlutterActivity
-    setActivityToListeners(activity)
   }
 
   /**
@@ -129,7 +143,9 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     mImpressionDataListener = null
     // Init
     mInitializationListener = null
-    // LevelPlay ReawrdedVideo
+    // LevelPlay Init
+    mLevelPlayInitListener = null
+    // LevelPlay RewardedVideo
     mLevelPlayRewardedVideoListener = null
     // LevelPlay Interstitial
     mLevelPlayInterstitialListener = null
@@ -137,7 +153,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     IronSource.setLevelPlayRewardedVideoListener(null)
   }
 
-  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+  override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       /** Base API ===============================================================================*/
       "validateIntegration" -> validateIntegration(result)
@@ -179,33 +195,43 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       "setClientSideCallbacks" -> setClientSideCallbacks(call, result)
       /** Internal Config API ====================================================================*/
       "setPluginData" -> setPluginData(call, result)
+
+      /** LevelPlay Init API ===============================================================================*/
+      "initLevelPlay" -> initLevelPlay(call, result)
+      /** LevelPlayInterstitialAd API ===============================================================================*/
+      "isInterstitialAdPlacementCapped" -> isInterstitialAdPlacementCapped(call, result)
+      "loadInterstitialAd" -> loadInterstitialAd(call, result)
+      "showInterstitialAd" -> showInterstitialAd(call, result)
+      "isInterstitialAdReady" -> isInterstitialAdReady(call, result)
+      "disposeAd" -> disposeAd(call, result)
+      "disposeAllAds" -> disposeAllAds(result)
+      /** LevelPlayAdSize API ===============================================================================*/
+      "createAdaptiveAdSize" -> createAdaptiveAdSize(call, result)
       else -> result.notImplemented()
     }
   }
 
   /** region Base API ============================================================================*/
 
-  //TODO: Implement with real error codes
   /**
    * Validates the integration of the SDK.
    *
    * @param result The result to be returned after validating the integration.
    */
-  private fun validateIntegration(@NonNull result: Result) {
+  private fun validateIntegration(result: Result) {
     activity?.apply {
       IntegrationHelper.validateIntegration(this)
       return result.success(null)
     } ?: return result.error("ERROR", "Activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets whether to track network state for IronSource SDK.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun shouldTrackNetworkState(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun shouldTrackNetworkState(call: MethodCall, result: Result) {
     if (activity == null) {
       return result.error("ERROR", "Activity is null", null)
     }
@@ -215,28 +241,26 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets whether to enable debug mode for IronSource SDK adapters.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setAdaptersDebug(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setAdaptersDebug(call: MethodCall, result: Result) {
     val isEnabled = call.argument("isEnabled") as Boolean?
         ?: return result.error("ERROR", "isEnabled is null", null)
     IronSource.setAdaptersDebug(isEnabled)
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets the dynamic user ID for IronSource SDK.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setDynamicUserId(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setDynamicUserId(call: MethodCall, result: Result) {
     val userId = call.argument("userId") as String?
         ?: return result.error("ERROR", "userId is null", null)
 
@@ -244,13 +268,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Retrieves the advertiser ID asynchronously.
    *
    * @param result The result to be returned after processing.
    */
-  private fun getAdvertiserId(@NonNull result: Result) {
+  private fun getAdvertiserId(result: Result) {
     activity?.apply {
       val executer = Executors.newSingleThreadExecutor()
       executer.execute {
@@ -261,28 +284,26 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     } ?: return result.error("ERROR", "getAdvertiserId called when activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets the consent status for the user.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setConsent(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setConsent(call: MethodCall, result: Result) {
     val isConsent = call.argument("isConsent") as Boolean?
         ?: return result.error("ERROR", "isConsent is null", null)
     IronSource.setConsent(isConsent)
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets the segment for the user.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setSegment(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setSegment(call: MethodCall, result: Result) {
     val segmentMap = call.argument("segment") as HashMap<String, Any?>?
         ?: return result.error("ERROR", "segment is null", null)
     val iSSegment = IronSourceSegment()
@@ -304,14 +325,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets meta data for IronSource.
    *
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setMetaData(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setMetaData(call: MethodCall, result: Result) {
     val metaDataMap = call.argument("metaData") as HashMap<String, List<String>>?
         ?: return result.error("ERROR", "metaData is null", null)
     // internally overload function uses setMetaData(key: String, values:List<String>) after all
@@ -324,12 +344,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun launchTestSuite(@NonNull result: Result) {
+  private fun launchTestSuite(result: Result) {
     context?.let { IronSource.launchTestSuite(it) }
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets the waterfall configuration for an ad unit.
    *
@@ -368,14 +387,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region Init API ============================================================================*/
 
-  //TODO: Implement with real error codes
   /**
    * Sets the user ID for IronSource.
    *
    * @param call The method call containing the user ID as an argument.
    * @param result The result to be returned after processing.
    */
-  private fun setUserId(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setUserId(call: MethodCall, result: Result) {
     val userId = call.argument("userId") as String?
         ?: return result.error("ERROR", "userId is null", null)
 
@@ -383,14 +401,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Initializes IronSource SDK with the provided app key and ad units.
    *
    * @param call The method call containing the app key and ad units as arguments.
    * @param result The result to be returned after processing.
    */
-  private fun initIronSource(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun initIronSource(call: MethodCall, result: Result) {
     if (activity == null) {
       return result.error("ERROR", "Activity is null", null)
     }
@@ -420,14 +437,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region RewardedVideo API ==============================================================================*/
 
-  //TODO: Implement with real error codes
   /**
    * Shows a rewarded video.
    *
    * @param call The method call containing the placement name as an argument.
    * @param result The result to be returned after processing.
    */
-  private fun showRewardedVideo(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun showRewardedVideo(call: MethodCall, result: Result) {
     activity?.apply {
       // Retrieve placement name from method call arguments
       val placementName = call.argument("placementName") as String?
@@ -440,15 +456,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     } ?: return result.error("ERROR", "showRewardedVideo called when activity is null", null)
   }
 
-
-  //TODO: Implement with real error codes
   /**
    * Retrieves information about a rewarded video placement.
    *
    * @param call The method call containing the placement name as an argument.
    * @param result The result to be returned after processing.
    */
-  private fun getRewardedVideoPlacementInfo(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun getRewardedVideoPlacementInfo(call: MethodCall, result: Result) {
     // Retrieve placement name from method call arguments
     val placementName = call.argument("placementName") as String?
       ?: return result.error("ERROR", "placementName is null", null)
@@ -463,19 +477,18 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun isRewardedVideoAvailable(@NonNull result: Result) {
+  private fun isRewardedVideoAvailable(result: Result) {
     // Check if rewarded video is available and return the result
     return result.success(IronSource.isRewardedVideoAvailable())
   }
 
-  //TODO: Implement with real error codes
   /**
    * Checks if a rewarded video placement is capped.
    *
    * @param call The method call containing the placement name as an argument.
    * @param result The result to be returned after processing.
    */
-  private fun isRewardedVideoPlacementCapped(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun isRewardedVideoPlacementCapped(call: MethodCall, result: Result) {
     // Retrieve placement name from method call arguments
     val placementName = call.argument("placementName") as String?
       ?: return result.error("ERROR", "placementName is null", null)
@@ -484,14 +497,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     return result.success(isCapped)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Sets server parameters for rewarded video.
    *
    * @param call The method call containing the parameters as a hashmap.
    * @param result The result to be returned after processing.
    */
-  private fun setRewardedVideoServerParams(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setRewardedVideoServerParams(call: MethodCall, result: Result) {
     // Retrieve parameters from method call arguments
     val parameters = call.argument("parameters") as HashMap<String, String>?
       ?: return result.error("ERROR", "parameters is null", null)
@@ -506,7 +518,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun clearRewardedVideoServerParams(@NonNull result: Result) {
+  private fun clearRewardedVideoServerParams(result: Result) {
     // Clear rewarded video server parameters
     IronSource.clearRewardedVideoServerParameters()
     // Return success
@@ -519,7 +531,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun setLevelPlayRewardedVideoManual(@NonNull result: Result) {
+  private fun setLevelPlayRewardedVideoManual(result: Result) {
     // Remove the auto load LevelPlay RewardedVideo listener
     IronSource.setLevelPlayRewardedVideoListener(null)
     // Set the LevelPlay RewardedVideo manual
@@ -533,7 +545,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun loadRewardedVideo(@NonNull result: Result) {
+  private fun loadRewardedVideo(result: Result) {
     IronSource.loadRewardedVideo()
     return result.success(null)
   }
@@ -546,19 +558,18 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun loadInterstitial(@NonNull result: Result) {
+  private fun loadInterstitial(result: Result) {
     IronSource.loadInterstitial()
     return result.success(null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Shows an Interstitial ad.
    *
    * @param call   The method call containing arguments, such as placementName.
    * @param result The result to be returned after processing.
    */
-  private fun showInterstitial(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun showInterstitial(call: MethodCall, result: Result) {
     activity?.apply {
       val placementName = call.argument("placementName") as String?
       placementName?.let { name -> IronSource.showInterstitial(name) }
@@ -573,23 +584,23 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun isInterstitialReady(@NonNull result: Result) {
+  private fun isInterstitialReady(result: Result) {
     return result.success(IronSource.isInterstitialReady())
   }
 
-  //TODO: Implement with real error codes
   /**
    * Checks if the specified Interstitial placement is capped.
    *
    * @param call   The method call containing arguments, such as placementName.
    * @param result The result to be returned after processing.
    */
-  private fun isInterstitialPlacementCapped(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun isInterstitialPlacementCapped(call: MethodCall, result: Result) {
     val placementName = call.argument("placementName") as String?
         ?: return result.error("ERROR", "placementName is null", null)
     val isCapped = IronSource.isInterstitialPlacementCapped(placementName)
     return result.success(isCapped)
   }
+
   // endregion
 
   /** region Banner API ==============================================================================*/
@@ -601,7 +612,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call   The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun loadBanner(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun loadBanner(call: MethodCall, result: Result) {
     // fallback to BANNER in the case of invalid descriptions
     fun getBannerSize(description: String, width: Int, height: Int): ISBannerSize {
       return when (description) {
@@ -614,7 +625,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       }
     }
 
-    //TODO: Implement with real error codes
     activity?.apply {
       // args
       // Dart int is 64bits, so if the value is over 32bits, it is parsed into Long
@@ -706,24 +716,22 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
             } else {
               IronSource.loadBanner(mBanner)
             }
-            //TODO: Implement with real error codes
             result.success(null)
           } catch (e: Throwable) {
             Log.e(TAG, e.toString())
             result.error("ERROR", "Failed to load banner", e)
           }
         }
-      }//TODO: Implement with real error codes
+      }
     } ?: result.error("ERROR", "loadBanner called when activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Destroys the banner ad.
    *
    * @param result The result to be returned after processing.
    */
-  private fun destroyBanner(@NonNull result: Result) {
+  private fun destroyBanner(result: Result) {
     activity?.apply {
       runOnUiThread {
         synchronized(this@IronSourceMediationPlugin) {
@@ -739,13 +747,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     } ?: result.error("ERROR", "destroyBanner called when activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Displays the banner ad.
    *
    * @param result The result to be returned after processing.
    */
-  private fun displayBanner(@NonNull result: Result) {
+  private fun displayBanner(result: Result) {
     activity?.apply {
       runOnUiThread {
         synchronized(this@IronSourceMediationPlugin) {
@@ -758,13 +765,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     } ?: result.error("ERROR", "displayBanner called when activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Hides the banner ad.
    *
    * @param result The result to be returned after processing.
    */
-  private fun hideBanner(@NonNull result: Result) {
+  private fun hideBanner(result: Result) {
     activity?.apply {
       runOnUiThread {
         synchronized(this@IronSourceMediationPlugin) {
@@ -777,14 +783,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     } ?: result.error("ERROR", "hideBanner called when activity is null", null)
   }
 
-  //TODO: Implement with real error codes
   /**
    * Checks if a banner placement is capped.
    *
    * @param call   The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun isBannerPlacementCapped(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun isBannerPlacementCapped(call: MethodCall, result: Result) {
     val placementName = call.argument("placementName") as String?
         ?: return result.error("ERROR", "placementName is null", null)
     val isCapped = IronSource.isBannerPlacementCapped(placementName)
@@ -837,14 +842,13 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region Config API ==========================================================================*/
 
-  //TODO: Implement with real error codes
   /**
    * Enables or disables client-side callbacks.
    *
    * @param call   The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setClientSideCallbacks(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setClientSideCallbacks(call: MethodCall, result: Result) {
     val isEnabled = call.argument("isEnabled") as Boolean?
         ?: return result.error("ERROR", "isEnabled is null", null)
     SupersonicConfig.getConfigObj().clientSideCallbacks = isEnabled
@@ -854,7 +858,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region Internal Config API =================================================================*/
 
-  //TODO: Implement with real error codes
   /**
    * Sets plugin data for IronSource mediation.
    * Only called internally in the process of init on the Flutter plugin
@@ -862,7 +865,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call   The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setPluginData(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setPluginData(call: MethodCall, result: Result) {
 
     val pluginType = call.argument("pluginType") as String?
         ?: return result.error("ERROR", "pluginType is null", null)
@@ -876,9 +879,90 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   // endregion
 
+  /** region LevelPlay Init API =================================================================*/
+
+  private fun initLevelPlay(call: MethodCall, result: Result) {
+    if (context == null) {
+      return result.error("ERROR", "Context is null", null)
+    }
+    val appKey = call.argument("appKey") as String? ?: return result.error("ERROR", "appKey is null", null)
+    val adFormats = call.argument("adFormats") as List<String>? ?: listOf()
+    val legacyAdFormats: List<LevelPlay.AdFormat> = adFormats.map {
+      when (it) {
+        "REWARDED" -> LevelPlay.AdFormat.REWARDED
+        "INTERSTITIAL" -> LevelPlay.AdFormat.INTERSTITIAL
+        "BANNER" -> LevelPlay.AdFormat.BANNER
+        "NATIVE_AD" -> LevelPlay.AdFormat.NATIVE_AD
+        else -> return@initLevelPlay result.error("ERROR", "Unsupported ad format: $it", null)
+      }
+    }.toList()
+    val initRequest = LevelPlayInitRequest.Builder(appKey)
+      .withLegacyAdFormats(legacyAdFormats)
+      .build()
+
+    LevelPlay.init(context!!, initRequest, mLevelPlayInitListener!!)
+
+    return result.success(null)
+  }
+
+  // endregion
+
+  /** region LevelPlayInterstitialAd API =================================================================*/
+  private fun isInterstitialAdPlacementCapped(call: MethodCall, result: Result) {
+    val placementName: String = call.argument("placementName")!!
+    val isCapped = LevelPlayInterstitialAd.isPlacementCapped(placementName)
+    result.success(isCapped)
+  }
+
+  private fun loadInterstitialAd(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val adUnitId: String = call.argument("adUnitId")!!
+    levelPlayAdObjectManager.loadInterstitialAd(adObjectId, adUnitId)
+    result.success(null)
+  }
+
+  private fun showInterstitialAd(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val placementName: String? = call.argument("placementName")
+    levelPlayAdObjectManager.showInterstitialAd(adObjectId, placementName)
+    result.success(null)
+  }
+
+  private fun isInterstitialAdReady(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val isReady = levelPlayAdObjectManager.isInterstitialAdReady(adObjectId)
+    result.success(isReady)
+  }
+
+  private fun disposeAd(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    levelPlayAdObjectManager.disposeAd(adObjectId)
+    result.success(null)
+  }
+
+  private fun disposeAllAds(result: Result) {
+    levelPlayAdObjectManager.disposeAllAds()
+    result.success(null)
+  }
+
+  // endregion
+
+  /** region LevelPlayAdSize API =================================================================*/
+
+  private fun createAdaptiveAdSize(call: MethodCall, result: Result) {
+    val width = call.argument("width") as Int?
+    val size = context?.let {
+      LevelPlayAdSize.createAdaptiveAdSize(it, width)
+    }
+    return result.success(size.toMap())
+  }
+
+  // endregion
+
   /** region ActivityAware =======================================================================*/
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     activity = binding.activity
+    levelPlayAdObjectManager.activity = binding.activity
     if (activity is FlutterActivity)
     {
       (activity as FlutterActivity).lifecycle.addObserver(this)
@@ -887,7 +971,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     {
       (activity as FlutterFragmentActivity).lifecycle.addObserver(this)
     }
-    setActivityToListeners(activity)
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -900,7 +983,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       (activity as FlutterFragmentActivity).lifecycle.removeObserver(this)
     }
     activity = null
-    setActivityToListeners(null)
+    levelPlayAdObjectManager.activity = null
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -914,7 +997,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       activity = binding.activity as FlutterFragmentActivity
       (activity as FlutterFragmentActivity).lifecycle.addObserver(this)
     }
-    setActivityToListeners(activity)
+    levelPlayAdObjectManager.activity = activity
   }
   override fun onDetachedFromActivity() {
     if (activity is FlutterActivity)
@@ -926,21 +1009,10 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       (activity as FlutterFragmentActivity).lifecycle.removeObserver(this)
     }
     activity = null
-    setActivityToListeners(null)
+    levelPlayAdObjectManager.activity = null
   }
 
   // endregion
-
-  /**
-   * Set FlutterActivity to listener instances
-   */
-  private fun setActivityToListeners(activity: Activity?) {
-    mImpressionDataListener?.activity = activity
-    mInitializationListener?.activity = activity
-    mLevelPlayRewardedVideoListener?.activity = activity
-    mLevelPlayInterstitialListener?.activity = activity
-    mLevelPlayBannerListener?.activity = activity
-  }
 
   /** region LifeCycleObserver  ==================================================================*/
   @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -954,9 +1026,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   // endregion
 
   companion object {
-    val TAG = IronSourceMediationPlugin::class.java.simpleName
-    var isPluginAttached: Boolean = false
-
+    val TAG: String = IronSourceMediationPlugin::class.java.simpleName
 
     /**
      * Registers a native ad view factory with the specified factory ID to be used within the Flutter engine.

@@ -1,6 +1,5 @@
 #import "LevelPlayBannerDelegateMethodHandler.h"
-#import "IronSourceError.h"
-#import "AdInfo.h"
+#import "../../LevelPlayUtils.h"
 
 @implementation LevelPlayBannerDelegateMethodHandler
 
@@ -20,27 +19,27 @@
     if (self.onDidLoadLevelPlayBanner) {
             self.onDidLoadLevelPlayBanner(bannerView, adInfo);
         }
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLoaded" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLoaded" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didFailToLoadWithError:(NSError *)error {
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLoadFailed" args:[error toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLoadFailed" args: [LevelPlayUtils dictionaryForError: error]];
 }
 
 - (void)didClickWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdClicked" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdClicked" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didPresentScreenWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdScreenPresented" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdScreenPresented" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didDismissScreenWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdScreenDismissed" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdScreenDismissed" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didLeaveApplicationWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLeftApplication" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_Banner:onAdLeftApplication" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 @end

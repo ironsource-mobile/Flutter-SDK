@@ -9,6 +9,11 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.impressionData.ImpressionData
 import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.model.Placement
+import com.unity3d.mediation.LevelPlayAdError
+import com.unity3d.mediation.LevelPlayAdInfo
+import com.unity3d.mediation.LevelPlayAdSize
+import com.unity3d.mediation.LevelPlayConfiguration
+import com.unity3d.mediation.LevelPlayInitError
 import java.io.ByteArrayOutputStream
 
 /**
@@ -51,6 +56,9 @@ fun ImpressionData.toMap(): HashMap<String, Any> {
     return hashMapOf(
         "auctionId" to this.auctionId,
         "adUnit" to this.adUnit,
+        "adUnitName" to this.mediationAdUnitName,
+        "adUnitId" to this.mediationAdUnitId,
+        "adFormat" to this.adFormat,
         "country" to this.country,
         "ab" to this.ab,
         "segmentName" to this.segmentName,
@@ -84,6 +92,7 @@ fun AdInfo.toMap(): HashMap<String, Any> {
         "segmentName" to this.segmentName,
         "revenue" to this.revenue,
         "precision" to this.precision,
+        "lifetimeRevenue" to this.lifetimeRevenue,
         "encryptedCPM" to this.encryptedCPM
     )
 }
@@ -101,8 +110,10 @@ fun LevelPlayNativeAd.toMap(): HashMap<String, Any?> {
         "body" to this.body,
         "advertiser" to this.advertiser,
         "callToAction" to this.callToAction,
-        "iconUri" to this.icon?.uri.toString(),
-        "iconImageData" to this.icon?.drawable?.toBytes()
+        "icon" to hashMapOf(
+            "uri" to this.icon?.uri.toString(),
+            "imageData" to this.icon?.drawable?.toBytes()
+        )
     )
 }
 
@@ -164,4 +175,72 @@ fun Bitmap.toBytes(): ByteArray {
 
     // Convert the ByteArrayOutputStream to a byte array and return the result
     return stream.toByteArray()
+}
+
+/**
+ * Extension function to convert a LevelPlayInitError object to a Map.
+ * This function converts the LevelPlayInitError object's properties into a HashMap with String keys
+ * and nullable Any values, allowing easy serialization or mapping of the object.
+ *
+ * @return A HashMap representing the LevelPlayInitError object.
+ */
+fun LevelPlayInitError.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "errorCode" to this.errorCode,
+        "errorMessage" to this.errorMessage
+    )
+}
+
+/**
+ * Extension function to convert a LevelPlayConfiguration object to a Map.
+ * This function converts the LevelPlayConfiguration object's properties into a HashMap with String keys
+ * and nullable Any values, allowing easy serialization or mapping of the object.
+ *
+ * @return A HashMap representing the LevelPlayConfiguration object.
+ */
+fun LevelPlayConfiguration.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "isAdQualityEnabled" to this.isAdQualityEnabled
+    )
+}
+
+fun LevelPlayAdInfo.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "adUnitId" to this.getAdUnitId(),
+        "adFormat" to this.getAdFormat(),
+        "adSize" to this.getAdSize().toMap(),
+        "impressionData" to hashMapOf(
+            "auctionId" to this.getAuctionId(),
+            "adUnitName" to this.getAdUnitName(),
+            "adUnitId" to this.getAdUnitId(),
+            "adFormat" to this.getAdFormat(),
+            "country" to this.getCountry(),
+            "ab" to this.getAb(),
+            "segmentName" to this.getSegmentName(),
+            "placement" to this.getPlacementName(),
+            "adNetwork" to this.getAdNetwork(),
+            "instanceName" to this.getInstanceName(),
+            "instanceId" to this.getInstanceId(),
+            "revenue" to this.getRevenue(),
+            "precision" to this.getPrecision(),
+            "encryptedCPM" to this.getEncryptedCPM(),
+        ),
+    )
+}
+
+fun LevelPlayAdSize?.toMap(): HashMap<String, Any?>? {
+    return if (this != null) hashMapOf(
+        "width" to this.getWidth(),
+        "height" to this.getHeight(),
+        "adLabel" to this.getDescription(),
+        "isAdaptive" to this.isAdaptive
+    ) else null
+}
+
+fun LevelPlayAdError.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "adUnitId" to this.adUnitId,
+        "errorCode" to this.getErrorCode(),
+        "errorMessage" to this.getErrorMessage()
+    )
 }

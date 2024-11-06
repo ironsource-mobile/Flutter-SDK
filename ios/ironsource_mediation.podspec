@@ -26,5 +26,5 @@ Mobile sdk for IronSource
   }
 
   # ironSource
-  s.dependency 'IronSourceSDK','8.1.0.0'
+  s.dependency 'IronSourceSDK','8.4.0.0'
 end

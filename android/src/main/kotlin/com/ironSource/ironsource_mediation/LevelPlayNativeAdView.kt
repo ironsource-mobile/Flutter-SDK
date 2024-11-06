@@ -4,9 +4,8 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
-import com.ironsource.mediationsdk.ads.nativead.LevelPlayMediaView
+import com.ironSource.ironsource_mediation.LevelPlayUtils.Companion.invokeMethodOnUiThread
 import com.ironsource.mediationsdk.ads.nativead.LevelPlayNativeAd
 import com.ironsource.mediationsdk.ads.nativead.LevelPlayNativeAdListener
 import com.ironsource.mediationsdk.ads.nativead.NativeAdLayout
@@ -25,7 +24,7 @@ import io.flutter.plugin.platform.PlatformView
  * @property placement The placement name associated with the native ad.
  * @property levelPlayBinaryMessenger The binary messenger used for communication between Flutter and native code.
  */
-class LevelPlayNativeAdView(
+internal class LevelPlayNativeAdView(
     viewId: Int?,
     private var placement: String? = "",
     levelPlayBinaryMessenger: BinaryMessenger,
@@ -40,17 +39,11 @@ class LevelPlayNativeAdView(
     init {
         methodChannel = MethodChannel(levelPlayBinaryMessenger, "${viewType}_$viewId")
         methodChannel!!.setMethodCallHandler { call, result ->  handleMethodCall(call, result)}
-
-        // Apply styles before ad loaded
-        applyStyles(
-            nativeAdLayout.findViewById(R.id.adTitle),
-            nativeAdLayout.findViewById(R.id.adBody),
-            nativeAdLayout.findViewById(R.id.adAdvertiser),
-            nativeAdLayout.findViewById(R.id.adCallToAction))
     }
 
     private fun applyStyles(titleView: TextView, bodyView: TextView, advertiserView: TextView, callToActionView: Button) {
         templateStyles?.let { styles ->
+            styles.mainBackgroundColor?.let { nativeAdLayout.setBackgroundColor(it) }
             applyStyle(titleView, styles.titleStyle)
             applyStyle(bodyView, styles.bodyStyle)
             applyStyle(advertiserView, styles.advertiserStyle)
@@ -159,7 +152,7 @@ class LevelPlayNativeAdView(
         result.success(null)
     }
 
-    override fun getView(): View = nativeAdLayout
+    override fun getView(): NativeAdLayout = nativeAdLayout
 
     override fun dispose() {
         // Remove any views
@@ -175,17 +168,17 @@ class LevelPlayNativeAdView(
 
     override fun onAdClicked(nativeAd: LevelPlayNativeAd?, adInfo: AdInfo?) {
         // Notify Flutter that the ad has been clicked
-        methodChannel?.invokeMethod("onAdClicked", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
+        invokeMethodOnUiThread(methodChannel!!, "onAdClicked", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
     }
 
     override fun onAdImpression(nativeAd: LevelPlayNativeAd?, adInfo: AdInfo?) {
         // Notify Flutter that the ad has been shown
-        methodChannel?.invokeMethod("onAdImpression", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
+        invokeMethodOnUiThread(methodChannel!!, "onAdImpression", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
     }
 
     override fun onAdLoadFailed(nativeAd: LevelPlayNativeAd?, error: IronSourceError?) {
         // Notify Flutter that the ad load has been failed
-        methodChannel?.invokeMethod("onAdLoadFailed", LevelPlayUtils.hashMapOfIronSourceNativeAdAndError(nativeAd, error))
+        invokeMethodOnUiThread(methodChannel!!, "onAdLoadFailed", LevelPlayUtils.hashMapOfIronSourceNativeAdAndError(nativeAd, error))
     }
 
     override fun onAdLoaded(nativeAd: LevelPlayNativeAd?, adInfo: AdInfo?) {
@@ -196,6 +189,16 @@ class LevelPlayNativeAdView(
         onBindNativeAdView.invoke(nativeAd)
 
         // Notify Flutter that the ad has been loaded
-        methodChannel?.invokeMethod("onAdLoaded", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
+        invokeMethodOnUiThread(methodChannel!!, "onAdLoaded", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
+
+        // Apply styles
+        applyStyles(
+            nativeAdLayout.findViewById(R.id.adTitle),
+            nativeAdLayout.findViewById(R.id.adBody),
+            nativeAdLayout.findViewById(R.id.adAdvertiser),
+            nativeAdLayout.findViewById(R.id.adCallToAction))
+
+        // Visible the ad
+        nativeAdLayout.visibility = View.VISIBLE
     }
 }

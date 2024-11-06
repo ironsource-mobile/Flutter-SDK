@@ -7,11 +7,7 @@ import com.ironsource.mediationsdk.sdk.LevelPlayRewardedVideoListener
 import com.ironsource.mediationsdk.sdk.LevelPlayRewardedVideoManualListener
 import io.flutter.plugin.common.MethodChannel
 
-/**
- * LevelPlay ReawrdedVideo Listener
- */
-class LevelPlayRewardedVideoListener(channel: MethodChannel) : IronSourceListener(channel),
-    LevelPlayRewardedVideoListener, LevelPlayRewardedVideoManualListener {
+class LevelPlayRewardedVideoListener(channel: MethodChannel) : LevelPlayListener(channel), LevelPlayRewardedVideoListener, LevelPlayRewardedVideoManualListener {
 
   override fun onAdAvailable(adInfo: AdInfo) {
     invokeMethod("LevelPlay_RewardedVideo:onAdAvailable", adInfo.toMap())

@@ -10,7 +10,9 @@ class IronSourceAdInfo {
   final String? precision;
   final String? ab;
   final String? segmentName;
+  final double? lifetimeRevenue;
   final String? encryptedCPM;
+  final double? conversionValue;
 
   IronSourceAdInfo(
       {this.auctionId,
@@ -23,7 +25,9 @@ class IronSourceAdInfo {
       this.precision,
       this.ab,
       this.segmentName,
-      this.encryptedCPM});
+      this.lifetimeRevenue,
+      this.encryptedCPM,
+      this.conversionValue});
 
   @override
   String toString() {
@@ -38,7 +42,9 @@ class IronSourceAdInfo {
         ', precision=$precision'
         ', ab=$ab'
         ', segmentName=$segmentName'
+        ', lifetimeRevenue=$lifetimeRevenue'
         ', encryptedCPM=$encryptedCPM'
+        ', conversionValue=$conversionValue'
         '}';
   }
 
@@ -56,7 +62,9 @@ class IronSourceAdInfo {
         other.precision == precision &&
         other.ab == ab &&
         other.segmentName == segmentName &&
-        other.encryptedCPM == encryptedCPM;
+        other.lifetimeRevenue == lifetimeRevenue &&
+        other.encryptedCPM == encryptedCPM &&
+        other.conversionValue == conversionValue;
   }
 
   @override
@@ -71,5 +79,7 @@ class IronSourceAdInfo {
       precision.hashCode ^
       ab.hashCode ^
       segmentName.hashCode ^
-      encryptedCPM.hashCode;
+      lifetimeRevenue.hashCode ^
+      encryptedCPM.hashCode ^
+      conversionValue.hashCode;
 }

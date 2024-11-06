@@ -1,11 +1,13 @@
 import 'package:flutter/services.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
 
-import '../ironsource_constants.dart';
-import '../parsers/incoming_value_parser.dart';
+import '../utils/ironsource_constants.dart';
+import './listeners/level_play_native_ad_listener.dart';
+import '../utils/incoming_value_parser.dart';
+import './ironsource_ad_info.dart';
+import './ironsource_error.dart';
 
-/// For LevelPlayListeners
-class LevelPlayNativeAd with LevelPlayNativeAdListener{
+/// Class representing a level play native ad
+class LevelPlayNativeAd with LevelPlayNativeAdListener {
   String? placementName;
   LevelPlayNativeAdListener? listener;
   final String? title;
@@ -40,12 +42,34 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener{
   }
 
   LevelPlayNativeAd? _extractCompletedNativeAd(dynamic args) {
-    final nativeAd = IncomingValueParser.getLevelPlayNativeAd(IncomingValueParser.getValueForKey(IronConstKey.NATIVE_AD, args));
+    final nativeAd = LevelPlayNativeAd.fromMap(args[IronConstKey.NATIVE_AD]);
     // Copy existing variables to complete the native ad object
     nativeAd.methodChannel = methodChannel;
     nativeAd.listener = listener;
     nativeAd.placementName = placementName;
     return nativeAd;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'body': body,
+      'advertiser': advertiser,
+      'callToAction': callToAction,
+      'icon': icon?.toMap()
+    };
+  }
+
+  factory LevelPlayNativeAd.fromMap(dynamic args) {
+    return LevelPlayNativeAd(
+      title: args['title'] as String?,
+      body: args['body'] as String?,
+      advertiser: args['advertiser'] as String?,
+      callToAction: args['callToAction'] as String?,
+      icon: args['icon'] != null
+          ? LevelPlayNativeAdIcon.fromMap(args['icon'])
+          : null
+    );
   }
 
   /// Handle various method calls from the native platform
@@ -54,7 +78,7 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener{
       case 'onAdLoaded':
         // Extract native ad and ad info from arguments
         final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
+        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
         // Notify user on ad loaded event
         listener?.onAdLoaded(nativeAd, adInfo);
         break;
@@ -68,14 +92,14 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener{
       case 'onAdImpression':
         // Extract native ad and ad info from arguments
         final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
+        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
         // Notify user on ad load impression event
         listener?.onAdImpression(nativeAd, adInfo);
         break;
       case 'onAdClicked':
         // Extract native ad and ad info from arguments
         final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
+        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
         // Notify user on ad load clicked event
         listener?.onAdClicked(nativeAd, adInfo);
         break;
@@ -83,17 +107,13 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener{
     }
   }
 
-  void loadAd() {
-    methodChannel?.invokeMethod('loadAd');
-  }
+  Future<void> loadAd() async => await methodChannel?.invokeMethod('loadAd');
 
-  void destroyAd() {
-    methodChannel?.invokeMethod('destroyAd');
-  }
+  Future<void> destroyAd() async => methodChannel?.invokeMethod('destroyAd');
 
   @override
   String toString() {
-    return 'IronSourceNativeAd{title: $title, body: $body, advertiser: $advertiser, callToAction: $callToAction, iconUriString: ${icon?.uri}';
+    return 'LevelPlayNativeAd{title: $title, body: $body, advertiser: $advertiser, callToAction: $callToAction, iconUriString: ${icon?.uri}';
   }
 
   @override
@@ -145,7 +165,7 @@ class LevelPlayNativeAdIcon {
   final String? uri;
   final Uint8List? imageData;
 
-  LevelPlayNativeAdIcon(this.uri, this.imageData);
+  LevelPlayNativeAdIcon({this.uri, this.imageData});
 
   // Method to check if the image data is valid
   bool isValidImageData() {
@@ -161,6 +181,20 @@ class LevelPlayNativeAdIcon {
     } catch (e) {
       return false;
     }
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uri': uri,
+      'imageData': imageData
+    };
+  }
+
+  factory LevelPlayNativeAdIcon.fromMap(dynamic args) {
+    return LevelPlayNativeAdIcon(
+        uri: args['uri'] as String?,
+        imageData: args['imageData'] as Uint8List?
+    );
   }
 
   @override

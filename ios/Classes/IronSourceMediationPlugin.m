@@ -2,16 +2,19 @@
 #import <IronSource/IronSource.h>
 #import "ATTrackingManagerChannel.h"
 #import "InitDelegateMethodHandler.h"
+#import "LevelPlayInitDelegateHandler.h"
 #import "ConsentViewDelegateMethodHandler.h"
 #import "ImpressionDataDelegateMethodHandler.h"
-#import "ISPlacementInfo.h"
 #import "LevelPlayRewardedVideoDelegateMethodHandler.h"
 #import "LevelPlayInterstitialDelegateMethodHandler.h"
 #import "LevelPlayBannerDelegateMethodHandler.h"
 #import "LevelPlayNativeAdViewFactoryTemplate.h"
 #import "LevelPlayNativeAdViewFactory.h"
 #import "LevelPlayNativeAdView.h"
+#import "LevelPlayBannerAdViewFactory.h"
+#import "LevelPlayBannerAdView.h"
 #import "LevelPlayUtils.h"
+#import "LevelPlayAdObjectManager.h"
 
 @interface IronSourceMediationPlugin()
 @property (nonatomic,strong) FlutterMethodChannel* channel;
@@ -21,9 +24,10 @@
 @property (nonatomic) BOOL shouldHideBanner;
 @property (nonatomic,strong) UIViewController* bannerViewController;
 @property (nonatomic,strong) InitDelegateMethodHandler* initializationDelegate;
-@property (nonatomic,strong) UIViewController* CurrentViewController;
+@property (nonatomic,strong) LevelPlayInitDelegateHandler* levelPlayInitDelegateHandler;
 @property (nonatomic,strong) NSObject<FlutterPluginRegistrar> *registrar;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, LevelPlayNativeAdViewFactory *> *nativeAdViewFactories;
+@property (nonatomic, strong) LevelPlayAdObjectManager *levelPlayAdObjectManager;
 
 @end
 
@@ -66,6 +70,8 @@ static IronSourceMediationPlugin *instance = nil;
     // Set ironSource delegates
     // Init
     instance.initializationDelegate = [[InitDelegateMethodHandler alloc] initWithChannel:channel];
+    // LevelPlay Init
+    instance.levelPlayInitDelegateHandler = [[LevelPlayInitDelegateHandler alloc] initWithChannel:channel];
     // ConsentView
     [IronSource setConsentViewWithDelegate: [[ConsentViewDelegateMethodHandler alloc] initWithChannel:channel]];
     // Imp Data
@@ -85,11 +91,17 @@ static IronSourceMediationPlugin *instance = nil;
     // ATT Brigde
     [ATTrackingManagerChannel registerWithMessenger:[registrar messenger]];
 
+    // Banner ad view registry
+    LevelPlayBannerAdViewFactory *bannerAdViewFactory = [[LevelPlayBannerAdViewFactory alloc] initWithMessenger:[instance.registrar messenger]];
+    [instance.registrar registerViewFactory: bannerAdViewFactory withId: @"levelPlayBannerAdView"];
 
     // Native ad view registry
     LevelPlayNativeAdViewFactoryTemplate *nativeAdViewFactory = [[LevelPlayNativeAdViewFactoryTemplate alloc] initWithMessenger:[instance.registrar messenger]];
-    [instance.nativeAdViewFactories setValue:nativeAdViewFactory forKey:@"levelPlayNativeAdViewType"];
-    [instance.registrar registerViewFactory: nativeAdViewFactory withId: @"levelPlayNativeAdViewType"];
+    [instance.nativeAdViewFactories setValue:nativeAdViewFactory forKey:@"levelPlayNativeAdView"];
+    [instance.registrar registerViewFactory: nativeAdViewFactory withId: @"levelPlayNativeAdView"];
+
+    // Ad instance manager registry
+    instance.levelPlayAdObjectManager = [[LevelPlayAdObjectManager alloc] initWithChannel: channel];
 }
 
 /// Clean up
@@ -99,6 +111,7 @@ static IronSourceMediationPlugin *instance = nil;
     self.bannerViewController = nil;
     self.bannerOffset = nil;
     self.initializationDelegate = nil;
+    self.levelPlayInitDelegateHandler = nil;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -172,7 +185,23 @@ static IronSourceMediationPlugin *instance = nil;
         [self showConsentViewWithType:call.arguments result:result];
     } else if([@"setPluginData" isEqualToString:call.method]) { /* Internal Config API =*/
         [self setPluginData:call.arguments result:result];
-    } else {
+    } else if ([@"initLevelPlay" isEqualToString:call.method]) { /* LevelPlay Init API =*/
+        [self initLevelPlay:call.arguments result:result];
+    } else if([@"isInterstitialAdPlacementCapped" isEqualToString:call.method]) { /* LPMInterstitialAd API =*/
+        [self isInterstitialAdPlacementCapped:call.arguments result:result];
+    } else if ([@"loadInterstitialAd" isEqualToString:call.method]) {
+        [self loadInterstitialAd: call.arguments result:result];
+    } else if ([@"showInterstitialAd" isEqualToString:call.method]) {
+        [self showInterstitialAd: call.arguments result:result];
+    } else if ([@"isInterstitialAdReady" isEqualToString:call.method]) {
+        [self isInterstitialAdReady:call.arguments result: result];
+    } else if ([@"disposeAd" isEqualToString:call.method]) {
+        [self disposeAd: call.arguments result: result];
+    } else if ([@"disposeAllAds" isEqualToString:call.method]) {
+        [self disposeAllAd: result];
+    }else if([@"createAdaptiveAdSize" isEqualToString:call.method]) { /* LPMAdSize API =*/
+        [self createAdaptiveAdSize:call.arguments result:result];
+    }    else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -527,7 +556,7 @@ static IronSourceMediationPlugin *instance = nil;
         return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
     }
     ISPlacementInfo *placementInfo = [IronSource rewardedVideoPlacementInfo:placementName];
-    return result(placementInfo != nil ? [placementInfo toArgDictionary] : nil);
+    return result(placementInfo != nil ? [LevelPlayUtils dictionaryForPlacementInfo: placementInfo] : nil);
 }
 
 /**
@@ -1102,6 +1131,125 @@ static IronSourceMediationPlugin *instance = nil;
     }
     [IronSource showConsentViewWithViewController:[self getRootViewController] andType:consentViewType];
     return result(nil);
+}
+
+#pragma mark - LevelPlay Init ===============================================================================
+/**
+ * Initializes IronSource with the provided app key and ad units.
+ *
+ * @param args   The arguments containing the app key and ad units.
+ * @param result The result to be returned after processing.
+ */
+- (void)initLevelPlay:(nullable id)args result:(nonnull FlutterResult)result {
+    if(!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+
+    NSString *appKey = [args valueForKey:@"appKey"];
+    NSString *userId = [args valueForKey:@"userId"];
+    NSArray<NSString*> *adFormats = [args valueForKey:@"adFormats"];
+    if(appKey == nil || [[NSNull null] isEqual:appKey]){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"appKey is missing" details:nil]);
+    }
+
+    NSMutableArray<NSString*> *parsedLegacyAdFormats = [[NSMutableArray alloc]init];
+    if(adFormats != nil && adFormats.count) {
+        for(NSString *unit in adFormats){
+            if([unit isEqualToString:@"REWARDED"]){
+                [parsedLegacyAdFormats addObject:IS_REWARDED_VIDEO];
+            } else if ([unit isEqualToString:@"INTERSTITIAL"]){
+                [parsedLegacyAdFormats addObject:IS_INTERSTITIAL];
+            } else if ([unit isEqualToString:@"BANNER"]){
+                [parsedLegacyAdFormats addObject:IS_BANNER];
+            } else if ([unit isEqualToString:@"NATIVE_AD"]){
+                [parsedLegacyAdFormats addObject:IS_NATIVE_AD];
+            }
+        }
+    }
+    LPMInitRequestBuilder *requestBuilder = [[LPMInitRequestBuilder alloc] initWithAppKey: appKey];
+    [requestBuilder withLegacyAdFormats: parsedLegacyAdFormats];
+    if(userId != nil){
+        [requestBuilder withUserId: userId];
+    }
+    LPMInitRequest *initRequest = [requestBuilder build];
+    [LevelPlay initWithRequest:initRequest completion:^(LPMConfiguration *_Nullable config, NSError *_Nullable error){
+        if(error) {
+            // There was an error on initialization. Take necessary actions or retry
+            [self.levelPlayInitDelegateHandler onInitFailed: [LevelPlayUtils dictionaryForInitError: error]];
+        } else {
+            // Initialization was successful. You can now load banner ad or perform other tasks
+            [self.levelPlayInitDelegateHandler onInitSuccess: [LevelPlayUtils dictionaryForInitSuccess: config]];
+        }
+    }];
+
+    return result(nil);
+}
+
+#pragma mark - LPMInterstitialAd ===============================================================================
+
+/**
+ * Checks whether the specified placement for interstitial ads is capped.
+ *
+ * @param args   The arguments containing the placement name.
+ * @param result The result to be returned after processing.
+ */
+- (void)isInterstitialAdPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
+    if(!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+    NSString *placementName = [args valueForKey:@"placementName"];
+    if(placementName == nil || [[NSNull null] isEqual:placementName]){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+    }
+    BOOL isCapped = [LPMInterstitialAd isPlacementCapped:placementName];
+    return result([NSNumber numberWithBool:isCapped]);
+}
+
+- (void)loadInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *adUnitId = args[@"adUnitId"];
+    [self.levelPlayAdObjectManager loadInterstitialAd:adObjectId adUnitId:adUnitId];
+    result(nil);
+}
+
+- (void)showInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *placementName = args[@"placementName"];
+    [self.levelPlayAdObjectManager showInterstitialAd:adObjectId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
+    result(nil);
+}
+
+- (void)isInterstitialAdReady:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    BOOL isReady = [self.levelPlayAdObjectManager isInterstitialAdReady:adObjectId];
+    result(@(isReady));
+}
+
+- (void)disposeAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    [self.levelPlayAdObjectManager disposeAd:adObjectId];
+    result(nil);
+}
+
+- (void)disposeAllAd:(nullable FlutterResult) result {
+    [self.levelPlayAdObjectManager disposeAllAds];
+    result(nil);
+}
+
+#pragma mark - LPMAdSize ===============================================================================
+
+- (void)createAdaptiveAdSize:(nullable id) args result:(nonnull FlutterResult)result{
+    if(!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+    NSNumber *widthNumber = [args[@"width"] isKindOfClass:[NSNumber class]] ? args[@"width"] : nil;
+    if (widthNumber == nil) {
+        LPMAdSize *adSize = [LPMAdSize createAdaptiveAdSize];
+        return result([LevelPlayUtils dictionaryForAdSize: adSize]);
+    }
+    CGFloat width = [widthNumber floatValue];
+    LPMAdSize *adSize = [LPMAdSize createAdaptiveAdSizeWithWidth: width];
+    return result([LevelPlayUtils dictionaryForAdSize: adSize]);
 }
 
 #pragma mark - Utils ===============================================================================

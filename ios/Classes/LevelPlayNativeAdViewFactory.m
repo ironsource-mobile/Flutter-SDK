@@ -57,12 +57,14 @@
     NSString *viewType = [args[@"viewType"] isKindOfClass:[NSString class]] ? args[@"viewType"] : nil; // May be NSNull
     NSDictionary *templateStyleDict = [args[@"templateStyle"] isKindOfClass:[NSDictionary class]] ? args[@"templateStyle"] : nil; // May be NSNull
     // Parse LevelPlayNativeAdElementStyle objects
+    NSNumber *mainBackgroundColor = templateStyleDict[@"mainBackgroundColor"];
     LevelPlayNativeAdElementStyle *titleStyle = [self parseElementStyle:templateStyleDict[@"titleStyle"]];
     LevelPlayNativeAdElementStyle *bodyStyle = [self parseElementStyle:templateStyleDict[@"bodyStyle"]];
     LevelPlayNativeAdElementStyle *advertiserStyle = [self parseElementStyle:templateStyleDict[@"advertiserStyle"]];
     LevelPlayNativeAdElementStyle *callToActionStyle = [self parseElementStyle:templateStyleDict[@"callToActionStyle"]];
     // Create the template style from parsed element styles(if exist)
-    LevelPlayNativeAdTemplateStyle *templateStyle = [[LevelPlayNativeAdTemplateStyle alloc] initWithTitle:titleStyle
+    LevelPlayNativeAdTemplateStyle *templateStyle = [[LevelPlayNativeAdTemplateStyle alloc] initWithMainBackgroundColor:mainBackgroundColor
+                                                                                               titleStyle:titleStyle
                                                                                                 bodyStyle:bodyStyle
                                                                                           advertiserStyle:advertiserStyle
                                                                                         callToActionStyle:callToActionStyle];

@@ -32,7 +32,7 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   # Required when using custom native ad implementation
-    pod 'IronSourceSDK','8.1.0.0'
+    pod 'IronSourceSDK','8.4.0.0'
   
   # Add Adapters here
   # https://developers.is.com/ironsource-mobile/flutter/mediation-networks-flutter/

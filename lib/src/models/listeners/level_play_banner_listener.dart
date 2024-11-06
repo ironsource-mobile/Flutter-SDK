@@ -1,6 +1,7 @@
 import '../ironsource_error.dart';
 import '../ironsource_ad_info.dart';
 
+@Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdViewListener with LevelPlayBannerAdView instead.")
 abstract class LevelPlayBannerListener {
   /// Invoked each time a banner was loaded. Either on refresh, or manual load.\
   /// - [adInfo] includes information about the loaded ad

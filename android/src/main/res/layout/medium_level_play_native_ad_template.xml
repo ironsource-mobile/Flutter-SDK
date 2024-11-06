@@ -3,21 +3,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="350dp"
+    android:background="@android:color/background_light"
+    android:visibility="invisible"
+    tools:visibility="visible"
     android:contentDescription="com.ironsource.mediationsdk.ads.NativeAdLayout">
 
     <!-- Root RelativeLayout for the entire native ad layout MEDIUM template -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
         <!-- Top section of the ad layout containing the ad badge -->
         <RelativeLayout
             android:id="@+id/topView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:background="@android:color/background_light">
+            android:layout_height="wrap_content">
 
             <!-- TextView displaying 'AD' badge -->
             <TextView
@@ -41,8 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/topView"
-            android:background="@android:color/background_light"
-            android:padding="8dp"
+            android:background="@android:color/transparent"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <!-- ImageView for the ad's app icon -->
@@ -57,6 +59,7 @@
                 android:id="@+id/adTextLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
                 android:paddingHorizontal="4dp"
                 android:orientation="vertical">
 
@@ -65,6 +68,7 @@
                     android:id="@+id/adTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
                     tools:text="Title"
                     android:textSize="14sp"
                     android:textStyle="bold"
@@ -76,6 +80,7 @@
                     android:id="@+id/adAdvertiser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
                     tools:text="Advertiser"
                     android:textSize="14sp"
                     android:textStyle="bold"
@@ -90,14 +95,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/stackTopView"
-            android:background="@android:color/background_light"
-            android:padding="8dp"
+            android:background="@android:color/transparent"
             android:orientation="vertical">
+
+            <!-- Push body to bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <!-- TextView for the ad body text -->
             <TextView
                 android:id="@+id/adBody"
                 android:layout_width="match_parent"
+                android:background="@android:color/transparent"
                 android:layout_height="wrap_content"
                 tools:text="Body"
                 android:textSize="12sp"
@@ -110,8 +121,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:scaleType="fitXY"
-                android:background="@android:color/background_light"
-                android:layout_marginTop="8dp"/>
+                android:background="@android:color/transparent"
+                android:layout_marginTop="4dp"/>
 
             <!-- Layout for ad details and call-to-action button -->
             <LinearLayout
@@ -119,7 +130,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal">
 
                 <!-- TextView for the ad price (initially hidden - not supported yet) -->
@@ -127,6 +138,7 @@
                     android:id="@+id/adPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/background_light"
                     tools:text="Price"
                     android:textSize="12sp"
                     android:textColor="@android:color/black"
@@ -137,6 +149,7 @@
                     android:id="@+id/adStore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/background_light"
                     tools:text="Store"
                     android:textSize="12sp"
                     android:textColor="@android:color/black"
@@ -146,7 +159,7 @@
                 <Button
                     android:id="@+id/adCallToAction"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     tools:text="Button"
                     android:textColor="@android:color/white"
                     android:background="@android:color/holo_blue_light"

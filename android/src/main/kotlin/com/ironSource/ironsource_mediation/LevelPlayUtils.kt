@@ -1,7 +1,7 @@
 package com.ironSource.ironsource_mediation
 
-import android.app.Activity
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
@@ -14,29 +14,21 @@ import io.flutter.plugin.common.MethodChannel
  */
 class LevelPlayUtils {
   companion object {
-    /**
-     * Invokes a method on the given method channel from the UI thread.
-     * This method is used to invoke Flutter methods from non-UI threads.
-     *
-     * @param activity The current activity.
-     * @param channel The method channel.
-     * @param methodName The name of the method to invoke.
-     * @param args The arguments to pass to the method.
-     */
-    fun invokeChannelMethod(activity: Activity?, channel: MethodChannel, methodName: String, args: Any? = null) {
-      activity?.runOnUiThread {
-        channel.invokeMethod(methodName, args, object : MethodChannel.Result {
-          override fun success(result: Any?) {}
-          override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-            Log.e(IronSourceMediationPlugin.TAG, "Error: invokeMethod $methodName failed "
-                + "errorCode: $errorCode, message: $errorMessage, details: $errorDetails")
-          }
 
-          override fun notImplemented() {
-            throw Error("Critical Error: invokeMethod $methodName notImplemented ")
-          }
-        })
-      }
+    /**
+     * Invokes a method on a Flutter MethodChannel on the UI thread.
+     *
+     * This function ensures that the call to `invokeMethod` on the
+     * MethodChannel is performed on the main (UI) thread. This is essential
+     * for thread-safety and to prevent crashes due to improper thread access.
+     *
+     * @param channel The [MethodChannel] on which the method is to be invoked.
+     * @param methodName The name of the method to invoke on the channel.
+     * @param arguments The arguments to pass to the method. This parameter is optional and defaults to null.
+     */
+    fun invokeMethodOnUiThread(channel: MethodChannel, methodName: String, arguments: Map<String, Any?>? = null) {
+      Handler(Looper.getMainLooper())
+        .post { channel.invokeMethod(methodName, arguments) }
     }
 
     /**

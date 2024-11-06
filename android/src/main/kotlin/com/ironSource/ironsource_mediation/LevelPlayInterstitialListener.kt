@@ -5,11 +5,7 @@ import com.ironsource.mediationsdk.logger.IronSourceError
 import com.ironsource.mediationsdk.sdk.LevelPlayInterstitialListener
 import io.flutter.plugin.common.MethodChannel
 
-/**
- * LevelPlay Interstitial Listener
- */
-class LevelPlayInterstitialListener(channel: MethodChannel) : IronSourceListener(channel),
-    LevelPlayInterstitialListener {
+class LevelPlayInterstitialListener(channel: MethodChannel) : LevelPlayListener(channel), LevelPlayInterstitialListener {
 
   override fun onAdReady(adInfo: AdInfo) {
     invokeMethod("LevelPlay_Interstitial:onAdReady", adInfo.toMap())

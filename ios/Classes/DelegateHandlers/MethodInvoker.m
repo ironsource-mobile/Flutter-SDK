@@ -1,5 +1,6 @@
 #import "MethodInvoker.h"
 #import <Flutter/Flutter.h>
+#import "../LevelPlayUtils.h"
 
 @interface MethodInvoker()
 @property (nonatomic,strong) FlutterMethodChannel* channel;
@@ -14,20 +15,8 @@
     return self;
 }
 
-// thin wrapper for UI thread execution of invokeMethod
-// No success result handling expected for now.
-- (void)invokeChannelMethodWithName:(NSString *) methodName args:(id _Nullable) args {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.channel invokeMethod:methodName arguments:args result:^(id _Nullable result){
-            if([result isKindOfClass:[FlutterError class]]){
-                FlutterError *error = result;
-                NSLog(@"Critical Error: invokeMethod %@ failed with FlutterError errorCode: %@, message: %@, details: %@", methodName, [error code], [error message], [error details]);
-            } else if([result isKindOfClass:[FlutterMethodNotImplemented class]]){
-                NSLog(@"Critical Error: invokeMethod %@ failed with FlutterMethodNotImplemented", methodName);
-                [result raise]; // force shut down
-            }
-        }];
-    });
+- (void)invokeChannelMethodWithName:(NSString *) methodName args:(NSDictionary *) args {
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.channel methodName: methodName args: args];
 }
 
 @end

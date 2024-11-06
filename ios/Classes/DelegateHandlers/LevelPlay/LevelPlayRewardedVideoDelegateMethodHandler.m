@@ -1,14 +1,12 @@
 #import "LevelPlayRewardedVideoDelegateMethodHandler.h"
-#import "IronSourceError.h"
-#import "AdInfo.h"
-#import "LevelPlayArgUtils.h"
+#import "../../LevelPlayUtils.h"
 
 @implementation LevelPlayRewardedVideoDelegateMethodHandler
 
 #pragma mark - LevelPlayRewardedVideoDelegate
 
 - (void)hasAvailableAdWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdAvailable" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdAvailable" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)hasNoAvailableAd {
@@ -16,34 +14,46 @@
 }
 
 - (void)didReceiveRewardForPlacement:(ISPlacementInfo *)placementInfo withAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdRewarded" args:[LevelPlayArgUtils getDictionaryWithPlacement:placementInfo andAdInfo:adInfo]];
+    NSDictionary *args = @{
+            @"placement": [LevelPlayUtils dictionaryForPlacementInfo: placementInfo],
+            @"adInfo": [LevelPlayUtils dictionaryForAdInfo: adInfo]
+    };
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdRewarded" args: args];
 }
 
 - (void)didFailToShowWithError:(NSError *)error andAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdShowFailed" args:[LevelPlayArgUtils getDictionaryWithError:error andAdInfo:adInfo]];
+    NSDictionary *args = @{
+            @"error": [LevelPlayUtils dictionaryForError: error],
+            @"adInfo": [LevelPlayUtils dictionaryForAdInfo: adInfo]
+    };
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdShowFailed" args: args];
 }
 
 - (void)didOpenWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdOpened" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdOpened" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didCloseWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdClosed" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdClosed" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 
 - (void)didClick:(ISPlacementInfo *)placementInfo withAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdClicked" args:[LevelPlayArgUtils getDictionaryWithPlacement:placementInfo andAdInfo:adInfo]];
+    NSDictionary *args = @{
+            @"placement": [LevelPlayUtils dictionaryForPlacementInfo: placementInfo],
+            @"adInfo": [LevelPlayUtils dictionaryForAdInfo: adInfo]
+    };
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdClicked" args: args];
 }
 
 #pragma mark - LevelPlayRewardedVideoManualDelegate
 
 - (void)didLoadWithAdInfo:(ISAdInfo *)adInfo {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdReady" args:[adInfo toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdReady" args: [LevelPlayUtils dictionaryForAdInfo: adInfo]];
 }
 
 - (void)didFailToLoadWithError:(NSError *)error {
-    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdLoadFailed" args:[error toArgDictionary]];
+    [self invokeChannelMethodWithName:@"LevelPlay_RewardedVideo:onAdLoadFailed" args: [LevelPlayUtils dictionaryForError: error]];
 }
 
 @end

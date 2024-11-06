@@ -5,7 +5,6 @@ import '../ironsource_ad_info.dart';
 abstract class LevelPlayRewardedVideoListener implements LevelPlayRewardedVideoBaseListener {
   /// Indicates that there's an available ad.
   /// - [adInfo] includes information about the ad that was loaded successfully
-  /// - Use this callback instead of [onRewardedVideoAvailabilityChanged]
   ///
   /// Native SDK Reference
   /// - Android: onAdAvailable
@@ -13,7 +12,6 @@ abstract class LevelPlayRewardedVideoListener implements LevelPlayRewardedVideoB
   void onAdAvailable(IronSourceAdInfo adInfo);
 
   /// Indicates that no ads are available to be displayed.
-  /// - Use this callback instead of [onRewardedVideoAvailabilityChanged]
   ///
   /// Native SDK Reference
   /// - Android: onAdUnavailable

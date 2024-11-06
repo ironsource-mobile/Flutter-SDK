@@ -4,9 +4,8 @@ import com.ironsource.mediationsdk.impressionData.ImpressionData
 import com.ironsource.mediationsdk.impressionData.ImpressionDataListener
 import io.flutter.plugin.common.MethodChannel
 
-class ImpressionDataListener(channel: MethodChannel) : IronSourceListener(channel),
-    ImpressionDataListener {
+class ImpressionDataListener(channel: MethodChannel) : LevelPlayListener(channel), ImpressionDataListener {
   override fun onImpressionSuccess(impressionData: ImpressionData?) {
-    invokeMethod("onImpressionSuccess", impressionData?.toMap())
+      invokeMethod( "onImpressionSuccess", impressionData?.toMap())
   }
 }

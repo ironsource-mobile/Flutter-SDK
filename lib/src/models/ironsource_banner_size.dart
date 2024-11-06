@@ -2,6 +2,7 @@
 import './ironsource_container_params.dart';
 
 /// Banner Size
+@Deprecated("This class will be removed in future versions. Please use LevelPlayBannerAdView instead.")
 class IronSourceBannerSize {
   late final int _width;
   get width => _width;
