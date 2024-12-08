@@ -12,7 +12,7 @@ class LevelPlayInitRequest {
     return {
       'appKey': appKey,
       'userId': userId,
-      'legacyAdFormats': legacyAdFormats.map((unit) => unit.value).toList()
+      'adFormats': legacyAdFormats.map((unit) => unit.value).toList()
     };
   }
 

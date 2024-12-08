@@ -1,14 +1,6 @@
 name: ironsource_mediation
-description: >-
-  The IronSource Flutter SDK Bridge is a plugin that allows seamless integration of 
-  IronSource's robust ad mediation platform into Flutter applications. 
-  This plugin enables developers to monetize their apps with various 
-  ad formats, including rewarded video, interstitial, banner, and native ads. 
-  It provides easy-to-use APIs for ad management and event handling, ensuring 
-  a smooth and efficient monetization experience. For additional information check
-  Flutter documentation on our site.
-
-version: 3.0.0
+description: IronSource ad mediation Flutter plugin. Monetize apps with rewarded video, interstitial, banner, and native ads.
+version: 3.0.1
 homepage: https://is.com
 documentation: https://developers.is.com/ironsource-mobile/flutter/flutter-plugin/
 repository: https://github.com/ironsource-mobile/Flutter-SDK

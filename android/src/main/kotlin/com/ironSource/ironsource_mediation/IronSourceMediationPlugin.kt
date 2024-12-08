@@ -887,6 +887,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     }
     val appKey = call.argument("appKey") as String? ?: return result.error("ERROR", "appKey is null", null)
     val adFormats = call.argument("adFormats") as List<String>? ?: listOf()
+    val userId = call.argument("userId") as String?
     val legacyAdFormats: List<LevelPlay.AdFormat> = adFormats.map {
       when (it) {
         "REWARDED" -> LevelPlay.AdFormat.REWARDED
@@ -896,9 +897,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
         else -> return@initLevelPlay result.error("ERROR", "Unsupported ad format: $it", null)
       }
     }.toList()
-    val initRequest = LevelPlayInitRequest.Builder(appKey)
-      .withLegacyAdFormats(legacyAdFormats)
-      .build()
+    val requestBuilder = LevelPlayInitRequest.Builder(appKey)
+    requestBuilder.withLegacyAdFormats(legacyAdFormats)
+    if (userId != null)
+      requestBuilder.withUserId(userId)
+    val initRequest = requestBuilder.build()
 
     LevelPlay.init(context!!, initRequest, mLevelPlayInitListener!!)
 
