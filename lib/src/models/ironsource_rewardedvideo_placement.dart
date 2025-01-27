@@ -1,4 +1,5 @@
 /// Placement for RewardedVideo
+@Deprecated("This class will be removed in native sdk version 9.0.0 along with LevelPlayRewardedVideoBaseListener.")
 class IronSourceRewardedVideoPlacement {
   final String placementName;
   final String rewardName;

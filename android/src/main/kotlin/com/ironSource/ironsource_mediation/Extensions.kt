@@ -14,6 +14,7 @@ import com.unity3d.mediation.LevelPlayAdInfo
 import com.unity3d.mediation.LevelPlayAdSize
 import com.unity3d.mediation.LevelPlayConfiguration
 import com.unity3d.mediation.LevelPlayInitError
+import com.unity3d.mediation.rewarded.LevelPlayReward
 import java.io.ByteArrayOutputStream
 
 /**
@@ -242,5 +243,12 @@ fun LevelPlayAdError.toMap(): HashMap<String, Any?> {
         "adUnitId" to this.adUnitId,
         "errorCode" to this.getErrorCode(),
         "errorMessage" to this.getErrorMessage()
+    )
+}
+
+fun LevelPlayReward.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "name" to this.name,
+        "amount" to this.amount
     )
 }

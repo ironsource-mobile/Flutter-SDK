@@ -1,4 +1,5 @@
 /// For ILR data
+@Deprecated("This class will be removed in future versions along with IronSourceImpressionDataListener.")
 class IronSourceImpressionData {
   final String? auctionId;
   final String? adUnit;

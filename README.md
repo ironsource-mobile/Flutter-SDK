@@ -93,47 +93,48 @@ Read more about Apple's ATT and user privacy guideline [here](https://developer.
 
 ### Implement Listeners
 
-#### LevelPlayRewardedVideoListener
+#### LevelPlayRewardedAdListener
 ```dart
-class LevelPlayRewardedVideoListenerClass with LevelPlayRewardedVideoListener {
+class LevelPlayRewardedAdVideoListenerClass with LevelPlayRewardedVideoListener {
   @override
-  void onAdAvailable(IronSourceAdInfo? adInfo) {
-    // Indicates that there's an available ad. 
+  void onAdLoaded(LevelPlayAdInfo adInfo) {
+    // Provided when the ad is successfully loaded
   }
 
   @override
-  void onAdUnavailable() {
-    // Indicates that no ads are available to be displayed 
+  void onAdLoadFailed(LevelPlayAdError error) {
+    // Provided when the ad fails to load. Ad Unit information is included
   }
 
   @override
-  void onAdOpened(IronSourceAdInfo? adInfo) {
-    // The Rewarded Video ad view has opened. Your activity will loose focus
-  }
-  
-  @override
-  void onAdClosed(IronSourceAdInfo? adInfo) {
-    // The Rewarded Video ad view is about to be closed. Your activity will regain its focus
+  void onAdDisplayed(LevelPlayAdInfo adInfo) {
+    // Provided when the ad is displayed. This is equivalent to an impression
   }
 
+  @override
+  void onAdDisplayFailed(LevelPlayAdError error, LevelPlayAdInfo adInfo) {
+    // Provided when the ad fails to be displayed
+  }
 
   @override
-  void onAdRewarded(IronSourceRewardedVideoPlacement? placement, IronSourceAdInfo? adInfo) {
+  void onAdClicked(LevelPlayAdInfo adInfo) {
+    // Provided when the user clicks on the ad
+  }
+
+  @override
+  void onAdClosed(LevelPlayAdInfo adInfo) {
+    // Provided when the ad is closed
+  }
+
+  @override
+  void onAdInfoChanged(LevelPlayAdInfo adInfo) {
+    // Provided when the ad info is updated. Available when another ad has loaded, and includes a higher CPM/Rate
+  }
+
+  @override
+  void onAdRewarded(LevelPlayReward reward, LevelPlayAdInfo adInfo) {
     // The user completed to watch the video, and should be rewarded. 
-    // The placement parameter will include the reward data.
-    // When using server-to-server callbacks, you may ignore this event and wait for the ironSource server callback
-  }
-
-  @override
-  void onAdShowFailed(IronSourceError? error, IronSourceAdInfo? adInfo) {
-    // The rewarded video ad was failed to show
-  }
-
-  @override
-  void onAdClicked(IronSourceRewardedVideoPlacement? placement, IronSourceAdInfo? adInfo) {
-    // Invoked when the video ad was clicked. 
-    // This callback is not supported by all networks, and we recommend using it 
-    // only if it's supported by all networks you included in your build
+    // The reward parameter will include the reward data.
   }
 }
 ```
@@ -253,9 +254,13 @@ class LevelPlayNativeAdListenerClass with LevelPlayNativeAdListener {
 ```dart
 Future<void> init() async {
   final appKey = '[YOUR_APP_KEY]';
+  final userId = '[YOUR_USER_ID]';
   try {
     List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
-    final initRequest = LevelPlayInitRequest(appKey: appKey, legacyAdFormats: legacyAdFormats);
+    final initRequest = LevelPlayInitRequest.builder(configState.appKey)
+        .withLegacyAdFormats(legacyAdFormats)
+        .withUserId(userId)
+        .build();
     await LevelPlay.init(initRequest: initRequest, initListener: this);
   } on PlatformException catch (e) {
     print(e);
@@ -267,118 +272,110 @@ Future<void> init() async {
 
 #### LevelPlayRewardedVideo
 ```dart
-Future<void> _showRewardedVideoOnClick() async {
-  if (await IronSource.isRewardedVideoAvailable()) {
-    IronSource.showRewardedVideo();
+final LevelPlayRewardedAd _rewardedAd = LevelPlayRewardedAd(adUnitId: [YOUR_AD_UNIT]);
+
+@override
+void initState() {
+  super.initState();
+  _rewardedAd.setListener([YOUR_LISTENER]);
+}
+
+void _loadRewarded() {
+  _rewardedAd.loadAd();
+}
+
+Future<void> _showRewarded() async {
+  if (await _rewardedAd.isAdReady()) {
+    _rewardedAd.showAd(placement: [YOUR_PLACEMENT]);
   }
 }
+
+// Rest of the class
 ```
 
 #### LevelPlayInterstitial
 
 ```dart
-LevelPlayInterstitialAd? _interstitialAd;
+final LevelPlayInterstitialAd _interstitialAd = LevelPlayInterstitialAd(adUnitId: [YOUR_AD_UNIT]);
 
 @override
 void initState() {
   super.initState();
-  _createInterstitialAd();
-}
-
-void _createInterstitialAd() {
-  _intersitialAd = LevelPlayInterstitialAd(adUnitId: [YOUR_AD_UNIT]);
-  _interstitialAd!.setListener([YOUR_LISTENER]);
+  _interstitialAd.setListener([YOUR_LISTENER]);
 }
 
 void _loadInterstitial() {
-  _interstitialAd?.loadAd();
+  _interstitialAd.loadAd();
 }
 
 Future<void> _showInterstitial() async {
-  if (await __interstitialAd?.isAdReady()) {
-    _interstitialAd?.showAd(placement: [YOUR_PLACEMENT]);
+  if (await _interstitialAd.isAdReady()) {
+    _interstitialAd.showAd(placement: [YOUR_PLACEMENT]);
   }
 }
+
+// Rest of the class
 ```
 
 #### LevelPlayBanner
 
 ```dart
-LevelPlayBannerAdView? _bannerAdView;
+final _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
+final _adSize = LevelPlayAdSize.BANNER;
+final _adUnitId = 'YOUR_AD_UNIT_ID';
+final _placementName = 'YOUR_PLACEMENT';
+
+void _loadAd() {
+  _bannerKey.currentState?.loadAd();
+  // or store LevelPlayBannerAdView in variable and call '_bannerAdView.loadAd();'
+}
 
 @override
-void initState() {
-  super.initState();
-  _createBannerAdView();
-}
-
-void _createBannerAdView() {
-  final _bannerkey = GlobalKey<LevelPlayBannerAdViewState>();
-  _bannerAdView = LevelPlayBannerAdView(
+Widget build(BuildContext context) {
+  return
+    LevelPlayBannerAdView(
       key: _bannerKey,
-      adUnitId: [YOUR_AD_UNIT_ID],
-      adSize:[YOUR_AD_SIZE],
-      listener: [YOUR_LISTENER],
-      placementName: [YOUR_PLACEMENT],
-      onPlatformViewCreated: _loadBanner
-  );
-}
-
-void _loadBanner() {
-  _bannerAdView?.loadAd();
-  // or store and use key - _bannerKey.currentState?.loadAd();
+      adUnitId: _adUnitId,
+      adSize: _adSize,
+      listener: this,
+      placementName: _placementName,
+      onPlatformViewCreated: () {
+        _loadAd();
+      },
+    );
 }
 ```
 
 #### LevelPlayNativeAd
 ```dart
-class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdsSection> with LevelPlayNativeAdListener {
-  LevelPlayNativeAd? _nativeAd;
-  LevelPlayNativeAdView? _nativeAdView;
+LevelPlayNativeAd? _nativeAd;
 
-  @override
-  void initState() {
-    super.initState();
-    _createNativeAd();
-    _createNativeAdView();
-  }
+@override
+void initState() {
+  super.initState();
+  _nativeAd = LevelPlayNativeAd.builder()
+      .withPlacementName(_placementName)
+      .withListener(this)
+      .build();
+}
 
-  /// Initialize native ad object
-  void _createNativeAd() {
-    _nativeAd = LevelPlayNativeAd.builder()
-        .withPlacementName('YOUR_PLACEMENT_NAME') // Your placement name string
-        .withListener(LevelPlayNativeAdListenerClass()) // Your level play native ad listener
-        .build();
-  }
+/// Load native ad
+void _loadAd() {
+  _nativeAd?.loadAd();
+}
 
-  /// Initialize native ad view widget with native ad
-  void _createNativeAdView() {
-    _nativeAdView = LevelPlayNativeAdView(
-      key: GlobalKey(),
-      // Unique key to force recreation of widget
-      height: 150,
-      // Your chosen height
-      width: double.infinity,
-      // Your chosen width
+@override
+Widget build(BuildContext context) {
+  return
+    LevelPlayNativeAdView(
+      height: _height,
+      width: _width,
       nativeAd: _nativeAd,
-      // Native ad object
-      templateType: LevelPlayTemplateType.SMALL,
-      // Built-in native ad template(not required when implementing custom template)
-      templateStyle: LevelPlayNativeAdTemplateStyle( // Level play native ad styling(optional)
-          callToActionStyle: LevelPlayNativeAdElementStyle(
-              backgroundColor: Colors.white,
-              textColor: Colors.lightBlue
-          )
-      ),
+      templateType: _templateType,
+      onPlatformViewCreated: () {
+        _loadAd();
+      },
     );
-  }
-
-  /// Load native ad
-  void _loadAd() {
-    _nativeAd?.loadAd();
-  }
-
-  // Rest of the class
 }
 ```
 
@@ -389,8 +386,8 @@ Note:
 - Make sure to read the official documents at [ironSource Knowledge Center](TODO: replace with the real KC link) for proper usage.
 - Some configurations must be done before initialization.
 - LevelPlayBannerListener is deprecated - Please use LevelPlayBannerAdViewListener with LevelPlayBannerAdView instead.
-
-
+- LevelPlayInterstitialListener is deprecated - Please use LevelPlayInterstitialAdListener with LevelPlayInterstitialAd instead.
+- 
 # Mediation
 
 - You can use the ironSource LevelPlay's mediation feature by adding adapters/SDKs to your project.

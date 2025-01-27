@@ -195,42 +195,101 @@ class IronSourceMethodCallHandler {
         return _levelPlayBannerListener?.onAdLeftApplication(adInfo);
 
 
-      // LevelPlay Interstitial Ad
+      // LevelPlay Rewarded Ad
+      case 'onRewardedAdLoaded':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdLoaded(adInfo);
+        break;
+      case 'onRewardedAdLoadFailed':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdLoadFailed(error);
+        break;
+      case 'onRewardedAdInfoChanged':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdInfoChanged(adInfo);
+        break;
+      case 'onRewardedAdDisplayed':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdDisplayed(adInfo);
+        break;
+      case 'onRewardedAdDisplayFailed':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdDisplayFailed(error, adInfo);
+        break;
+      case 'onRewardedAdClicked':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdClicked(adInfo);
+        break;
+      case 'onRewardedAdClosed':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdClosed(adInfo);
+        break;
+      case 'onRewardedAdRewarded':
+        final adObjectId = call.arguments["adObjectId"] as int;
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final reward = LevelPlayReward.fromMap(call.arguments[IronConstKey.REWARD]);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adObjectId] as LevelPlayRewardedAd?;
+        rewardedAdObject?.getListener()?.onAdRewarded(reward, adInfo);
+        break;
+
+    // LevelPlay Interstitial Ad
       case 'onInterstitialAdLoaded':
         final adObjectId = call.arguments["adObjectId"] as int;
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdLoaded(adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdLoaded(adInfo);
         break;
       case 'onInterstitialAdLoadFailed':
         final adObjectId = call.arguments["adObjectId"] as int;
         final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdLoadFailed(error);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdLoadFailed(error);
         break;
       case 'onInterstitialAdInfoChanged':
         final adObjectId = call.arguments["adObjectId"] as int;
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdInfoChanged(adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdInfoChanged(adInfo);
         break;
       case 'onInterstitialAdDisplayed':
         final adObjectId = call.arguments["adObjectId"] as int;
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdDisplayed(adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdDisplayed(adInfo);
         break;
       case 'onInterstitialAdDisplayFailed':
         final adObjectId = call.arguments["adObjectId"] as int;
         final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdDisplayFailed(error, adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdDisplayFailed(error, adInfo);
         break;
       case 'onInterstitialAdClicked':
         final adObjectId = call.arguments["adObjectId"] as int;
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdClicked(adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdClicked(adInfo);
         break;
       case 'onInterstitialAdClosed':
         final adObjectId = call.arguments["adObjectId"] as int;
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        _levelPlayAdObjectManager.interstitialAdsMap[adObjectId]?.getListener()?.onAdClosed(adInfo);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adObjectId] as LevelPlayInterstitialAd?;
+        interstitialAdObject?.getListener()?.onAdClosed(adInfo);
         break;
       default:
         throw UnimplementedError("Method not implemented: ${call.method}");

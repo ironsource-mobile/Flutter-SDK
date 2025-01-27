@@ -1,6 +1,7 @@
 import '../ironsource_error.dart';
 import '../ironsource_ad_info.dart';
 
+@Deprecated("Use LevelPlayInterstitialAdListener instead.")
 abstract class LevelPlayInterstitialListener {
   /// Indicates that the interstitial ad was loaded successfully.
   /// - [adInfo] includes information about the loaded ad.

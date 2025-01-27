@@ -19,5 +19,6 @@
 + (NSDictionary *)dictionaryForPlacementInfo:(ISPlacementInfo *)placementInfo;
 + (NSDictionary *)dictionaryForIronSourceConsentViewError:(NSError *)error consentViewType:(NSString *)consentViewType;
 + (UIViewController *)getRootViewController;
++ (NSDictionary *)dictionaryForLPMReward:(LPMReward *)reward;
 
 @end

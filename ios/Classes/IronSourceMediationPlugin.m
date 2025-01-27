@@ -199,9 +199,17 @@ static IronSourceMediationPlugin *instance = nil;
         [self disposeAd: call.arguments result: result];
     } else if ([@"disposeAllAds" isEqualToString:call.method]) {
         [self disposeAllAd: result];
-    }else if([@"createAdaptiveAdSize" isEqualToString:call.method]) { /* LPMAdSize API =*/
+    } else if([@"createAdaptiveAdSize" isEqualToString:call.method]) { /* LPMAdSize API =*/
         [self createAdaptiveAdSize:call.arguments result:result];
-    }    else {
+    }else if([@"isRewardedAdPlacementCapped" isEqualToString:call.method]) { /* LPMRewardedAd API =*/
+        [self isRewardedAdPlacementCapped:call.arguments result:result];
+    } else if ([@"loadRewardedAd" isEqualToString:call.method]) {
+        [self loadRewardedAd: call.arguments result:result];
+    } else if ([@"showRewardedAd" isEqualToString:call.method]) {
+        [self showRewardedAd: call.arguments result:result];
+    } else if ([@"isRewardedAdReady" isEqualToString:call.method]) {
+        [self isRewardedAdReady:call.arguments result: result];
+    } else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -1252,37 +1260,50 @@ static IronSourceMediationPlugin *instance = nil;
     return result([LevelPlayUtils dictionaryForAdSize: adSize]);
 }
 
+#pragma mark - LPMRewardedAd ===============================================================================
+
+/**
+ * Checks whether the specified placement for rewarded ads is capped.
+ *
+ * @param args   The arguments containing the placement name.
+ * @param result The result to be returned after processing.
+ */
+- (void)isRewardedAdPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
+    if(!args){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+    }
+    NSString *placementName = [args valueForKey:@"placementName"];
+    if(placementName == nil || [[NSNull null] isEqual:placementName]){
+        return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+    }
+    BOOL isCapped = [LPMRewardedAd isPlacementCapped:placementName];
+    return result([NSNumber numberWithBool:isCapped]);
+}
+
+- (void)loadRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *adUnitId = args[@"adUnitId"];
+    [self.levelPlayAdObjectManager loadRewardedAd:adObjectId adUnitId:adUnitId];
+    result(nil);
+}
+
+- (void)showRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *placementName = args[@"placementName"];
+    [self.levelPlayAdObjectManager showRewardedAd:adObjectId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
+    result(nil);
+}
+
+- (void)isRewardedAdReady:(nullable id) args result:(nonnull FlutterResult)result{
+    NSNumber *adObjectId = args[@"adObjectId"];
+    BOOL isReady = [self.levelPlayAdObjectManager isRewardedAdReady:adObjectId];
+    result(@(isReady));
+}
+
 #pragma mark - Utils ===============================================================================
 
 - (UIViewController *)getRootViewController {
     return [UIApplication sharedApplication].keyWindow.rootViewController;
-}
-
-#pragma mark - Helper Functions ===============================================================================
-
-- (void)invokeChannelMethodWithName:(NSString *) methodName args:(id _Nullable) args {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.channel invokeMethod:methodName arguments:args result:^(id _Nullable result){
-            if([result isKindOfClass:[FlutterError class]]){
-                FlutterError *error = result;
-                NSLog(@"Critical Error: invokeMethod %@ failed with FlutterError errorCode: %@, message: %@, details: %@", methodName, [error code], [error message], [error details]);
-            } else if([result isKindOfClass:[FlutterMethodNotImplemented class]]){
-                NSLog(@"Critical Error: invokeMethod %@ failed with FlutterMethodNotImplemented", methodName);
-                [result raise]; // force shut down
-            }
-        }];
-    });
-}
-
-- (NSMutableDictionary *)getDictWithIronSourceError:(NSError *)error{
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    if(error != nil){
-        dict[@"errorCode"] = [NSNumber numberWithInteger: error.code];
-    }
-    if(error != nil && error.userInfo != nil){
-        dict[@"message"] = error.userInfo[NSLocalizedDescriptionKey];
-    }
-    return dict;
 }
 
 @end

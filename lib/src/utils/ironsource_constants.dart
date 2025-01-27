@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '3.0.1';
-  static const String ANDROID_SDK_VERSION = '8.4.0';
-  static const String IOS_SDK_VERSION = '8.4.0';
+  static const String PLUGIN_VERSION = '3.1.0';
+  static const String ANDROID_SDK_VERSION = '8.6.1';
+  static const String IOS_SDK_VERSION = '8.6.0';
 
   // Banner
   static const int BANNER_WIDTH = 320;
@@ -57,6 +57,7 @@ class IronConstKey {
   static const String LEVEL_PLAY_AD_SIZE = 'levelPlayAdSize';
   static const String AD_LABEL = 'adLabel';
   static const String IRON_SOURCE_ERROR = 'ironSourceError';
+  static const String REWARD = 'reward';
 
   // Native Ad
   static const String NATIVE_AD = 'nativeAd';

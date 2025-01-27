@@ -136,14 +136,10 @@ internal class LevelPlayNativeAdView(
 
     /**
      * Destroys the native ad.
-     * Removes all views from the nativeAdLayout, destroys the native ad object,
-     * and invokes a method on the MethodChannel to notify Flutter that the ad has been destroyed.
      *
      * @param result The result to be returned to Flutter indicating the success of the method call.
      */
     private fun destroyAd(result: MethodChannel.Result) {
-        // Remove all views from the layout
-        nativeAdLayout.removeAllViews()
         // Destroy the native ad
         nativeAd?.destroyAd()
         // Set nativeAd to null

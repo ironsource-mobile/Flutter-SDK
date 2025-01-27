@@ -179,8 +179,8 @@
     if (_nativeAd == nil) {
         _nativeAd = [[[[LevelPlayNativeAdBuilder new]
                 withViewController:[LevelPlayUtils getRootViewController]]
-                withPlacementName:self.placement] // Replace with your placement or leave empty
-                withDelegate:self]    // We implement the delegate in step 2
+                withPlacementName:self.placement]
+                withDelegate:self]
                 .build;
     }
 
@@ -197,9 +197,6 @@
  @param result The Flutter result callback to notify the completion of the method call.
  */
 - (void)destroyAd:(FlutterResult)result {
-    // Remove any added views from the native ad
-    [self removeViews];
-
     // Destroy the native ad
     [self.nativeAd destroyAd];
 

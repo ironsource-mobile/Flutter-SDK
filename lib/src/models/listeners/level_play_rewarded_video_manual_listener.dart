@@ -3,6 +3,7 @@ import './level_play_rewarded_video_base_listener.dart';
 import '../ironsource_error.dart';
 
 /// LevelPlay Listener for Manual Load RV
+@Deprecated("Use LevelPlayRewardedAdListener instead.")
 abstract class LevelPlayRewardedVideoManualListener implements LevelPlayRewardedVideoBaseListener {
   /// Indicates that the Rewarded video ad was loaded successfully.
   /// - [adInfo] includes information about the loaded ad.

@@ -2,6 +2,7 @@ import '../ironsource_rewardedvideo_placement.dart';
 import '../ironsource_error.dart';
 import '../ironsource_ad_info.dart';
 
+@Deprecated("Use LevelPlayRewardedAdListener instead.")
 abstract class LevelPlayRewardedVideoBaseListener {
   /// The Rewarded Video ad view has opened.
   ///

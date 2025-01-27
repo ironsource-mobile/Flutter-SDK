@@ -24,6 +24,7 @@ import com.unity3d.mediation.LevelPlay
 import com.unity3d.mediation.LevelPlayAdSize
 import com.unity3d.mediation.LevelPlayInitRequest
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
+import com.unity3d.mediation.rewarded.LevelPlayRewardedAd
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -207,6 +208,11 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       "disposeAllAds" -> disposeAllAds(result)
       /** LevelPlayAdSize API ===============================================================================*/
       "createAdaptiveAdSize" -> createAdaptiveAdSize(call, result)
+      /** LevelPlayRewardedAd API ===============================================================================*/
+      "isRewardedAdPlacementCapped" -> isRewardedAdPlacementCapped(call, result)
+      "loadRewardedAd" -> loadRewardedAd(call, result)
+      "showRewardedAd" -> showRewardedAd(call, result)
+      "isRewardedAdReady" -> isRewardedAdReady(call, result)
       else -> result.notImplemented()
     }
   }
@@ -958,6 +964,35 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       LevelPlayAdSize.createAdaptiveAdSize(it, width)
     }
     return result.success(size.toMap())
+  }
+
+  // endregion
+
+  /** region LevelPlayRewardedAd API =================================================================*/
+  private fun isRewardedAdPlacementCapped(call: MethodCall, result: Result) {
+    val placementName: String = call.argument("placementName")!!
+    val isCapped = LevelPlayRewardedAd.isPlacementCapped(placementName)
+    result.success(isCapped)
+  }
+
+  private fun loadRewardedAd(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val adUnitId: String = call.argument("adUnitId")!!
+    levelPlayAdObjectManager.loadRewardedAd(adObjectId, adUnitId)
+    result.success(null)
+  }
+
+  private fun showRewardedAd(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val placementName: String? = call.argument("placementName")
+    levelPlayAdObjectManager.showRewardedAd(adObjectId, placementName)
+    result.success(null)
+  }
+
+  private fun isRewardedAdReady(call: MethodCall, result: Result) {
+    val adObjectId: Int = call.argument("adObjectId")!!
+    val isReady = levelPlayAdObjectManager.isRewardedAdReady(adObjectId)
+    result.success(isReady)
   }
 
   // endregion
