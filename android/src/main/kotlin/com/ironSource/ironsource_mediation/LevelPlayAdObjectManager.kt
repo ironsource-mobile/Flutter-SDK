@@ -15,64 +15,70 @@ class LevelPlayAdObjectManager(
     var activity: Activity?,
     private val channel: MethodChannel
 ) {
-    private val interstitialAdsMap = hashMapOf<Int, LevelPlayInterstitialAd>()
-    private val rewardedAdsMap = hashMapOf<Int, LevelPlayRewardedAd>()
+    private val interstitialAdsMap = hashMapOf<String, LevelPlayInterstitialAd>()
+    private val rewardedAdsMap = hashMapOf<String, LevelPlayRewardedAd>()
+
 
     // Interstitial Ad Methods
-    fun loadInterstitialAd(adObjectId: Int, adUnitId: String) {
-        // Check if an interstitial ad already exists for this adObjectId
-        val existingAd = interstitialAdsMap[adObjectId]
-
-        if (existingAd != null) {
-            // Ad exists, load the existing ad
-            existingAd.loadAd()
-            return
-        }
-
-        // Ad doesn't exist, create a new one
+    fun createInterstitialAd(adUnitId: String): String {
+        // Create the interstitial ad
         val interstitialAd = LevelPlayInterstitialAd(adUnitId)
-        interstitialAd.setListener(createInterstitialAdListener(adObjectId))
-
-        // Store the new ad instance in the map and load it
-        interstitialAdsMap[adObjectId] = interstitialAd
-        interstitialAd.loadAd()
+        // Set the listener for the interstitial ad
+        interstitialAd.setListener(createInterstitialAdListener(interstitialAd.adId))
+        // Store the interstitial ad in the map
+        interstitialAdsMap[interstitialAd.adId] = interstitialAd
+        // Return the unique adId for the created ad object
+        return interstitialAd.adId
     }
 
-    fun showInterstitialAd(adObjectId: Int, placementName: String?) {
+    fun loadInterstitialAd(adId: String) {
+        // Retrieve the interstitial ad from the map and load it if found
+        interstitialAdsMap[adId]?.loadAd()
+    }
+
+    fun showInterstitialAd(adId: String, placementName: String?) {
+        // Only proceed if activity context is available
         activity?.let {
-            interstitialAdsMap[adObjectId]?.showAd(it, placementName)
+            // Find the object by adId, show it
+            interstitialAdsMap[adId]?.showAd(it, placementName)
         }
     }
-
-    fun isInterstitialAdReady(adObjectId: Int): Boolean {
-        return interstitialAdsMap[adObjectId]?.isAdReady() ?: false
+    /**
+     * Checks if an interstitial ad is ready to be displayed.
+     *
+     * @param adId The identifier of the ad to check
+     * @return true if the ad exists and is ready to be shown, false otherwise
+     *         (including when the ad doesn't exist in the map)
+     */
+    fun isInterstitialAdReady(adId: String): Boolean {
+        return interstitialAdsMap[adId]?.isAdReady() ?: false
     }
 
-    private fun createInterstitialAdListener(adObjectId: Int): LevelPlayInterstitialAdListener {
+    private fun createInterstitialAdListener(adId: String): LevelPlayInterstitialAdListener {
         return object : LevelPlayInterstitialAdListener {
             override fun onAdLoaded(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdLoaded", args)
             }
 
             override fun onAdLoadFailed(error: LevelPlayAdError) {
-                val args = hashMapOf("adObjectId" to adObjectId, "error" to error.toMap())
+                val args = hashMapOf("adId" to adId, "error" to error.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdLoadFailed", args)
             }
 
             override fun onAdInfoChanged(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdInfoChanged", args)
             }
 
             override fun onAdDisplayed(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdDisplayed", args)
             }
 
             override fun onAdDisplayFailed(error: LevelPlayAdError, adInfo: LevelPlayAdInfo) {
                 val args = hashMapOf(
-                    "adObjectId" to adObjectId,
+                    "adId" to adId,
                     "error" to error.toMap(),
                     "adInfo" to adInfo.toMap()
                 )
@@ -80,67 +86,73 @@ class LevelPlayAdObjectManager(
             }
 
             override fun onAdClicked(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdClicked", args)
             }
 
             override fun onAdClosed(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onInterstitialAdClosed", args)
             }
         }
     }
 
     // Rewarded Ad Methods
-    fun loadRewardedAd(adObjectId: Int, adUnitId: String) {
-        // Check if an rewarded ad already exists for this adObjectId
-        val existingAd = rewardedAdsMap[adObjectId]
-
-        if (existingAd != null) {
-            // Ad exists, load the existing ad
-            existingAd.loadAd()
-            return
-        }
-
-        // Ad doesn't exist, create a new one
+    fun createRewardedAd(adUnitId: String): String {
+        // Create the rewarded ad object
         val rewardedAd = LevelPlayRewardedAd(adUnitId)
-        rewardedAd.setListener(createRewardedAdListener(adObjectId))
-
-        // Store the new ad instance in the map and load it
-        rewardedAdsMap[adObjectId] = rewardedAd
-        rewardedAd.loadAd()
+        // Set the listener for the rewarded ad
+        rewardedAd.setListener(createRewardedAdListener(rewardedAd.adId))
+        // Store the rewarded ad in the map
+        rewardedAdsMap[rewardedAd.adId] = rewardedAd
+        // Return the unique adId for the created ad object
+        return rewardedAd.adId
     }
 
-    fun showRewardedAd(adObjectId: Int, placementName: String?) {
+    fun loadRewardedAd(adId: String) {
+        // Retrieve the rewarded ad from the map and load it if found
+        rewardedAdsMap[adId]?.loadAd()
+        }
+
+    fun showRewardedAd(adId: String, placementName: String?) {
+        // Only proceed if activity context is available
         activity?.let {
-            rewardedAdsMap[adObjectId]?.showAd(it, placementName)
+            // Find the adObject by adId, verify it's ready, then show it
+            rewardedAdsMap[adId]?.showAd(it, placementName)
         }
     }
+    /**
+     * Checks if rewarded ad is ready to be displayed.
+     *
+     * @param adId The identifier of the ad to check
+     * @return true if the ad exists and is ready to be shown, false otherwise
+     *         (including when the ad doesn't exist in the map)
+     */
 
-    fun isRewardedAdReady(adObjectId: Int): Boolean {
-        return rewardedAdsMap[adObjectId]?.isAdReady() ?: false
+    fun isRewardedAdReady(adId: String): Boolean {
+        return rewardedAdsMap[adId]?.isAdReady() ?: false
     }
 
-    private fun createRewardedAdListener(adObjectId: Int): LevelPlayRewardedAdListener {
+    private fun createRewardedAdListener(adId: String): LevelPlayRewardedAdListener {
         return object : LevelPlayRewardedAdListener {
             override fun onAdLoaded(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdLoaded", args)
             }
 
             override fun onAdLoadFailed(error: LevelPlayAdError) {
-                val args = hashMapOf("adObjectId" to adObjectId, "error" to error.toMap())
+                val args = hashMapOf("adId" to adId, "error" to error.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdLoadFailed", args)
             }
 
             override fun onAdDisplayed(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdDisplayed", args)
             }
 
             override fun onAdDisplayFailed(error: LevelPlayAdError, adInfo: LevelPlayAdInfo) {
                 val args = hashMapOf(
-                    "adObjectId" to adObjectId,
+                    "adId" to adId,
                     "error" to error.toMap(),
                     "adInfo" to adInfo.toMap()
                 )
@@ -148,23 +160,23 @@ class LevelPlayAdObjectManager(
             }
 
             override fun onAdInfoChanged(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdInfoChanged", args)
             }
 
             override fun onAdClicked(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdClicked", args)
             }
 
             override fun onAdClosed(adInfo: LevelPlayAdInfo) {
-                val args = hashMapOf("adObjectId" to adObjectId, "adInfo" to adInfo.toMap())
+                val args = hashMapOf("adId" to adId, "adInfo" to adInfo.toMap())
                 invokeMethodOnUiThread(channel, "onRewardedAdClosed", args)
             }
 
             override fun onAdRewarded(reward: LevelPlayReward, adInfo: LevelPlayAdInfo) {
                 val args = hashMapOf(
-                    "adObjectId" to adObjectId,
+                    "adId" to adId,
                     "adInfo" to adInfo.toMap(),
                     "reward" to reward.toMap()
                 )
@@ -175,11 +187,11 @@ class LevelPlayAdObjectManager(
     }
 
     // Shared Methods
-    fun disposeAd(adObjectId: Int) {
-        if (interstitialAdsMap.containsKey(adObjectId))
-            interstitialAdsMap.remove(adObjectId)
-        if (rewardedAdsMap.containsKey(adObjectId))
-            rewardedAdsMap.remove(adObjectId)
+    fun disposeAd(adId: String) {
+        if (interstitialAdsMap.containsKey(adId))
+            interstitialAdsMap.remove(adId)
+        if (rewardedAdsMap.containsKey(adId))
+            rewardedAdsMap.remove(adId)
     }
 
     fun disposeAllAds() {
@@ -187,3 +199,5 @@ class LevelPlayAdObjectManager(
         rewardedAdsMap.clear()
     }
 }
+
+

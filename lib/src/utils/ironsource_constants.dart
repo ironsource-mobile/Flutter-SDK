@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '3.1.0';
-  static const String ANDROID_SDK_VERSION = '8.6.1';
-  static const String IOS_SDK_VERSION = '8.6.0';
+  static const String PLUGIN_VERSION = '3.1.1';
+  static const String ANDROID_SDK_VERSION = '8.9.0';
+  static const String IOS_SDK_VERSION = '8.9.0';
 
   // Banner
   static const int BANNER_WIDTH = 320;
@@ -54,6 +54,7 @@ class IronConstKey {
   static const String AD_FORMATS = 'adFormats';
   static const String AD_FORMAT = 'adFormat';
   static const String AD_UNIT_ID = 'adUnitId';
+  static const String AD_ID = 'adId';
   static const String LEVEL_PLAY_AD_SIZE = 'levelPlayAdSize';
   static const String AD_LABEL = 'adLabel';
   static const String IRON_SOURCE_ERROR = 'ironSourceError';
@@ -82,6 +83,7 @@ class IronConstKey {
   static const String PRECISION = 'precision';
   static const String LIFETIME_REVENUE = 'lifetimeRevenue';
   static const String ENCRYPTED_CPM = 'encryptedCPM';
+  static const String CREATIVE_ID = 'creativeId';
 
   // iOS 14 ConsentView
   static const CONSENT_VIEW_TYPE = 'consentViewType';

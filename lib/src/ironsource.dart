@@ -52,6 +52,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: shouldTrackNetworkState
   /// -     iOS: shouldTrackReachability
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> shouldTrackNetworkState(bool isEnabled) async {
     final args = OutgoingValueParser.shouldTrackNetworkState(isEnabled);
     return _channel.invokeMethod('shouldTrackNetworkState', args);
@@ -83,6 +84,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getAdvertiserId
   /// -     iOS: advertiserId
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<String> getAdvertiserId() async {
     final id = await _channel.invokeMethod<String>('getAdvertiserId');
     return id ?? "";
@@ -151,6 +153,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setUserId
   /// -     iOS: setUserId
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setUserId(String userId) async {
     final args = OutgoingValueParser.setUserId(userId);
     return _channel.invokeMethod('setUserId', args);
@@ -164,6 +167,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: init
   /// -     iOS: initWithAppKey
+  @Deprecated("This method will be removed in 4.0.0 version. Please use LevelPlay.init instead.")
   static Future<void> init(
       {required String appKey,
       List<IronSourceAdUnit>? adUnits,
@@ -190,7 +194,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: showRewardedVideo
   /// -     iOS: showRewardedVideoWithViewController
-  @Deprecated("This method will be removed in future versions. Please use LevelPlayRewardedAd instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Please use LevelPlayRewardedAd instead.")
   static Future<void> showRewardedVideo({String? placementName}) async {
     return _channel.invokeMethod('showRewardedVideo',
         OutgoingValueParser.showRewardedVideo(placementName));
@@ -203,7 +207,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getRewardedVideoPlacementInfo
   /// -     iOS: rewardedVideoPlacementInfo
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<IronSourceRewardedVideoPlacement?>
       getRewardedVideoPlacementInfo({required String placementName}) async {
     final args =
@@ -220,7 +224,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isRewardedVideoAvailable
   /// -     iOS: hasRewardedVideo
-  @Deprecated("Use the alternate API LevelPlayRewardedAd#isAdReady() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayRewardedAd#isAdReady() instead.")
   static Future<bool> isRewardedVideoAvailable() async {
     final bool isAvailable =
         await _channel.invokeMethod('isRewardedVideoAvailable');
@@ -232,7 +236,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isRewardedVideoPlacementCapped
   /// -     iOS: isRewardedVideoCappedForPlacement
-  @Deprecated("Use the alternate API LevelPlayRewardedAd#isPlacementCapped(placementName) instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayRewardedAd#isPlacementCapped(placementName) instead.")
   static Future<bool> isRewardedVideoPlacementCapped(
       {required String placementName}) async {
     final args =
@@ -249,7 +253,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setRewardedVideoServerParameters
   /// -     iOS: setRewardedVideoServerParameters
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setRewardedVideoServerParams(
       Map<String, String> parameters) async {
     final args = OutgoingValueParser.setRewardedVideoServerParams(parameters);
@@ -261,7 +265,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: clearRewardedVideoServerParameters
   /// -     iOS: clearRewardedVideoServerParameters
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> clearRewardedVideoServerParams() async {
     return _channel.invokeMethod('clearRewardedVideoServerParams');
   }
@@ -273,7 +277,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setLevelPlayRewardedVideoManualListener
   /// -     iOS: setLevelPlayRewardedVideoManualDelegate
-  @Deprecated("Use the alternate API LevelPlayRewardedAd#setListener(LevelPlayRewardedAdListener) instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayRewardedAd#setListener(LevelPlayRewardedAdListener) instead.")
   static Future<void> setLevelPlayRewardedVideoManualListener(
       LevelPlayRewardedVideoManualListener? listener) async {
     IronSourceMethodCallHandler.setLevelPlayRewardedVideoManualListener(listener);
@@ -286,7 +290,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: loadRewardedVideo
   /// -     iOS: loadRewardedVideo
-  @Deprecated("Use the alternate API LevelPlayRewardedAd#loadAd() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayRewardedAd#loadAd() instead.")
   static Future<void> loadRewardedVideo() async {
     return _channel.invokeMethod('loadRewardedVideo');
   }
@@ -299,7 +303,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: loadInterstitial
   /// -     iOS: loadInterstitial
-  @Deprecated("Use the alternate API LevelPlayInterstitialAd#loadAd() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayInterstitialAd#loadAd() instead.")
   static Future<void> loadInterstitial() async {
     return _channel.invokeMethod('loadInterstitial');
   }
@@ -310,7 +314,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: showInterstitial
   /// -     iOS: showInterstitialWithViewController
-  @Deprecated("Use the alternate API LevelPlayInterstitialAd#showAd() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayInterstitialAd#showAd() instead.")
   static Future<void> showInterstitial({String? placementName}) async {
     final args = OutgoingValueParser.showInterstitial(placementName);
     return _channel.invokeMethod('showInterstitial', args);
@@ -321,7 +325,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isInterstitialReady
   /// -     iOS: hasInterstitial
-  @Deprecated("Use the alternate API LevelPlayInterstitialAd#isAdReady() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayInterstitialAd#isAdReady() instead.")
   static Future<bool> isInterstitialReady() async {
     final bool isISReady = await _channel.invokeMethod('isInterstitialReady');
     return isISReady;
@@ -332,7 +336,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: isInterstitialPlacementCapped
   /// -     iOS: isInterstitialCappedForPlacement
-  @Deprecated("Use the alternate API LevelPlayInterstitialAd#isPlacementCapped(placementName) instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayInterstitialAd#isPlacementCapped(placementName) instead.")
   static Future<bool> isInterstitialPlacementCapped(
       {required String placementName}) async {
     final args =
@@ -353,7 +357,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: loadBanner
   /// -     iOS: loadBannerWithViewController
-  @Deprecated("Use the alternate API LevelPlayBannerAdView#loadAd() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayBannerAdView#loadAd() instead.")
   static Future<void> loadBanner({
     required IronSourceBannerSize size,
     required IronSourceBannerPosition position,
@@ -370,20 +374,20 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: destroyBanner
   /// -     iOS: destroyBanner
-  @Deprecated("Use the alternate API LevelPlayBannerAdView#destroy() instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayBannerAdView#destroy() instead.")
   static Future<void> destroyBanner() async {
     return _channel.invokeMethod('destroyBanner');
   }
 
   /// Changes the visibility of loaded Banner to visible.
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> displayBanner() async {
     return _channel.invokeMethod('displayBanner');
   }
 
   /// Changes the visibility of loaded Banner to invisible.
   /// - Reloading does not take place while it's hidden.
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> hideBanner() async {
     return _channel.invokeMethod('hideBanner');
   }
@@ -406,7 +410,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: getMaximalAdaptiveHeight
   /// -     iOS: getMaximalAdaptiveHeight
-  @Deprecated("This method will be removed in future versions.")
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<int> getMaximalAdaptiveHeight(int width) async {
     final args = OutgoingValueParser.getMaximalAdaptiveHeight(width);
     final int adaptiveHeight = await _channel.invokeMethod('getMaximalAdaptiveHeight', args);
@@ -421,6 +425,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setClientSideCallbacks
   /// -     iOS: setUseClientSideCallbacks
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setClientSideCallbacks(bool isEnabled) async {
     final args = OutgoingValueParser.setClientSideCallbacks(isEnabled);
     return _channel.invokeMethod('setClientSideCallbacks', args);
@@ -433,6 +438,7 @@ class IronSource {
   ///
   /// Native SDK Reference
   /// - iOS: getConversionValue
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<int?> getConversionValue() async {
     if (!Platform.isIOS) {
       return null;
@@ -449,6 +455,7 @@ class IronSource {
   ///
   /// Native SDK Reference
   /// - iOS: loadConsentViewWithType
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> loadConsentViewWithType(String consentViewType) async {
     if (!Platform.isIOS) {
       return;
@@ -462,6 +469,7 @@ class IronSource {
   ///
   /// Native SDK Reference
   /// - iOS: showConsentViewWithViewController
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> showConsentViewWithType(String consentViewType) async {
     if (!Platform.isIOS) {
       return;
@@ -472,7 +480,7 @@ class IronSource {
 
   // Listener setters
 
-  @Deprecated("This method will be removed in future versions. Please use addImpressionDataListener instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Please use addImpressionDataListener instead.")
   static void setImpressionDataListener(IronSourceImpressionDataListener? listener) {
     IronSourceMethodCallHandler.addImpressionDataListener(null); // Make sure only one listener is set
     IronSourceMethodCallHandler.setImpressionDataListener(listener);
@@ -483,17 +491,18 @@ class IronSource {
     IronSourceMethodCallHandler.addImpressionDataListener(listener);
   }
 
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static void setConsentViewListener(IronSourceConsentViewListener? listener) {
     IronSourceMethodCallHandler.setConsentViewListener(listener);
   }
 
-  @Deprecated("Use the alternate API LevelPlayRewardedAd#setListener(LevelPlayRewardedAdListener) instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayRewardedAd#setListener(LevelPlayRewardedAdListener) instead.")
   static void setLevelPlayRewardedVideoListener(
       LevelPlayRewardedVideoListener? listener) {
     IronSourceMethodCallHandler.setLevelPlayRewardedVideoListener(listener);
   }
 
-  @Deprecated("Use the alternate API LevelPlayInterstitialAd#setListener(LevelPlayInterstitialAdListener) instead.")
+  @Deprecated("This method will be removed in 4.0.0 version. Use the alternate API LevelPlayInterstitialAd#setListener(LevelPlayInterstitialAdListener) instead.")
   static void setLevelPlayInterstitialListener(
       LevelPlayInterstitialListener? listener) {
     IronSourceMethodCallHandler.setLevelPlayInterstitialListener(listener);

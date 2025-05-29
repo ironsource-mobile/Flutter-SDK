@@ -11,6 +11,7 @@ import '../models/level_play_ad_error.dart';
 /// [LevelPlayBannerAdView] is the widget that contains the banner elements
 ///  and must be created in order load banner ad
 class LevelPlayBannerAdView extends StatefulWidget {
+
   /// A unique ad unit id for banner
   final String adUnitId;
 
@@ -27,7 +28,7 @@ class LevelPlayBannerAdView extends StatefulWidget {
   final VoidCallback? onPlatformViewCreated;
 
   /// Constructs an instance of [LevelPlayBannerAdView].
-  const LevelPlayBannerAdView({
+   const LevelPlayBannerAdView({
     super.key,
     required this.adUnitId,
     required this.adSize,
@@ -50,6 +51,11 @@ class LevelPlayBannerAdView extends StatefulWidget {
   /// Method to resume(after pause) the auto refresh of the banner
   Future<void> resumeAutoRefresh() async => await _globalKey.currentState?.resumeAutoRefresh();
 
+  /// Provides access to the `adId`
+  String get adId {
+    return _globalKey.currentState?._adId ?? "";
+  }
+
   @override
   State<LevelPlayBannerAdView> createState() => LevelPlayBannerAdViewState();
 }
@@ -57,11 +63,13 @@ class LevelPlayBannerAdView extends StatefulWidget {
 class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
   final String viewType = 'levelPlayBannerAdView';
   MethodChannel? channel;
+  String _adId = "";
 
-  void _onPlatformViewCreated(int id) {
+  Future<void> _onPlatformViewCreated(int id) async {
     final String methodChannelName = '${viewType}_$id';
     channel = MethodChannel(methodChannelName);
     channel!.setMethodCallHandler(_onNativeAdMethodCall);
+    _adId = await channel?.invokeMethod('getAdId');
     // Notify on ad view creation
     widget.onPlatformViewCreated?.call();
   }
@@ -70,6 +78,10 @@ class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
   Future<void> destroy() async => await channel?.invokeMethod('destroyBanner');
   Future<void> pauseAutoRefresh() async => await channel?.invokeMethod('pauseAutoRefresh');
   Future<void> resumeAutoRefresh() async => await channel?.invokeMethod('resumeAutoRefresh');
+
+  String get adId {
+    return _adId;
+  }
 
   @override
   Widget build(BuildContext context) {

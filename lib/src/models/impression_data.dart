@@ -6,7 +6,7 @@ import 'dart:io';
 /// Represents the data collected for an ad impression.
 class ImpressionData {
   final String? auctionId;
-  @Deprecated("This parameter will be removed in native sdk version 9.0.0. Please use [adFormat] instead.")
+  @Deprecated("This parameter will be removed in Flutter version 4.0.0. Please use [adFormat] instead.")
   final String? adUnit;
   final String? adUnitName;
   final String? adUnitId;
@@ -20,10 +20,11 @@ class ImpressionData {
   final String? instanceId;
   final double? revenue;
   final String? precision;
-  @Deprecated("This parameter will be removed in native sdk version 9.0.0.")
+  @Deprecated("This parameter will be removed in Flutter version 4.0.0.")
   final double? lifetimeRevenue;
   final String? encryptedCPM;
-  final double? conversionValue;
+  final double? conversionValue; // Only for ios
+  final String? creativeId;
 
   ImpressionData({
     required this.auctionId,
@@ -42,7 +43,8 @@ class ImpressionData {
     required this.precision,
     required this.lifetimeRevenue,
     required this.encryptedCPM,
-    required this.conversionValue // Only for ios
+    required this.conversionValue, // Only for ios
+    required this.creativeId
   });
 
   Map<String, dynamic> toMap() {
@@ -63,7 +65,8 @@ class ImpressionData {
       'precision': precision,
       'lifetimeRevenue': lifetimeRevenue,
       'encryptedCPM': encryptedCPM,
-      'conversionValue': conversionValue
+      'conversionValue': conversionValue,
+      'creativeId': creativeId
     };
   }
 
@@ -86,6 +89,7 @@ class ImpressionData {
       lifetimeRevenue: args['lifetimeRevenue'] as double?,
       encryptedCPM: args['encryptedCPM'] as String?,
       conversionValue: args['conversionValue'] as double?,
+      creativeId: args['creativeId'] as String?
     );
   }
 
@@ -109,6 +113,7 @@ class ImpressionData {
         ', lifetimeRevenue=$lifetimeRevenue'
         ', encryptedCPM=$encryptedCPM'
         '${Platform.isIOS ? ', conversionValue=$conversionValue' : ''}'
+        ', creativeId=$creativeId'
         '}';
   }
 
@@ -130,7 +135,8 @@ class ImpressionData {
         other.revenue == revenue &&
         other.precision == precision &&
         other.encryptedCPM == encryptedCPM &&
-        other.conversionValue == conversionValue;
+        other.conversionValue == conversionValue &&
+        other.creativeId == creativeId;
   }
 
   @override
@@ -149,5 +155,6 @@ class ImpressionData {
       revenue.hashCode ^
       precision.hashCode ^
       encryptedCPM.hashCode ^
-      conversionValue.hashCode;
+      conversionValue.hashCode ^
+      creativeId.hashCode;
 }

@@ -38,5 +38,5 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // ironSource SDK
-    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.6.1'
+    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.9.0'
 }

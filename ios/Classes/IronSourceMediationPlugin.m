@@ -38,7 +38,6 @@ static IronSourceMediationPlugin *instance = nil;
 - (id)initWithChannel:(FlutterMethodChannel*)channel {
     if (self = [super init]) {
         // observe device orientation changes
-        // observe device orientation changes
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didChangeOrientation:)
@@ -189,6 +188,8 @@ static IronSourceMediationPlugin *instance = nil;
         [self initLevelPlay:call.arguments result:result];
     } else if([@"isInterstitialAdPlacementCapped" isEqualToString:call.method]) { /* LPMInterstitialAd API =*/
         [self isInterstitialAdPlacementCapped:call.arguments result:result];
+    } else if ([@"createInterstitialAd" isEqualToString:call.method]) {
+        [self createInterstitialAd: call.arguments result:result];
     } else if ([@"loadInterstitialAd" isEqualToString:call.method]) {
         [self loadInterstitialAd: call.arguments result:result];
     } else if ([@"showInterstitialAd" isEqualToString:call.method]) {
@@ -203,6 +204,8 @@ static IronSourceMediationPlugin *instance = nil;
         [self createAdaptiveAdSize:call.arguments result:result];
     }else if([@"isRewardedAdPlacementCapped" isEqualToString:call.method]) { /* LPMRewardedAd API =*/
         [self isRewardedAdPlacementCapped:call.arguments result:result];
+    } else if ([@"createRewardedAd" isEqualToString:call.method]) {
+        [self createRewardedAd: call.arguments result:result];
     } else if ([@"loadRewardedAd" isEqualToString:call.method]) {
         [self loadRewardedAd: call.arguments result:result];
     } else if ([@"showRewardedAd" isEqualToString:call.method]) {
@@ -1213,29 +1216,34 @@ static IronSourceMediationPlugin *instance = nil;
     return result([NSNumber numberWithBool:isCapped]);
 }
 
-- (void)loadInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
+- (void)createInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adUnitId = args[@"adUnitId"];
-    [self.levelPlayAdObjectManager loadInterstitialAd:adObjectId adUnitId:adUnitId];
+    NSString *adId = [self.levelPlayAdObjectManager createInterstitialAd:adUnitId];
+    result(adId);
+}
+
+- (void)loadInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSString *adId = args[@"adId"];
+    [self.levelPlayAdObjectManager loadInterstitialAd:adId];
     result(nil);
 }
 
 - (void)showInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *adId = args[@"adId"];
     NSString *placementName = args[@"placementName"];
-    [self.levelPlayAdObjectManager showInterstitialAd:adObjectId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
+    [self.levelPlayAdObjectManager showInterstitialAd:adId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
     result(nil);
 }
 
 - (void)isInterstitialAdReady:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
-    BOOL isReady = [self.levelPlayAdObjectManager isInterstitialAdReady:adObjectId];
+    NSString *adId = args[@"adId"];
+    BOOL isReady = [self.levelPlayAdObjectManager isInterstitialAdReady:adId];
     result(@(isReady));
 }
 
 - (void)disposeAd:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
-    [self.levelPlayAdObjectManager disposeAd:adObjectId];
+    NSString *adId = args[@"adId"];
+    [self.levelPlayAdObjectManager disposeAd:adId];
     result(nil);
 }
 
@@ -1280,23 +1288,28 @@ static IronSourceMediationPlugin *instance = nil;
     return result([NSNumber numberWithBool:isCapped]);
 }
 
-- (void)loadRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
+- (void)createRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adUnitId = args[@"adUnitId"];
-    [self.levelPlayAdObjectManager loadRewardedAd:adObjectId adUnitId:adUnitId];
+    NSString *adId = [self.levelPlayAdObjectManager createRewardedAd:adUnitId];
+    result(adId);
+}
+
+- (void)loadRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
+    NSString *adId = args[@"adId"];
+    [self.levelPlayAdObjectManager loadRewardedAd:adId];
     result(nil);
 }
 
 - (void)showRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
+    NSString *adId = args[@"adId"];
     NSString *placementName = args[@"placementName"];
-    [self.levelPlayAdObjectManager showRewardedAd:adObjectId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
+    [self.levelPlayAdObjectManager showRewardedAd:adId placementName:placementName rootViewController:[LevelPlayUtils getRootViewController]];
     result(nil);
 }
 
 - (void)isRewardedAdReady:(nullable id) args result:(nonnull FlutterResult)result{
-    NSNumber *adObjectId = args[@"adObjectId"];
-    BOOL isReady = [self.levelPlayAdObjectManager isRewardedAdReady:adObjectId];
+    NSString *adId = args[@"adId"];
+    BOOL isReady = [self.levelPlayAdObjectManager isRewardedAdReady:adId];
     result(@(isReady));
 }
 

@@ -4,6 +4,43 @@ import 'package:flutter/services.dart';
 import 'package:ironsource_mediation/ironsource_mediation.dart';
 
 const APP_USER_ID = '[YOUR_UNIQUE_APP_USER_ID]';
+const String TAG = 'LevelPlayFlutterDemo';
+
+// App Keys
+const String APP_KEY_ANDROID = '85460dcd';
+const String APP_KEY_IOS = '8545d445';
+
+// Rewarded video ad unit IDs
+const String REWARDED_AD_UNIT_ID_ANDROID = '76yy3nay3ceui2a3';
+const String REWARDED_AD_UNIT_ID_IOS = 'qwouvdrkuwivay5q';
+
+// Interstitial ad unit IDs
+const String INTERSTITIAL_AD_UNIT_ID_ANDROID = 'aeyqi3vqlv6o8sh9';
+const String INTERSTITIAL_AD_UNIT_ID_IOS = 'wmgt0712uuux8ju4';
+
+// Banner ad unit IDs
+const String BANNER_AD_UNIT_ID_ANDROID = 'thnfvcsog13bhn08';
+const String BANNER_AD_UNIT_ID_IOS = 'iep3rxsyp9na3rw8';
+
+// Native ad unit IDs
+const String NATIVE_AD_UNIT_ID_ANDROID = 'ysoafvxg3grxe59f';
+const String NATIVE_AD_UNIT_ID_IOS = 'w58kpushhcbps32x';
+
+// Helper methods to get platform-specific appkeys and ad unit IDs.
+String get appKey => Platform.isAndroid ? APP_KEY_ANDROID : Platform.isIOS ? APP_KEY_IOS
+    : throw Exception("Unsupported Platform for App Key");
+
+String get rewardedAdUnitId => Platform.isAndroid ? REWARDED_AD_UNIT_ID_ANDROID : Platform.isIOS ? REWARDED_AD_UNIT_ID_IOS
+    : throw Exception("Unsupported Platform for Rewarded Ad Unit ID");
+
+String get interstitialAdUnitId => Platform.isAndroid ? INTERSTITIAL_AD_UNIT_ID_ANDROID : Platform.isIOS ? INTERSTITIAL_AD_UNIT_ID_IOS
+    : throw Exception("Unsupported Platform for Interstitial Ad Unit ID");
+
+String get bannerAdUnitId => Platform.isAndroid ? BANNER_AD_UNIT_ID_ANDROID : Platform.isIOS ? BANNER_AD_UNIT_ID_IOS
+    : throw Exception("Unsupported Platform for Banner Ad Unit ID");
+
+String get nativeAdUnitId => Platform.isAndroid ? NATIVE_AD_UNIT_ID_ANDROID : Platform.isIOS ? NATIVE_AD_UNIT_ID_IOS
+    : throw Exception("Unsupported Platform for Native Ad Unit ID");
 
 void main() {
   runApp(const MyApp());
@@ -33,16 +70,16 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
   Future<void> checkATT() async {
     final currentStatus =
     await ATTrackingManager.getTrackingAuthorizationStatus();
-    print('ATTStatus: $currentStatus');
+    logMethodName('getTrackingAuthorizationStatus', 'ATTStatus:', currentStatus);
     if (currentStatus == ATTStatus.NotDetermined) {
       final returnedStatus =
       await ATTrackingManager.requestTrackingAuthorization();
-      print('ATTStatus returned: $returnedStatus');
+      logMethodName('requestTrackingAuthorizationATTStatus', 'ATTStatus returned:', returnedStatus);
     }
     return;
   }
 
-  /// Enables debug mode for IronSource adapters.
+  /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
     await IronSource.setAdaptersDebug(true);
@@ -50,59 +87,13 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
     IronSource.validateIntegration();
   }
 
-  /// Sets user segment params sample information for IronSource.
-  Future<void> setSegment() async {
-    final segment = IronSourceSegment();
-    segment.age = 20;
-    segment.gender = IronSourceUserGender.Female;
-    segment.level = 3;
-    segment.isPaying = false;
-    segment.userCreationDateInMillis = DateTime.now().millisecondsSinceEpoch;
-    segment.iapTotal = 1000;
-    segment.setCustom(key: 'DemoCustomKey', value: 'DemoCustomVal');
-    await IronSource.setSegment(segment);
-  }
-
-  /// Sets regulation parameters for IronSource.
-  Future<void> setRegulationParams() async {
-    // GDPR
-    await IronSource.setConsent(true);
-    await IronSource.setMetaData({
-      // CCPA
-      'do_not_sell': ['false'],
-      // COPPA
-      'is_child_directed': ['false'],
-      'is_test_suite': ['enable']
-    });
-
-    return;
-  }
-
-  /// Initialize iron source SDK.
+  /// Initialize LevelPlay SDK.
   Future<void> init() async {
-    final appKey = Platform.isAndroid
-        ? "1dc3db545"
-        : Platform.isIOS
-        ? "1dc3deecd"
-        : throw Exception("Unsupported Platform");
+
     try {
       IronSource.setFlutterVersion('3.16.9');
       IronSource.addImpressionDataListener(this);
       await enableDebug();
-      await IronSource.shouldTrackNetworkState(true);
-
-      // GDPR, CCPA, COPPA etc
-      await setRegulationParams();
-
-      // Segment info
-      await setSegment();
-
-      // GAID, IDFA, IDFV
-      String id = await IronSource.getAdvertiserId();
-      print('AdvertiserID: $id');
-
-      // Do not use AdvertiserID for this.
-      await IronSource.setUserId(APP_USER_ID);
 
       // Authorization Request for IDFA use
       if (Platform.isIOS) {
@@ -111,14 +102,14 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.BANNER, AdFormat.REWARDED, AdFormat.INTERSTITIAL, AdFormat.NATIVE_AD];
+      List<AdFormat> legacyAdFormats = [AdFormat.NATIVE_AD];
       final initRequest = LevelPlayInitRequest.builder(appKey)
         .withLegacyAdFormats(legacyAdFormats)
         .withUserId(APP_USER_ID)
         .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
     } on PlatformException catch (e) {
-      print(e);
+      logMethodName('LevelPlayInit', 'PlatformException', e);
     }
   }
 
@@ -138,11 +129,10 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
                   const SizedBox(height: 15),
                   const LevelPlayInterstitialAdSection(),
                   const SizedBox(height: 15),
-                  const LevelPlayBannerAdViewSection(),
+                  const LevelPlayBannerAdSection(),
                   const SizedBox(height: 15),
-                  const LevelPlayNativeAdViewSection(),
+                  const LevelPlayNativeAdSection(),
                   const SizedBox(height: 15),
-                  if (Platform.isIOS) const IOSSection()
                 ],
               ),
             ),
@@ -155,21 +145,20 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
   /// ImpressionData listener --------------------------------------------------///
   @override
   void onImpressionSuccess(ImpressionData? impressionData) {
-    print('Impression Data: $impressionData');
+    logMethodName('Impression Data', 'onImpressionSuccess', impressionData);
   }
 
   /// LevelPlay Init listener --------------------------------------------------///
   @override
   void onInitFailed(LevelPlayInitError error) {
-    print('onInitFailed ${error.errorMessage}');
+    logMethodName('InitListener', 'onInitFailed', error);
   }
 
   @override
   void onInitSuccess(LevelPlayConfiguration configuration) {
-    print('onInitSuccess isAdQualityEnabled=${configuration.isAdQualityEnabled}');
+    logMethodName('InitListener', 'onInitSuccess', configuration);
   }
 }
-
 /// LevelPlay Rewarded Video Section -------------------------------------------///
 class LevelPlayRewardedVideoSection extends StatefulWidget {
   const LevelPlayRewardedVideoSection({Key? key}) : super(key: key);
@@ -180,40 +169,26 @@ class LevelPlayRewardedVideoSection extends StatefulWidget {
 }
 
 class _LevelPlayRewardedVideoSectionState extends State<LevelPlayRewardedVideoSection> with LevelPlayRewardedAdListener {
-  final LevelPlayRewardedAd _rewardedAd = LevelPlayRewardedAd(adUnitId: Platform.isAndroid ? 'ugymkux8j6lfs2u4' : '9f4ukec62lsnsyhp');
+  // Instance of the Rewarded Ad
+  final LevelPlayRewardedAd _rewardedAd = LevelPlayRewardedAd(adUnitId: rewardedAdUnitId);
 
   @override
   void initState() {
     super.initState();
+    // Set this class as the listener for the rewarded ad events.
     _rewardedAd.setListener(this);
   }
 
+  // Initiates loading of a rewarded ad.
   void _loadAd() async {
     _rewardedAd.loadAd();
   }
 
+  // Shows the rewarded ad if it's ready.
   Future<void> _showAd() async {
     if (await _rewardedAd.isAdReady()) {
       _rewardedAd.showAd(placementName: 'Default');
     }
-  }
-
-  void showTextDialog(BuildContext context, String title, String content) {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(content),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: const Text('OK'))
-            ],
-          );
-        });
   }
 
   @override
@@ -229,43 +204,43 @@ class _LevelPlayRewardedVideoSectionState extends State<LevelPlayRewardedVideoSe
 
   @override
   void onAdRewarded(LevelPlayReward reward, LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdRewarded: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdRewarded', '$adInfo | $reward');
     showTextDialog(context, 'Rewarded', reward.toString());
   }
 
   @override
   void onAdClicked(LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdClicked: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdClicked', adInfo);
   }
 
   @override
   void onAdClosed(LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdClosed: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdClosed', adInfo);
   }
 
   @override
   void onAdDisplayFailed(LevelPlayAdError error, LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdDisplayFailed: adInfo - $adInfo, error - $error");
+    logMethodName('Rewarded Ad', 'onAdDisplayFailed', '$error | $adInfo');
   }
 
   @override
   void onAdDisplayed(LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdDisplayed: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdDisplayed', adInfo);
   }
 
   @override
   void onAdInfoChanged(LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdInfoChanged: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdInfoChanged', adInfo);
   }
 
   @override
   void onAdLoadFailed(LevelPlayAdError error) {
-    print("Rewarded Ad - onAdLoadFailed: $error");
+    logMethodName('Rewarded Ad', 'onAdLoadFailed', error);
   }
 
   @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
-    print("Rewarded Ad - onAdLoaded: $adInfo");
+    logMethodName('Rewarded Ad', 'onAdLoaded', adInfo);
   }
 }
 
@@ -278,7 +253,7 @@ class LevelPlayInterstitialAdSection extends StatefulWidget {
 }
 
 class _LevelPlayInterstitialAdSectionState extends State<LevelPlayInterstitialAdSection> with LevelPlayInterstitialAdListener {
-  final LevelPlayInterstitialAd _interstitialAd = LevelPlayInterstitialAd(adUnitId: Platform.isAndroid ? '71tj8zbmfozim5nd' : 'v3fn8t0yhk0awqsm');
+  final LevelPlayInterstitialAd _interstitialAd = LevelPlayInterstitialAd(adUnitId: interstitialAdUnitId);
 
   @override
   void initState() {
@@ -309,81 +284,78 @@ class _LevelPlayInterstitialAdSectionState extends State<LevelPlayInterstitialAd
 
   @override
   void onAdClicked(LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdClicked: $adInfo");
+    logMethodName('Interstitial Ad', 'onAdClicked', adInfo);
   }
 
   @override
   void onAdClosed(LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdClosed: $adInfo");
+    logMethodName('Interstitial Ad', 'onAdClosed', adInfo);
   }
 
   @override
   void onAdDisplayFailed(LevelPlayAdError error, LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdDisplayFailed: adInfo - $adInfo, error - $error");
+    logMethodName('Interstitial Ad', 'onAdDisplayFailed', '$error | $adInfo');
   }
 
   @override
   void onAdDisplayed(LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdDisplayed: $adInfo");
+    logMethodName('Interstitial Ad', 'onAdDisplayed', adInfo);
   }
 
   @override
   void onAdInfoChanged(LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdInfoChanged: $adInfo");
+    logMethodName('Interstitial Ad', 'onAdInfoChanged', adInfo);
   }
 
   @override
   void onAdLoadFailed(LevelPlayAdError error) {
-    print("Interstitial Ad - onAdLoadFailed: $error");
+    logMethodName('Interstitial Ad', 'onAdLoadFailed', error);
   }
 
   @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
-    print("Interstitial Ad - onAdLoaded: $adInfo");
+    logMethodName('Interstitial Ad', 'onAdLoaded', adInfo);
   }
 }
 
-/// LevelPlay Banner Ad View Section -------------------------------------------///
-class LevelPlayBannerAdViewSection extends StatefulWidget {
-  const LevelPlayBannerAdViewSection({Key? key}) : super(key: key);
+/// LevelPlay Banner Ad Section -------------------------------------------///
+class LevelPlayBannerAdSection extends StatefulWidget {
+  const LevelPlayBannerAdSection({Key? key}) : super(key: key);
 
   @override
-  _LevelPlayBannerAdViewSectionState createState() => _LevelPlayBannerAdViewSectionState();
+  _LevelPlayBannerAdSectionState createState() => _LevelPlayBannerAdSectionState();
 }
 
-class _LevelPlayBannerAdViewSectionState extends State<LevelPlayBannerAdViewSection> with LevelPlayBannerAdViewListener {
-  final GlobalKey<LevelPlayBannerAdViewState> _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
+class _LevelPlayBannerAdSectionState extends State<LevelPlayBannerAdSection> with LevelPlayBannerAdViewListener {
+  // GlobalKey to control the LevelPlayBannerAd state (e.g., load, destroy)
+  GlobalKey<LevelPlayBannerAdViewState> _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
   final _adSize = LevelPlayAdSize.BANNER;
-  final _adUnitId = Platform.isAndroid ? 'iq2gxli4u8n10jrp' : 'pfhu8mrg1arqwlo8';
+  final _adUnitId = bannerAdUnitId;
   final _placementName = '';
 
+  // Initiates loading of the banner ad.
   void _loadAd() {
     _bannerKey.currentState?.loadAd();
   }
 
+  // Destroys the current banner ad view and prepares for a new one.
   void _destroyAd() {
     _bannerKey.currentState?.destroy();
-  }
 
-  void _pauseAutoRefresh() {
-    _bannerKey.currentState?.pauseAutoRefresh();
-  }
-
-  void _resumeAutoRefresh() {
-    _bannerKey.currentState?.resumeAutoRefresh();
+    // Recreate the banner key to reset the state of the banner ad view.
+    // This ensures that if we load again, it's a fresh banner instance.
+    setState(() {
+      _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Banner Ad View", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Banner Ad", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       HorizontalButtons([
         ButtonInfo("Load Ad", _loadAd),
         ButtonInfo("Destroy Ad", _destroyAd)
-      ]),
-      HorizontalButtons([
-        ButtonInfo("Pause Auto Refresh", _pauseAutoRefresh ),
-        ButtonInfo("Resume Auto Refresh", _resumeAutoRefresh ),
       ]),
       SizedBox(
         width: _adSize.width.toDouble(),
@@ -401,201 +373,166 @@ class _LevelPlayBannerAdViewSectionState extends State<LevelPlayBannerAdViewSect
 
   @override
   void onAdClicked(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdClicked: $adInfo");
+    logMethodName('Banner Ad', 'onAdClicked', adInfo);
   }
 
   @override
   void onAdCollapsed(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdCollapsed: $adInfo");
+    logMethodName('Banner Ad', 'onAdCollapsed', adInfo);
   }
 
   @override
   void onAdDisplayFailed(LevelPlayAdInfo adInfo, LevelPlayAdError error) {
-    print("Banner Ad View - onAdDisplayFailed: adInfo - $adInfo, error - $error");
+    logMethodName('Banner Ad', 'onAdDisplayFailed', '$error | $adInfo');
   }
 
   @override
   void onAdDisplayed(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdDisplayed: $adInfo");
+    logMethodName('Banner Ad', 'onAdDisplayed', adInfo);
   }
 
   @override
   void onAdExpanded(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdExpanded: $adInfo");
+    logMethodName('Banner Ad', 'onAdExpanded', adInfo);
   }
 
   @override
   void onAdLeftApplication(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdLeftApplication: $adInfo");
+    logMethodName('Banner Ad', 'onAdLeftApplication', adInfo);
   }
 
   @override
   void onAdLoadFailed(LevelPlayAdError error) {
-    print("Banner Ad View - onAdLoadFailed: $error");
+    logMethodName('Banner Ad', 'onAdLoadFailed', error);
   }
 
   @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
-    print("Banner Ad View - onAdLoaded: $adInfo");
+    logMethodName('Banner Ad', 'onAdLoaded', adInfo);
   }
 }
 
-/// LevelPlay Native Ad View Section -------------------------------------------///
-class LevelPlayNativeAdViewSection extends StatefulWidget {
+/// LevelPlay Native Ad Section -------------------------------------------///
+class LevelPlayNativeAdSection extends StatefulWidget {
 
-  const LevelPlayNativeAdViewSection({Key? key}) : super(key: key);
+  const LevelPlayNativeAdSection({Key? key}) : super(key: key);
 
   @override
   _LevelPlayNativeAdsSection createState() =>
       _LevelPlayNativeAdsSection();
 }
 
-class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdViewSection> with LevelPlayNativeAdListener {
+class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdSection> with LevelPlayNativeAdListener {
   late LevelPlayNativeAd _nativeAd;
+  // GlobalKey to allow re-rendering the LevelPlayNativeAdView widget when the ad is destroyed and re-created.
+  GlobalKey _nativeAdKey = GlobalKey();
   final double _width = 350;
   final double _height = 300;
   final String _placementName = '';
-  final LevelPlayTemplateType _templateType = LevelPlayTemplateType.MEDIUM; // Built-in native ad template(not required when implementing custom template)
+  final LevelPlayTemplateType _templateType = LevelPlayTemplateType
+      .MEDIUM; // Built-in native ad template(not required when implementing custom template)
 
   @override
   void initState() {
     super.initState();
+    // Initialize the native ad
+    _createNativeAd();
+  }
+
+  // Creates a new instance of LevelPlayNativeAd with the specified listener and placement.
+  void _createNativeAd() {
     _nativeAd = LevelPlayNativeAd.builder()
-        .withPlacementName(_placementName) // Your placement name string
-        .withListener(this) // Your level play native ad listener
+        .withPlacementName(_placementName)
+        .withListener(this)
         .build();
   }
 
+  // Initiates loading of the native ad.
   void _loadAd() {
     _nativeAd.loadAd();
   }
 
+  // Destroys the current native ad and prepares for a new one.
   void _destroyAd() {
     _nativeAd.destroyAd();
+    // Create a new key and a new native ad instance to force widget recreation
+    setState(() {
+      _nativeAdKey = GlobalKey(); // Create a new key to force view recreation
+      _createNativeAd(); // Create a new native ad instance
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Native Ad View", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Native Ad",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       HorizontalButtons([
         ButtonInfo("Load Ad", _loadAd),
         ButtonInfo("Destroy Ad", _destroyAd),
       ]),
       LevelPlayNativeAdView(
-          height: _height,
-          width: _width,
-          nativeAd: _nativeAd,
-          templateType: _templateType,
+        key: _nativeAdKey,
+        height: _height,
+        width: _width,
+        nativeAd: _nativeAd,
+        templateType: _templateType,
       )
     ],
     );
   }
 
   // LevelPlay NativeAd listener
-
   @override
   void onAdClicked(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    print('onAdLoaded - adInfo: $adInfo');
+    logMethodName('Native Ad', 'onAdClicked', adInfo);
   }
 
   @override
   void onAdImpression(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    print('onAdLoaded - adInfo: $adInfo');
+    logMethodName('Native Ad', 'onAdImpression', adInfo);
   }
 
   @override
   void onAdLoadFailed(LevelPlayNativeAd? nativeAd, IronSourceError? error) {
-    print('onAdLoadFailed - error: $error');
+    logMethodName('Native Ad', 'onAdLoadFailed', error);
   }
 
   @override
   void onAdLoaded(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    print('onAdLoaded - nativeAd: $_nativeAd, adInfo: $adInfo');
+    logMethodName('Native Ad', 'onAdLoaded', adInfo);
     if (nativeAd != null) {
       setState(() {
+        // Update the state with the loaded native ad.
         _nativeAd = nativeAd;
       });
     }
   }
 }
 
-/// IOS Section ----------------------------------------------------------------///
-class IOSSection extends StatefulWidget {
-  const IOSSection({Key? key}) : super(key: key);
+/// Utils ----------------------------------------------------------------///
 
-  @override
-  _IOSSectionState createState() => _IOSSectionState();
+void showTextDialog(BuildContext context, String title, String content) {
+  showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: const Text('OK'))
+          ],
+        );
+      });
 }
-
-class _IOSSectionState extends State<IOSSection> with IronSourceConsentViewListener {
-  @override
-  void initState() {
-    super.initState();
-    IronSource.setConsentViewListener(this);
-  }
-
-  void showTextDialog(BuildContext context, String title, String content) {
-    showDialog(
-        context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(content),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: const Text('OK'))
-            ],
-          );
-        });
-  }
-
-  Future<void> _loadConsentView() async =>await IronSource.loadConsentViewWithType('pre');
-
-  Future<void> _getConversionValue(BuildContext context) async {
-    final cv = await IronSource.getConversionValue();
-    showTextDialog(context, "ConversionValue", cv.toString());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      const Text("iOS 14", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-      HorizontalButtons([ButtonInfo("Get Conversion Value", () => _getConversionValue(context))]),
-      HorizontalButtons([ButtonInfo("Load Consent View", () => _loadConsentView)])
-    ]);
-  }
-
-  @override
-  void consentViewDidAccept(String consentViewType) {
-    print('consentViewDidAccept consentViewType:$consentViewType');
-  }
-
-  @override
-  void consentViewDidFailToLoad(IronSourceConsentViewError error) {
-    print('consentViewDidFailToLoad error:$error');
-  }
-
-  @override
-  void consentViewDidFailToShow(IronSourceConsentViewError error) {
-    print('consentViewDidFailToShow error:$error');
-  }
-
-  @override
-  void consentViewDidLoadSuccess(String consentViewType) {
-    print('consentViewDidLoadSuccess consentViewType:$consentViewType');
-    if (mounted) {
-      IronSource.showConsentViewWithType(consentViewType);
-    }
-  }
-
-  @override
-  void consentViewDidShowSuccess(String consentViewType) {
-    print('consentViewDidLoadSuccess consentViewType:$consentViewType');
-  }
+// Log utility function to print ad format, method name and additional data
+void logMethodName(String adFormat, String methodName, dynamic data) {
+  print('$TAG: $adFormat - $methodName $data');
 }
 
 /// Widgets ----------------------------------------------------------------///

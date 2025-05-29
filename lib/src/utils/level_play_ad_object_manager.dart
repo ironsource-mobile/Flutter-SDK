@@ -12,10 +12,11 @@ class LevelPlayAdObjectManager {
   static final MethodChannel _channel = LevelPlayMethodChannel().channel;
 
   /// Ad cache
-  final Map<int, LevelPlayInterstitialAd> interstitialAdsMap = <int, LevelPlayInterstitialAd>{};
-  final Map<int, LevelPlayRewardedAd> rewardedAdsMap = <int, LevelPlayRewardedAd>{};
+  final Map<String, LevelPlayInterstitialAd> interstitialAdsMap = <String, LevelPlayInterstitialAd>{};
+  final Map<String, LevelPlayRewardedAd> rewardedAdsMap = <String, LevelPlayRewardedAd>{};
 
   /// Ad object id
+  @Deprecated('This field is deprecated and will be removed in 4.0.0 version. Use the adId property on ad objects instead.')
   int _adObjectId = 0;
 
   /// Private constructor
@@ -28,24 +29,34 @@ class LevelPlayAdObjectManager {
 
   /// Interstitial Ad
 
+  Future<String> createInterstitialAd(LevelPlayInterstitialAd interstitialAd) async{
+    // Invoke native method to create interstitial ad and get the ad identifier
+    final adId = await _channel.invokeMethod('createInterstitialAd', { 'adUnitId': interstitialAd.adUnitId });
+    // Store the ad instance in the map if it's not already present
+    if (!interstitialAdsMap.containsKey(adId)) {
+      // Assign the returned ID to the ad object
+      interstitialAd.adId = adId;
+      // Add the ad to the map using its ID as key for future reference
+      interstitialAdsMap[adId] = interstitialAd;
+    }
+    return adId;
+  }
+
   Future<void> loadInterstitialAd(LevelPlayInterstitialAd interstitialAd) async {
-    final adObjectId = interstitialAd.adObjectId;
-    final adUnitId = interstitialAd.adUnitId;
-    if (!interstitialAdsMap.containsKey(adObjectId)) {
-      interstitialAdsMap[adObjectId] = interstitialAd;
-    }
-    return await _channel.invokeMethod('loadInterstitialAd', { 'adObjectId': adObjectId, 'adUnitId': adUnitId });
+    final adId = interstitialAd.adId.isEmpty ?
+      await createInterstitialAd(interstitialAd) : interstitialAd.adId;
+    await _channel.invokeMethod('loadInterstitialAd', { 'adId': adId });
   }
 
-  Future<void> showInterstitialAd(int adObjectId, String placementName) async {
-    if (interstitialAdsMap.containsKey(adObjectId)) {
-      await _channel.invokeMethod('showInterstitialAd', { 'adObjectId': adObjectId, 'placementName': placementName });
+  Future<void> showInterstitialAd(String adId, String placementName) async {
+    if (interstitialAdsMap.containsKey(adId)) {
+      await _channel.invokeMethod('showInterstitialAd', { 'adId': adId, 'placementName': placementName });
     }
   }
 
-  Future<bool> isInterstitialAdReady(int adObjectId) async {
+  Future<bool> isInterstitialAdReady(String adId) async {
     try {
-      return await _channel.invokeMethod<bool>('isInterstitialAdReady', { 'adObjectId': adObjectId }) ?? false;
+      return await _channel.invokeMethod<bool>('isInterstitialAdReady', { 'adId': adId }) ?? false;
     } on PlatformException catch (_) {
       return false;
     }
@@ -53,24 +64,34 @@ class LevelPlayAdObjectManager {
 
   /// Rewarded Ad
 
+  Future<String> createRewardedAd(LevelPlayRewardedAd rewardedAd) async{
+    // Invoke native method to create rewarded ad and get the ad identifier
+    final adId = await _channel.invokeMethod('createRewardedAd', { 'adUnitId': rewardedAd.adUnitId });
+    // Store the ad instance in the map if it's not already present
+    if (!rewardedAdsMap.containsKey(adId)) {
+      // Assign the returned ID to the ad object
+        rewardedAd.adId = adId;
+        // Add the ad to the map using its ID as key for future reference
+        rewardedAdsMap[adId] = rewardedAd;
+      }
+      return adId;
+    }
+
   Future<void> loadRewardedAd(LevelPlayRewardedAd rewardedAd) async {
-    final adObjectId = rewardedAd.adObjectId;
-    final adUnitId = rewardedAd.adUnitId;
-    if (!rewardedAdsMap.containsKey(adObjectId)) {
-      rewardedAdsMap[adObjectId] = rewardedAd;
+    final adId = rewardedAd.adId.isEmpty ?
+    await createRewardedAd(rewardedAd) : rewardedAd.adId;
+    await _channel.invokeMethod('loadRewardedAd', { 'adId': adId });
     }
-    return await _channel.invokeMethod('loadRewardedAd', { 'adObjectId': adObjectId, 'adUnitId': adUnitId });
-  }
 
-  Future<void> showRewardedAd(int adObjectId, String placementName) async {
-    if (rewardedAdsMap.containsKey(adObjectId)) {
-      await _channel.invokeMethod('showRewardedAd', { 'adObjectId': adObjectId, 'placementName': placementName });
+  Future<void> showRewardedAd(String adId, String placementName) async {
+    if (rewardedAdsMap.containsKey(adId)) {
+      await _channel.invokeMethod('showRewardedAd', { 'adId': adId, 'placementName': placementName });
     }
   }
 
-  Future<bool> isRewardedAdReady(int adObjectId) async {
+  Future<bool> isRewardedAdReady(String adId) async {
     try {
-      return await _channel.invokeMethod<bool>('isRewardedAdReady', { 'adObjectId': adObjectId }) ?? false;
+      return await _channel.invokeMethod<bool>('isRewardedAdReady', { 'adId': adId }) ?? false;
     } on PlatformException catch (_) {
       return false;
     }
@@ -78,24 +99,24 @@ class LevelPlayAdObjectManager {
 
   /// Shared Methods
 
-  Future<void> disposeAd(int adObjectId) async {
+  Future<void> disposeAd(String adId) async {
     bool wasRemoved = false;
 
     // Check and remove from interstitial ads map
-    if (interstitialAdsMap.containsKey(adObjectId)) {
-      interstitialAdsMap.remove(adObjectId);
+    if (interstitialAdsMap.containsKey(adId)) {
+      interstitialAdsMap.remove(adId);
       wasRemoved = true;
     }
 
     // Check and remove from rewarded ads map
-    if (rewardedAdsMap.containsKey(adObjectId)) {
-      rewardedAdsMap.remove(adObjectId);
+    if (rewardedAdsMap.containsKey(adId)) {
+      rewardedAdsMap.remove(adId);
       wasRemoved = true;
     }
 
     // Only invoke the channel method if the adObjectId was present in any map
     if (wasRemoved) {
-      await _channel.invokeMethod('disposeAd', { 'adObjectId': adObjectId });
+      await _channel.invokeMethod('disposeAd', { 'adId': adId });
     }
   }
 
@@ -108,4 +129,5 @@ class LevelPlayAdObjectManager {
   int generateAdObjectId() {
     return _adObjectId++;
   }
+
 }

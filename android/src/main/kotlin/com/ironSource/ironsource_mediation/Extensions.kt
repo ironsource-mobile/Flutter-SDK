@@ -70,7 +70,8 @@ fun ImpressionData.toMap(): HashMap<String, Any> {
         "revenue" to this.revenue,
         "precision" to this.precision,
         "lifetimeRevenue" to this.lifetimeRevenue,
-        "encryptedCPM" to this.encryptedCPM
+        "encryptedCPM" to this.encryptedCPM,
+        "creativeId" to this.creativeId,
     )
 }
 
@@ -207,6 +208,7 @@ fun LevelPlayConfiguration.toMap(): HashMap<String, Any?> {
 
 fun LevelPlayAdInfo.toMap(): HashMap<String, Any?> {
     return hashMapOf(
+        "adId" to this.getAdId(),
         "adUnitId" to this.getAdUnitId(),
         "adFormat" to this.getAdFormat(),
         "adSize" to this.getAdSize().toMap(),
@@ -225,6 +227,7 @@ fun LevelPlayAdInfo.toMap(): HashMap<String, Any?> {
             "revenue" to this.getRevenue(),
             "precision" to this.getPrecision(),
             "encryptedCPM" to this.getEncryptedCPM(),
+            "creativeId" to this.getCreativeId(),
         ),
     )
 }

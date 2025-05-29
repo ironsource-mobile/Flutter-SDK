@@ -37,6 +37,7 @@ internal class LevelPlayBannerAdView(
             "destroyBanner" -> destroyBanner(result)
             "pauseAutoRefresh" -> pauseAutoRefresh(result)
             "resumeAutoRefresh" -> resumeAutoRefresh(result)
+            "getAdId" -> getAdId(result)
             else -> result.error("ERROR", "Method ${call.method} unknown", null)
         }
     }
@@ -64,6 +65,11 @@ internal class LevelPlayBannerAdView(
         levelPlayBanner?.resumeAutoRefresh()
         // Return success result to Flutter
         result.success(null)
+    }
+
+    private fun getAdId(result: MethodChannel.Result) {
+        // Return adId result to Flutter
+        result.success(levelPlayBanner?.adId ?: "")
     }
 
     override fun getView(): LevelPlayBannerAdView? = levelPlayBanner

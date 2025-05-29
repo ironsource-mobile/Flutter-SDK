@@ -6,8 +6,11 @@ import './listeners/level_play_interstitial_ad_listener.dart';
 class LevelPlayInterstitialAd {
   /// The ad unit id
   final String adUnitId;
+  // The Ad id that is used to identify the ad object - replacing adObjectId
+  String adId = "";
 
   /// Unique ad object id
+  @Deprecated("This parameter will be removed in future sdk version, Please use [adId] instead.")
   late int adObjectId;
 
   /// A listener for interstitial ad events
@@ -34,6 +37,7 @@ class LevelPlayInterstitialAd {
     return listener;
   }
 
+
   /// Return whether placement is capped or not.
   static Future<bool> isPlacementCapped(String placementName) async {
     return await _channel.invokeMethod('isInterstitialAdPlacementCapped', { "placementName": placementName });
@@ -43,11 +47,11 @@ class LevelPlayInterstitialAd {
   Future<void> loadAd() async => await _levelPlayAdObjectManager.loadInterstitialAd(this);
 
   /// Show the interstitial ad.
-  Future<void> showAd({String? placementName = ''}) async => await _levelPlayAdObjectManager.showInterstitialAd(adObjectId, placementName ?? '');
+  Future<void> showAd({String? placementName = ''}) async => await _levelPlayAdObjectManager.showInterstitialAd(adId, placementName ?? '');
 
   /// Check if the ad is ready, returns `false` if the ad is not ready.
-  Future<bool> isAdReady() async => await _levelPlayAdObjectManager.isInterstitialAdReady(adObjectId);
+  Future<bool> isAdReady() async => await _levelPlayAdObjectManager.isInterstitialAdReady(adId);
 
   /// Dispose of the interstitial ad instance
-  Future<void> dispose() async => await _levelPlayAdObjectManager.disposeAd(adObjectId);
+  Future<void> dispose() async => await _levelPlayAdObjectManager.disposeAd(adId);
 }

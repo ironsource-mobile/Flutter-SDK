@@ -1,5 +1,6 @@
 import '../ironsource_error.dart';
 
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 /// iOS Consent View
 abstract class IronSourceConsentViewListener {
   /// Reference

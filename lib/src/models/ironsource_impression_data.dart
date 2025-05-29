@@ -14,6 +14,7 @@ class IronSourceImpressionData {
   final String? precision;
   final double? lifetimeRevenue;
   final String? encryptedCPM;
+  final String? creativeId;
 
   IronSourceImpressionData(
       {this.auctionId,
@@ -28,7 +29,8 @@ class IronSourceImpressionData {
       this.revenue,
       this.precision,
       this.lifetimeRevenue,
-      this.encryptedCPM});
+      this.encryptedCPM,
+      this.creativeId});
 
   @override
   String toString() {
@@ -46,6 +48,7 @@ class IronSourceImpressionData {
         ', precision=$precision'
         ', lifetimeRevenue=$lifetimeRevenue'
         ', encryptedCPM=$encryptedCPM'
+        ', creativeId=$creativeId'
         '}';
   }
 
@@ -65,7 +68,8 @@ class IronSourceImpressionData {
         other.revenue == revenue &&
         other.precision == precision &&
         other.lifetimeRevenue == lifetimeRevenue &&
-        other.encryptedCPM == encryptedCPM;
+        other.encryptedCPM == encryptedCPM &&
+        other.creativeId == creativeId;
   }
 
   @override
@@ -82,5 +86,6 @@ class IronSourceImpressionData {
       revenue.hashCode ^
       precision.hashCode ^
       lifetimeRevenue.hashCode ^
-      encryptedCPM.hashCode;
+      encryptedCPM.hashCode ^
+      creativeId.hashCode;
 }

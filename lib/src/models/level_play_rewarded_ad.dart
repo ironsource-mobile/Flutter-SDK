@@ -7,8 +7,12 @@ class LevelPlayRewardedAd {
   /// The ad unit id
   final String adUnitId;
 
+   String adId = "";
+
   /// Unique ad object id
+  @Deprecated("This parameter will be removed in future sdk version, Please use [adId] instead.")
   late int adObjectId;
+
 
   /// A listener for rewarded ad events
   LevelPlayRewardedAdListener? listener;
@@ -20,7 +24,7 @@ class LevelPlayRewardedAd {
   static final _channel = LevelPlayMethodChannel().channel;
 
   /// Constructs an instance of [LevelPlayRewardedAd].
-  LevelPlayRewardedAd({required this.adUnitId}) {
+  LevelPlayRewardedAd( {required this.adUnitId}) {
     adObjectId = _levelPlayAdObjectManager.generateAdObjectId();
   }
 
@@ -43,11 +47,11 @@ class LevelPlayRewardedAd {
   Future<void> loadAd() async => await _levelPlayAdObjectManager.loadRewardedAd(this);
 
   /// Show the rewarded ad.
-  Future<void> showAd({String? placementName = ''}) async => await _levelPlayAdObjectManager.showRewardedAd(adObjectId, placementName ?? '');
+  Future<void> showAd({String? placementName = ''}) async => await _levelPlayAdObjectManager.showRewardedAd(adId, placementName ?? '');
 
   /// Check if the ad is ready, returns `false` if the ad is not ready.
-  Future<bool> isAdReady() async => await _levelPlayAdObjectManager.isRewardedAdReady(adObjectId);
+  Future<bool> isAdReady() async => await _levelPlayAdObjectManager.isRewardedAdReady(adId);
 
   /// Dispose of the rewarded ad instance
-  Future<void> dispose() async => await _levelPlayAdObjectManager.disposeAd(adObjectId);
+  Future<void> dispose() async => await _levelPlayAdObjectManager.disposeAd(adId);
 }

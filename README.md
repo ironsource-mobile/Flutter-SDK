@@ -95,7 +95,7 @@ Read more about Apple's ATT and user privacy guideline [here](https://developer.
 
 #### LevelPlayRewardedAdListener
 ```dart
-class LevelPlayRewardedAdVideoListenerClass with LevelPlayRewardedVideoListener {
+class LevelPlayRewardedAdListenerClass with LevelPlayRewardedAdListener {
   @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
     // Provided when the ad is successfully loaded

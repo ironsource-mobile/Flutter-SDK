@@ -2,17 +2,22 @@
 #import <Foundation/Foundation.h>
 #import <IronSource/IronSource.h>
 
+
 @interface LevelPlayAdObjectManager : NSObject
 
 - (instancetype)initWithChannel:(FlutterMethodChannel *)channel;
 
-- (void)loadInterstitialAd:(NSNumber *)adObjectId adUnitId:(NSString *)adUnitId;
-- (void)showInterstitialAd:(NSNumber *)adObjectId placementName:(NSString *)placementName rootViewController:(UIViewController *_Nonnull)rootViewController;
-- (BOOL)isInterstitialAdReady:(NSNumber *)adObjectId;
-- (void)loadRewardedAd:(NSNumber *)adObjectId adUnitId:(NSString *)adUnitId;
-- (void)showRewardedAd:(NSNumber *)adObjectId placementName:(NSString *)placementName rootViewController:(UIViewController *_Nonnull)rootViewController;
-- (BOOL)isRewardedAdReady:(NSNumber *)adObjectId;
-- (void)disposeAd:(NSNumber *)adObjectId;
+- (NSString *)createInterstitialAd:(NSString *)adUnitId;
+- (void)loadInterstitialAd:(NSString *)adId;
+- (void)showInterstitialAd:(NSString *)adId placementName:(NSString *)placementName rootViewController:(UIViewController *_Nonnull)rootViewController;
+- (BOOL)isInterstitialAdReady:(NSString *)adId;
+- (NSString *)createRewardedAd:(NSString *)adUnitId;
+- (void)loadRewardedAd:(NSString *)adId;
+- (void)showRewardedAd:(NSString *)adId placementName:(NSString *)placementName rootViewController:(UIViewController *_Nonnull)rootViewController;
+- (BOOL)isRewardedAdReady:(NSString *)adId;
+- (void)disposeAd:(NSString *)adId;
 - (void)disposeAllAds;
 
 @end
+
+

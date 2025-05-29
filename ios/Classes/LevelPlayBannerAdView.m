@@ -57,6 +57,8 @@
         [self pauseAutoRefresh:result];
     } else if ([methodName isEqualToString:@"resumeAutoRefresh"]) {
         [self resumeAutoRefresh:result];
+    } else if ([methodName isEqualToString:@"getAdId"]) { // Add getAdId handling here
+        [self getAdId:result];
     }  else {
         result(FlutterMethodNotImplemented);
     }
@@ -82,6 +84,12 @@
 - (void)resumeAutoRefresh:(FlutterResult)result {
     [_bannerAdView resumeAutoRefresh];
     result(nil);
+}
+
+- (void)getAdId:(FlutterResult)result {
+    // Return adId result to Flutter
+    NSString *adId = _bannerAdView != nil ? _bannerAdView.adId : @"";
+    result(adId);
 }
 
 // MARK: View

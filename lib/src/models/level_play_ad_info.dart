@@ -3,12 +3,14 @@ import './level_play_ad_size.dart';
 
 /// Represents detailed information about a LevelPlay ad.
 class LevelPlayAdInfo {
+  final String adId;
   final String adUnitId;
   final String adFormat;
   final ImpressionData? impressionData;
   final LevelPlayAdSize? adSize;
 
   LevelPlayAdInfo({
+    required this.adId,
     required this.adUnitId,
     required this.adFormat,
     this.impressionData,
@@ -17,6 +19,7 @@ class LevelPlayAdInfo {
 
   Map<String, dynamic> toMap() {
     return {
+      'adId': adId,
       'adUnitId': adUnitId,
       'adFormat': adFormat,
       'impressionData': impressionData?.toMap(),
@@ -26,6 +29,7 @@ class LevelPlayAdInfo {
 
   factory LevelPlayAdInfo.fromMap(dynamic args) {
     return LevelPlayAdInfo(
+      adId: args['adId'] as String,
       adUnitId: args['adUnitId'] as String,
       adFormat: args['adFormat'] as String,
       impressionData: args['impressionData'] != null
@@ -40,7 +44,8 @@ class LevelPlayAdInfo {
   @override
   String toString() {
     return 'LevelPlayAdInfo{'
-        'adUnitId=$adUnitId'
+        'adId=$adId'
+        ', adUnitId=$adUnitId'
         ', adFormat=$adFormat'
         ', impressionData=${impressionData.toString()}'
         ', adSize=${adSize.toString()}'
@@ -51,6 +56,7 @@ class LevelPlayAdInfo {
   @override
   bool operator ==(other) {
     return (other is LevelPlayAdInfo) &&
+        other.adId == adId &&
         other.adUnitId == adUnitId &&
         other.adFormat == adFormat &&
         other.impressionData == impressionData &&
@@ -59,6 +65,7 @@ class LevelPlayAdInfo {
 
   @override
   int get hashCode =>
+      adId.hashCode ^
       adUnitId.hashCode ^
       adFormat.hashCode ^
       impressionData.hashCode ^

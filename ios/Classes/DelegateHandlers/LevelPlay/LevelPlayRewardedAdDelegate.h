@@ -4,6 +4,6 @@
 
 @interface LevelPlayRewardedAdDelegate : NSObject <LPMRewardedAdDelegate>
 
-- (instancetype)initWithAdObjectId:(int)adObjectId
+- (instancetype)initWithAdId:(NSString *)adId
         channel:(FlutterMethodChannel *)channel;
 @end
