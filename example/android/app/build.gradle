@@ -71,7 +71,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-basement:18.3.0'
 
     // Required when using custom native ad implementation
-    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.8.0'
+    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.9.1'
 
     // Add Adapters and Network SDKs here
     // https://developers.is.com/ironsource-mobile/flutter/mediation-networks-flutter/
