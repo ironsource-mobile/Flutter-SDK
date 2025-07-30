@@ -53,7 +53,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayInitListener {
+class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, LevelPlayInitListener {
 
   @override
   void initState() {
@@ -82,17 +82,17 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
   /// Enables debug mode for LevelPlay adapters.
   /// Validates integration.
   Future<void> enableDebug() async {
-    await IronSource.setAdaptersDebug(true);
+    await LevelPlay.setAdaptersDebug(true);
     // this function doesn't have to be awaited
-    IronSource.validateIntegration();
+    LevelPlay.validateIntegration();
   }
 
   /// Initialize LevelPlay SDK.
   Future<void> init() async {
 
     try {
-      IronSource.setFlutterVersion('3.16.9');
-      IronSource.addImpressionDataListener(this);
+      LevelPlay.setFlutterVersion('3.32.7');
+      LevelPlay.addImpressionDataListener(this);
       await enableDebug();
 
       // Authorization Request for IDFA use
@@ -144,7 +144,7 @@ class _MyAppState extends State<MyApp> with ImpressionDataListener, LevelPlayIni
 
   /// ImpressionData listener --------------------------------------------------///
   @override
-  void onImpressionSuccess(ImpressionData? impressionData) {
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {
     logMethodName('Impression Data', 'onImpressionSuccess', impressionData);
   }
 

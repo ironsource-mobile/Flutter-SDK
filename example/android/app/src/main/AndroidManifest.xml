@@ -1,9 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ironSource.ironsource_mediation_example"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <application
-      tools:replace="android:label"
+      android:name="${applicationName}"
       android:label="Flutter Demo"
       android:icon="@mipmap/ic_launcher"
       android:networkSecurityConfig="@xml/network_security_config">

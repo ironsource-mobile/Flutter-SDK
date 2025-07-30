@@ -169,7 +169,8 @@
                     @"conversionValue": adInfo.conversionValue ? @([adInfo.conversionValue doubleValue]) : [NSNull null], // (nullable)
                     @"creativeId": adInfo.creativeId, // (nonnull)
             },
-            @"adSize": [self dictionaryForAdSize:adInfo.adSize]
+            @"adSize": [self dictionaryForAdSize:adInfo.adSize],
+            @"placementName": adInfo.placementName ?: [NSNull null]
     };
 }
 
@@ -267,6 +268,27 @@
     return @{
             @"name": reward.name,
             @"amount": [NSNumber numberWithInteger: reward.amount],
+    };
+}
+
++ (NSDictionary *)dictionaryForLPMImpressionData:(LPMImpressionData *)impressionData {
+    return @{
+            @"auctionId": impressionData.auctionId ?: [NSNull null],
+            @"mediationAdUnitName": impressionData.mediationAdUnitName ?: [NSNull null],
+            @"mediationAdUnitId": impressionData.mediationAdUnitId ?: [NSNull null],
+            @"adFormat": impressionData.adFormat ?: [NSNull null],
+            @"country": impressionData.country ?: [NSNull null],
+            @"ab": impressionData.ab ?: [NSNull null],
+            @"segmentName": impressionData.segmentName ?: [NSNull null],
+            @"placement": impressionData.placement ?: [NSNull null],
+            @"adNetwork": impressionData.adNetwork ?: [NSNull null],
+            @"instanceName": impressionData.instanceName ?: [NSNull null],
+            @"instanceId": impressionData.instanceId ?: [NSNull null],
+            @"revenue": impressionData.revenue ? @([impressionData.revenue doubleValue]) : [NSNull null],
+            @"precision": impressionData.precision ?: [NSNull null],
+            @"encryptedCPM": impressionData.encryptedCpm ?: [NSNull null],
+            @"conversionValue": impressionData.conversionValue ? @([impressionData.conversionValue doubleValue]) : [NSNull null],
+            @"creativeId": impressionData.creativeId ?: [NSNull null],
     };
 }
 

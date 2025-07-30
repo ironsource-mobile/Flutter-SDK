@@ -2,9 +2,9 @@
 class IronConst {
   static const String METHOD_CHANNEL = 'ironsource_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '3.1.2';
-  static const String ANDROID_SDK_VERSION = '8.9.1';
-  static const String IOS_SDK_VERSION = '8.9.1';
+  static const String PLUGIN_VERSION = '3.2.0';
+  static const String ANDROID_SDK_VERSION = '8.10.0';
+  static const String IOS_SDK_VERSION = '8.10.0';
 
   // Banner
   static const int BANNER_WIDTH = 320;

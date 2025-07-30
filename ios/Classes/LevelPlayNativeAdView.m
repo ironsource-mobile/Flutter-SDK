@@ -257,6 +257,12 @@
     // Save native ad instance
     _nativeAd = nativeAd;
 
+    // Apply styles
+    [self applyStylesWithTitleView:self.isNativeAdView.adTitleView
+                          bodyView:self.isNativeAdView.adBodyView
+                    advertiserView:self.isNativeAdView.adBodyView
+                  callToActionView:self.isNativeAdView.adCallToActionView];
+
     [self.delegate bindNativeAdToView:nativeAd isNativeAdView:self.isNativeAdView];
 
     // Notify Flutter that the ad has been loaded
@@ -265,12 +271,6 @@
             [LevelPlayUtils dictionaryForAdInfo:adInfo], @"adInfo",
             nil];
     [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdLoaded" args: args];
-
-    // Apply styles
-    [self applyStylesWithTitleView:self.isNativeAdView.adTitleView
-                          bodyView:self.isNativeAdView.adBodyView
-                    advertiserView:self.isNativeAdView.adBodyView
-                  callToActionView:self.isNativeAdView.adCallToActionView];
 
     // Visible the ad
     self.isNativeAdView.hidden = NO;

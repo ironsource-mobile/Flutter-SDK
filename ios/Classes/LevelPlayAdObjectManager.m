@@ -28,32 +28,39 @@
 }
 
 // Interstitial Ad Methods
-- (NSString *)createInterstitialAd:(NSString *)adUnitId {
-        // Create the interstitial ad
-        LPMInterstitialAd *interstitialAd = [[LPMInterstitialAd alloc] initWithAdUnitId:adUnitId];
-        if (!interstitialAd) {
-            NSLog(@"Failed to create interstitial ad with adUnitId: %@", adUnitId);
-            return nil;
-        }
+- (NSString *)createInterstitialAd:(NSString *)adUnitId bidFloor:(NSNumber *)bidFloor {
+    // Define a price floor configuration
+    LPMInterstitialAdConfigBuilder *adConfigBuilder = [LPMInterstitialAdConfigBuilder new];
+    if (bidFloor != nil) {
+        [adConfigBuilder setWithBidFloor:bidFloor];
+    }
+    LPMInterstitialAdConfig *adConfig = [adConfigBuilder build];
+
+    // Create the interstitial ad
+    LPMInterstitialAd *interstitialAd = [[LPMInterstitialAd alloc] initWithAdUnitId:adUnitId config:adConfig];
+    if (!interstitialAd) {
+        NSLog(@"Failed to create interstitial ad with adUnitId: %@", adUnitId);
+        return nil;
+    }
         
-        if (!interstitialAd.adId) {
-            NSLog(@"Generated adId is nil for adUnitId: %@", adUnitId);
-            return nil;
-        }
+    if (!interstitialAd.adId) {
+        NSLog(@"Generated adId is nil for adUnitId: %@", adUnitId);
+        return nil;
+    }
         
-        // Set the listener
-        LevelPlayInterstitialAdDelegate *interstitialAdDelegate = [[LevelPlayInterstitialAdDelegate alloc]
+    // Set the listener
+    LevelPlayInterstitialAdDelegate *interstitialAdDelegate = [[LevelPlayInterstitialAdDelegate alloc]
                                                                    initWithAdId:interstitialAd.adId
                                                                    channel:self.channel];
         
-        [interstitialAd setDelegate:interstitialAdDelegate];
+    [interstitialAd setDelegate:interstitialAdDelegate];
         
     // Store references
-        self.interstitialDelegatesDict[interstitialAd.adId] = interstitialAdDelegate;
-        self.interstitialAdsDict[interstitialAd.adId] = interstitialAd;
+    self.interstitialDelegatesDict[interstitialAd.adId] = interstitialAdDelegate;
+    self.interstitialAdsDict[interstitialAd.adId] = interstitialAd;
         
-        // Return the adId
-        return interstitialAd.adId;
+    // Return the adId
+    return interstitialAd.adId;
 }
 
 - (void)loadInterstitialAd:(NSString *)adId {
@@ -85,9 +92,16 @@
 }
 
 // Rewarded Ad Methods
-- (NSString *)createRewardedAd:(NSString *)adUnitId {
+- (NSString *)createRewardedAd:(NSString *)adUnitId bidFloor:(NSNumber *)bidFloor {
+    // Define a price floor configuration
+    LPMRewardedAdConfigBuilder *adConfigBuilder = [LPMRewardedAdConfigBuilder new];
+    if (bidFloor != nil) {
+        [adConfigBuilder setWithBidFloor:bidFloor];
+    }
+    LPMRewardedAdConfig *adConfig = [adConfigBuilder build];
+
     // Create the rewarded ad
-    LPMRewardedAd *rewardedAd = [[LPMRewardedAd alloc] initWithAdUnitId:adUnitId];
+    LPMRewardedAd *rewardedAd = [[LPMRewardedAd alloc] initWithAdUnitId:adUnitId config:adConfig];
     if (!rewardedAd) {
             NSLog(@"Failed to create rewarded ad with adUnitId: %@", adUnitId);
             return nil;

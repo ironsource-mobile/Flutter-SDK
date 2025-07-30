@@ -4,13 +4,10 @@ import 'dart:io';
 /// see https://developers.is.com/ironsource-mobile/general/ad-revenue-measurement-postbacks/#step-2
 ///
 /// Represents the data collected for an ad impression.
-@Deprecated("This class will be removed in Flutter 4.0.0 version.")
-class ImpressionData {
+class LevelPlayImpressionData {
   final String? auctionId;
-  @Deprecated("This parameter will be removed in Flutter version 4.0.0. Please use [adFormat] instead.")
-  final String? adUnit;
-  final String? adUnitName;
-  final String? adUnitId;
+  final String? mediationAdUnitName;
+  final String? mediationAdUnitId;
   final String? adFormat;
   final String? country;
   final String? ab;
@@ -21,17 +18,14 @@ class ImpressionData {
   final String? instanceId;
   final double? revenue;
   final String? precision;
-  @Deprecated("This parameter will be removed in Flutter version 4.0.0.")
-  final double? lifetimeRevenue;
   final String? encryptedCPM;
   final double? conversionValue; // Only for ios
   final String? creativeId;
 
-  ImpressionData({
+  LevelPlayImpressionData({
     required this.auctionId,
-    required this.adUnit,
-    required this.adUnitName,
-    required this.adUnitId,
+    required this.mediationAdUnitName,
+    required this.mediationAdUnitId,
     required this.adFormat,
     required this.country,
     required this.ab,
@@ -42,7 +36,6 @@ class ImpressionData {
     required this.instanceId,
     required this.revenue,
     required this.precision,
-    required this.lifetimeRevenue,
     required this.encryptedCPM,
     required this.conversionValue, // Only for ios
     required this.creativeId
@@ -51,9 +44,8 @@ class ImpressionData {
   Map<String, dynamic> toMap() {
     return {
       'auctionId': auctionId,
-      'adUnit': adUnit,
-      'adUnitName': adUnitName,
-      'adUnitId': adUnitId,
+      'mediationAdUnitName': mediationAdUnitName,
+      'mediationAdUnitId': mediationAdUnitId,
       'adFormat': adFormat,
       'country': country,
       'ab': ab,
@@ -64,19 +56,17 @@ class ImpressionData {
       'instanceId': instanceId,
       'revenue': revenue,
       'precision': precision,
-      'lifetimeRevenue': lifetimeRevenue,
       'encryptedCPM': encryptedCPM,
       'conversionValue': conversionValue,
       'creativeId': creativeId
     };
   }
 
-  factory ImpressionData.fromMap(dynamic args) {
-    return ImpressionData(
+  factory LevelPlayImpressionData.fromMap(dynamic args) {
+    return LevelPlayImpressionData(
       auctionId: args['auctionId'] as String?,
-      adUnit: args['adUnit'] as String?,
-      adUnitName: args['adUnitName'] as String?,
-      adUnitId: args['adUnitId'] as String?,
+      mediationAdUnitName: args['mediationAdUnitName'] as String?,
+      mediationAdUnitId: args['mediationAdUnitId'] as String?,
       adFormat: args['adFormat'] as String?,
       country: args['country'] as String?,
       ab: args['ab'] as String?,
@@ -87,7 +77,6 @@ class ImpressionData {
       instanceId: args['instanceId'] as String?,
       revenue: args['revenue'] as double?,
       precision: args['precision'] as String?,
-      lifetimeRevenue: args['lifetimeRevenue'] as double?,
       encryptedCPM: args['encryptedCPM'] as String?,
       conversionValue: args['conversionValue'] as double?,
       creativeId: args['creativeId'] as String?
@@ -98,9 +87,8 @@ class ImpressionData {
   String toString() {
     return 'ImpressionData{'
         'auctionId=$auctionId'
-        ', adUnit=$adUnit'
-        ', adUnitName=$adUnitName'
-        ', adUnitId=$adUnitId'
+        ', mediationAdUnitName=$mediationAdUnitName'
+        ', mediationAdUnitId=$mediationAdUnitId'
         ', adFormat=$adFormat'
         ', country=$country'
         ', ab=$ab'
@@ -111,7 +99,6 @@ class ImpressionData {
         ', instanceId=$instanceId'
         ', revenue=$revenue'
         ', precision=$precision'
-        ', lifetimeRevenue=$lifetimeRevenue'
         ', encryptedCPM=$encryptedCPM'
         '${Platform.isIOS ? ', conversionValue=$conversionValue' : ''}'
         ', creativeId=$creativeId'
@@ -121,10 +108,10 @@ class ImpressionData {
   /// Equality overrides
   @override
   bool operator ==(other) {
-    return (other is ImpressionData) &&
+    return (other is LevelPlayImpressionData) &&
         other.auctionId == auctionId &&
-        other.adUnitName == adUnitName &&
-        other.adUnitId == adUnitId &&
+        other.mediationAdUnitName == mediationAdUnitName &&
+        other.mediationAdUnitId == mediationAdUnitId &&
         other.adFormat == adFormat &&
         other.country == country &&
         other.ab == ab &&
@@ -143,8 +130,8 @@ class ImpressionData {
   @override
   int get hashCode =>
       auctionId.hashCode ^
-      adUnitName.hashCode ^
-      adUnitId.hashCode ^
+      mediationAdUnitName.hashCode ^
+      mediationAdUnitId.hashCode ^
       adFormat.hashCode ^
       country.hashCode ^
       ab.hashCode ^

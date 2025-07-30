@@ -8,13 +8,15 @@ class LevelPlayAdInfo {
   final String adFormat;
   final ImpressionData? impressionData;
   final LevelPlayAdSize? adSize;
+  final String? placementName;
 
   LevelPlayAdInfo({
     required this.adId,
     required this.adUnitId,
     required this.adFormat,
     this.impressionData,
-    this.adSize
+    this.adSize,
+    this.placementName
   });
 
   Map<String, dynamic> toMap() {
@@ -24,6 +26,7 @@ class LevelPlayAdInfo {
       'adFormat': adFormat,
       'impressionData': impressionData?.toMap(),
       'adSize': adSize?.toMap(),
+      'placementName': placementName,
     };
   }
 
@@ -38,6 +41,7 @@ class LevelPlayAdInfo {
       adSize: args['adSize'] != null
           ? LevelPlayAdSize.fromMap(args['adSize'])
           : null,
+      placementName: args['placementName'] as String?,
     );
   }
 
@@ -49,6 +53,7 @@ class LevelPlayAdInfo {
         ', adFormat=$adFormat'
         ', impressionData=${impressionData.toString()}'
         ', adSize=${adSize.toString()}'
+        ', placementName=$placementName'
         '}';
   }
 
@@ -60,7 +65,8 @@ class LevelPlayAdInfo {
         other.adUnitId == adUnitId &&
         other.adFormat == adFormat &&
         other.impressionData == impressionData &&
-        other.adSize == adSize;
+        other.adSize == adSize &&
+        other.placementName == placementName;
   }
 
   @override
@@ -69,5 +75,6 @@ class LevelPlayAdInfo {
       adUnitId.hashCode ^
       adFormat.hashCode ^
       impressionData.hashCode ^
-      adSize.hashCode;
+      adSize.hashCode ^
+      placementName.hashCode;
 }

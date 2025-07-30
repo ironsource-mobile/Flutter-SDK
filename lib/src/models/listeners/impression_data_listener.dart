@@ -7,13 +7,16 @@ abstract class IronSourceImpressionDataListener {
   /// Native SDK Reference
   /// - Android: onImpressionSuccess
   /// -     iOS: impressionDataDidSucceed
+  @Deprecated("This class will be removed in Flutter 4.0.0 version.")
   void onImpressionSuccess(IronSourceImpressionData? impressionData);
 }
 
 /// Impression Level Revenue
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 abstract class ImpressionDataListener {
   /// Native SDK Reference
   /// - Android: onImpressionSuccess
   /// -     iOS: impressionDataDidSucceed
+  @Deprecated("This class will be removed in Flutter 4.0.0 version.")
   void onImpressionSuccess(ImpressionData? impressionData);
 }

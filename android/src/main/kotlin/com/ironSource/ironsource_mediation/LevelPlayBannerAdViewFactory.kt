@@ -20,11 +20,23 @@ class LevelPlayBannerAdViewFactory(
         val viewType = creationParams["viewType"] as String
         val placementName = creationParams["placementName"] as String?
         val adSize = getLevelPlayAdSize(context, creationParams["adSize"] as Map<String, Any?>)
-        val levelPlayBanner = context?.let { LevelPlayBannerAdView(it, adUnitId) }
-        if (adSize != null) {
-            levelPlayBanner?.setAdSize(adSize)
+        val bidFloor = creationParams["bidFloor"] as Double?
+
+        val adConfigBuilder = LevelPlayBannerAdView.Config.Builder()
+
+        if (adSize != null)
+            adConfigBuilder.setAdSize(adSize)
+
+        if (bidFloor != null)
+            adConfigBuilder.setBidFloor(bidFloor)
+
+        if (placementName != null) {
+            adConfigBuilder.setPlacementName(placementName)
         }
-        levelPlayBanner?.setPlacementName(placementName)
+
+        val adConfig = adConfigBuilder.build()
+
+        val levelPlayBanner = context?.let { LevelPlayBannerAdView(it, adUnitId, adConfig) }
         return LevelPlayBannerAdView(viewId, levelPlayBinaryMessenger, viewType, levelPlayBanner)
     }
 

@@ -4,6 +4,7 @@ import './ad_format.dart';
 class LevelPlayInitRequest {
   final String appKey;
   final String? userId;
+  @Deprecated("This variable will be removed in 4.0.0 version.")
   final List<AdFormat> legacyAdFormats;
 
   LevelPlayInitRequest({required this.appKey, this.userId = '', required this.legacyAdFormats});
@@ -42,6 +43,7 @@ class LevelPlayInitRequestBuilder {
     return this;
   }
 
+  @Deprecated("This method will be removed in 4.0.0 version.")
   LevelPlayInitRequestBuilder withLegacyAdFormats(List<AdFormat> legacyAdFormats) {
     this.legacyAdFormats = legacyAdFormats;
     return this;

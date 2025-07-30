@@ -1,4 +1,5 @@
 /// Enumeration representing different ad formats in the LevelPlay mediation network.
+@Deprecated("This class will be removed in 4.0.0 version.")
 enum AdFormat {
   /// Banner ad format.
   /// Typically a rectangular ad that spans the width of the screen or is fixed in a specific area of an app's layout.

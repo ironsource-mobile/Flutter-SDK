@@ -1,5 +1,6 @@
 
 /// Represents a configuration for a waterfall, defining its floor and ceiling.
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 class WaterfallConfiguration {
   /// Represents the lowest point of the waterfall.
   final double floor;
@@ -22,6 +23,7 @@ class WaterfallConfiguration {
 }
 
 /// Builder class for WaterfallConfiguration.
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 class WaterfallConfigurationBuilder {
   /// Represents the floor value being built by the builder.
   double _floor = 0.0;

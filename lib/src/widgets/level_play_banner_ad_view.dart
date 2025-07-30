@@ -24,6 +24,9 @@ class LevelPlayBannerAdView extends StatefulWidget {
   /// A placement string for the banner ad
   final String? placementName;
 
+  /// An optional bid floor
+  final double? bidFloor;
+
   /// Placement for banner
   final VoidCallback? onPlatformViewCreated;
 
@@ -34,6 +37,7 @@ class LevelPlayBannerAdView extends StatefulWidget {
     required this.adSize,
     required this.listener,
     this.placementName,
+    this.bidFloor,
     this.onPlatformViewCreated,
   }) : assert(key is GlobalKey<LevelPlayBannerAdViewState>, 'Key must be a GlobalKey<LevelPlayBannerAdViewState>');
 
@@ -91,6 +95,10 @@ class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
       'viewType': viewType,
       'adSize': widget.adSize.toMap(),
     };
+
+    if (widget.bidFloor != null) {
+      creationParams['bidFloor'] = widget.bidFloor;
+    }
 
     return Platform.isAndroid ? AndroidView(
       viewType: viewType,

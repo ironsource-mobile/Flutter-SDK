@@ -20,5 +20,6 @@
 + (NSDictionary *)dictionaryForIronSourceConsentViewError:(NSError *)error consentViewType:(NSString *)consentViewType;
 + (UIViewController *)getRootViewController;
 + (NSDictionary *)dictionaryForLPMReward:(LPMReward *)reward;
++ (NSDictionary *)dictionaryForLPMImpressionData:(LPMImpressionData *)impressionData;
 
 @end

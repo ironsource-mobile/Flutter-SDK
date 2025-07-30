@@ -41,7 +41,7 @@ internal class LevelPlayNativeAdView(
         methodChannel!!.setMethodCallHandler { call, result ->  handleMethodCall(call, result)}
     }
 
-    private fun applyStyles(titleView: TextView, bodyView: TextView, advertiserView: TextView, callToActionView: Button) {
+    private fun applyStyles(titleView: TextView?, bodyView: TextView?, advertiserView: TextView?, callToActionView: Button?) {
         templateStyles?.let { styles ->
             styles.mainBackgroundColor?.let { nativeAdLayout.setBackgroundColor(it) }
             applyStyle(titleView, styles.titleStyle)
@@ -181,18 +181,18 @@ internal class LevelPlayNativeAdView(
         // Save native ad instance
         this.nativeAd = nativeAd
 
-        // Invoke the binding method
-        onBindNativeAdView.invoke(nativeAd)
-
-        // Notify Flutter that the ad has been loaded
-        invokeMethodOnUiThread(methodChannel!!, "onAdLoaded", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
-
-        // Apply styles
+        // Apply styles before binding the views
         applyStyles(
             nativeAdLayout.findViewById(R.id.adTitle),
             nativeAdLayout.findViewById(R.id.adBody),
             nativeAdLayout.findViewById(R.id.adAdvertiser),
             nativeAdLayout.findViewById(R.id.adCallToAction))
+
+        // Invoke the binding method
+        onBindNativeAdView.invoke(nativeAd)
+
+        // Notify Flutter that the ad has been loaded
+        invokeMethodOnUiThread(methodChannel!!, "onAdLoaded", LevelPlayUtils.hashMapOfIronSourceNativeAdAndAdInfo(nativeAd, adInfo))
 
         // Visible the ad
         nativeAdLayout.visibility = View.VISIBLE

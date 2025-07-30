@@ -21,6 +21,7 @@ class IronSourceError {
   int get hashCode => errorCode.hashCode ^ message.hashCode;
 }
 
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 class IronSourceConsentViewError extends IronSourceError {
   final String consentViewType;
   IronSourceConsentViewError({errorCode, message, required this.consentViewType})

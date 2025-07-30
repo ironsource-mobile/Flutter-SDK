@@ -14,6 +14,7 @@ import com.unity3d.mediation.LevelPlayAdInfo
 import com.unity3d.mediation.LevelPlayAdSize
 import com.unity3d.mediation.LevelPlayConfiguration
 import com.unity3d.mediation.LevelPlayInitError
+import com.unity3d.mediation.impression.LevelPlayImpressionData
 import com.unity3d.mediation.rewarded.LevelPlayReward
 import java.io.ByteArrayOutputStream
 
@@ -229,6 +230,7 @@ fun LevelPlayAdInfo.toMap(): HashMap<String, Any?> {
             "encryptedCPM" to this.getEncryptedCPM(),
             "creativeId" to this.getCreativeId(),
         ),
+        "placementName" to this.getPlacementName()
     )
 }
 
@@ -253,5 +255,32 @@ fun LevelPlayReward.toMap(): HashMap<String, Any?> {
     return hashMapOf(
         "name" to this.name,
         "amount" to this.amount
+    )
+}
+
+/**
+ * Extension function to convert an LevelPlayImpressionData object to a Map.
+ * This function converts the LevelPlayImpressionData object's properties into a HashMap with String keys
+ * and Any values, allowing easy serialization or mapping of the object.
+ *
+ * @return A HashMap representing the LevelPlayImpressionData object.
+ */
+fun LevelPlayImpressionData.toMap(): HashMap<String, Any?> {
+    return hashMapOf(
+        "auctionId" to this.auctionId,
+        "mediationAdUnitName" to this.mediationAdUnitName,
+        "mediationAdUnitId" to this.mediationAdUnitId,
+        "adFormat" to this.adFormat,
+        "country" to this.country,
+        "ab" to this.ab,
+        "segmentName" to this.segmentName,
+        "placement" to this.placement,
+        "adNetwork" to this.adNetwork,
+        "instanceName" to this.instanceName,
+        "instanceId" to this.instanceId,
+        "revenue" to this.revenue,
+        "precision" to this.precision,
+        "encryptedCPM" to this.encryptedCPM,
+        "creativeId" to this.creativeId,
     )
 }

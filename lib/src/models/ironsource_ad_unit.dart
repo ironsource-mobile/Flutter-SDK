@@ -1,4 +1,5 @@
 /// Ad Unit
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 enum IronSourceAdUnit {
   RewardedVideo,
   Interstitial,

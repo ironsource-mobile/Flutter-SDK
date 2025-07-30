@@ -29,9 +29,18 @@ class LevelPlayAdObjectManager {
 
   /// Interstitial Ad
 
-  Future<String> createInterstitialAd(LevelPlayInterstitialAd interstitialAd) async{
+  Future<String> createInterstitialAd(LevelPlayInterstitialAd interstitialAd) async {
+    // Build parameters map
+    final Map<String, dynamic> params = {
+      'adUnitId': interstitialAd.adUnitId,
+    };
+
+    if (interstitialAd.bidFloor != null) {
+      params['bidFloor'] = interstitialAd.bidFloor;
+    }
+
     // Invoke native method to create interstitial ad and get the ad identifier
-    final adId = await _channel.invokeMethod('createInterstitialAd', { 'adUnitId': interstitialAd.adUnitId });
+    final adId = await _channel.invokeMethod('createInterstitialAd', params);
     // Store the ad instance in the map if it's not already present
     if (!interstitialAdsMap.containsKey(adId)) {
       // Assign the returned ID to the ad object
@@ -64,9 +73,18 @@ class LevelPlayAdObjectManager {
 
   /// Rewarded Ad
 
-  Future<String> createRewardedAd(LevelPlayRewardedAd rewardedAd) async{
+  Future<String> createRewardedAd(LevelPlayRewardedAd rewardedAd) async {
+    // Build parameters map
+    final Map<String, dynamic> params = {
+      'adUnitId': rewardedAd.adUnitId,
+    };
+
+    if (rewardedAd.bidFloor != null) {
+      params['bidFloor'] = rewardedAd.bidFloor;
+    }
+
     // Invoke native method to create rewarded ad and get the ad identifier
-    final adId = await _channel.invokeMethod('createRewardedAd', { 'adUnitId': rewardedAd.adUnitId });
+    final adId = await _channel.invokeMethod('createRewardedAd', params);
     // Store the ad instance in the map if it's not already present
     if (!rewardedAdsMap.containsKey(adId)) {
       // Assign the returned ID to the ad object

@@ -15,6 +15,7 @@
 #import "LevelPlayBannerAdView.h"
 #import "LevelPlayUtils.h"
 #import "LevelPlayAdObjectManager.h"
+#import "LevelPlayImpressionDataDelegateHandler.h"
 
 @interface IronSourceMediationPlugin()
 @property (nonatomic,strong) FlutterMethodChannel* channel;
@@ -24,6 +25,7 @@
 @property (nonatomic) BOOL shouldHideBanner;
 @property (nonatomic,strong) UIViewController* bannerViewController;
 @property (nonatomic,strong) InitDelegateMethodHandler* initializationDelegate;
+@property (nonatomic,strong) LevelPlayImpressionDataDelegateHandler* levelPlayImpressionDataDelegateHandler;
 @property (nonatomic,strong) LevelPlayInitDelegateHandler* levelPlayInitDelegateHandler;
 @property (nonatomic,strong) NSObject<FlutterPluginRegistrar> *registrar;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, LevelPlayNativeAdViewFactory *> *nativeAdViewFactories;
@@ -69,8 +71,6 @@ static IronSourceMediationPlugin *instance = nil;
     // Set ironSource delegates
     // Init
     instance.initializationDelegate = [[InitDelegateMethodHandler alloc] initWithChannel:channel];
-    // LevelPlay Init
-    instance.levelPlayInitDelegateHandler = [[LevelPlayInitDelegateHandler alloc] initWithChannel:channel];
     // ConsentView
     [IronSource setConsentViewWithDelegate: [[ConsentViewDelegateMethodHandler alloc] initWithChannel:channel]];
     // Imp Data
@@ -78,7 +78,7 @@ static IronSourceMediationPlugin *instance = nil;
     
 # pragma mark - LevelPlay Delegates=========================================================================
     // LevelPlay RewardedVideo
-     [IronSource setLevelPlayRewardedVideoDelegate:[[LevelPlayRewardedVideoDelegateMethodHandler alloc] initWithChannel:channel]];
+    [IronSource setLevelPlayRewardedVideoDelegate:[[LevelPlayRewardedVideoDelegateMethodHandler alloc] initWithChannel:channel]];
     // LevelPlay Interstitial
     [IronSource setLevelPlayInterstitialDelegate:[[LevelPlayInterstitialDelegateMethodHandler alloc] initWithChannel:channel]];
     // LevelPlay Banner
@@ -89,6 +89,11 @@ static IronSourceMediationPlugin *instance = nil;
     
     // ATT Brigde
     [ATTrackingManagerChannel registerWithMessenger:[registrar messenger]];
+
+    // LevelPlay ImpressionData
+    instance.levelPlayImpressionDataDelegateHandler = [[LevelPlayImpressionDataDelegateHandler alloc] initWithChannel:channel];
+    // LevelPlay Init
+    instance.levelPlayInitDelegateHandler = [[LevelPlayInitDelegateHandler alloc] initWithChannel:channel];
 
     // Banner ad view registry
     LevelPlayBannerAdViewFactory *bannerAdViewFactory = [[LevelPlayBannerAdViewFactory alloc] initWithMessenger:[instance.registrar messenger]];
@@ -110,34 +115,36 @@ static IronSourceMediationPlugin *instance = nil;
     self.bannerViewController = nil;
     self.bannerOffset = nil;
     self.initializationDelegate = nil;
+    self.levelPlayImpressionDataDelegateHandler = nil;
     self.levelPlayInitDelegateHandler = nil;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-    if([@"validateIntegration" isEqualToString:call.method]) { /* Base API ====================*/
-        [self validateIntegration:result];
+    /* Legacy API ====================*/
+    if([@"validateIntegrationLegacy" isEqualToString:call.method]) { /* Base API ====================*/
+        [self validateIntegrationLegacy:result];
     } else if([@"shouldTrackNetworkState" isEqualToString:call.method]) {
         [self shouldTrackNetworkState:call.arguments result:result];
-    } else if([@"setAdaptersDebug" isEqualToString:call.method]) {
-        [self setAdaptersDebug:call.arguments result:result];
-    } else if([@"setDynamicUserId" isEqualToString:call.method]) {
-        [self setDynamicUserId:call.arguments result:result];
+    } else if([@"setAdaptersDebugLegacy" isEqualToString:call.method]) {
+        [self setAdaptersDebugLegacy:call.arguments result:result];
+    } else if([@"setDynamicUserIdLegacy" isEqualToString:call.method]) {
+        [self setDynamicUserIdLegacy:call.arguments result:result];
     } else if([@"getAdvertiserId" isEqualToString:call.method]) {
         [self getAdvertiserId:result];
-    } else if([@"setConsent" isEqualToString:call.method]) {
-        [self setConsent:call.arguments result:result];
-    } else if([@"setSegment" isEqualToString:call.method]) {
-        [self setSegment:call.arguments result:result];
-    } else if([@"setMetaData" isEqualToString:call.method]) {
-        [self setMetaData:call.arguments result:result];
+    } else if([@"setConsentLegacy" isEqualToString:call.method]) {
+        [self setConsentLegacy:call.arguments result:result];
+    } else if([@"setSegmentLegacy" isEqualToString:call.method]) {
+        [self setSegmentLegacy:call.arguments result:result];
+    } else if([@"setMetaDataLegacy" isEqualToString:call.method]) {
+        [self setMetaDataLegacy:call.arguments result:result];
     } else if([@"setWaterfallConfiguration" isEqualToString:call.method]) {
         [self setWaterfallConfiguration:call.arguments result:result];
     } else if([@"setUserId" isEqualToString:call.method]) { /* Init API ========================*/
         [self setUserId:call.arguments result:result];
-    } else if ([@"init" isEqualToString:call.method]) {
-        [self init:call.arguments result:result];
-    } else if ([@"launchTestSuite" isEqualToString:call.method]) {
-        [self launchTestSuite:result];
+    } else if ([@"initLegacy" isEqualToString:call.method]) {
+        [self initLegacy:call.arguments result:result];
+    } else if ([@"launchTestSuiteLegacy" isEqualToString:call.method]) {
+        [self launchTestSuiteLegacy:result];
     } else if([@"showRewardedVideo" isEqualToString:call.method]) { /* RewardedVideo API ==================*/
         [self showRewardedVideo:call.arguments result:result];
     } else if([@"getRewardedVideoPlacementInfo" isEqualToString:call.method]) {
@@ -184,8 +191,24 @@ static IronSourceMediationPlugin *instance = nil;
         [self showConsentViewWithType:call.arguments result:result];
     } else if([@"setPluginData" isEqualToString:call.method]) { /* Internal Config API =*/
         [self setPluginData:call.arguments result:result];
-    } else if ([@"initLevelPlay" isEqualToString:call.method]) { /* LevelPlay Init API =*/
-        [self initLevelPlay:call.arguments result:result];
+
+    /* New API ====================*/
+    } else if([@"validateIntegration" isEqualToString:call.method]) { /* Base API ====================*/
+        [self validateIntegration:result];
+    } else if([@"setAdaptersDebug" isEqualToString:call.method]) {
+        [self setAdaptersDebug:call.arguments result:result];
+    } else if([@"setDynamicUserId" isEqualToString:call.method]) {
+        [self setDynamicUserId:call.arguments result:result];
+    } else if([@"setConsent" isEqualToString:call.method]) {
+        [self setConsent:call.arguments result:result];
+    } else if([@"setSegment" isEqualToString:call.method]) {
+        [self setSegment:call.arguments result:result];
+    } else if([@"setMetaData" isEqualToString:call.method]) {
+        [self setMetaData:call.arguments result:result];
+    } else if ([@"addImpressionDataListener" isEqualToString:call.method]) {
+        [self addImpressionDataListener:call.arguments result:result];
+    } else if ([@"init" isEqualToString:call.method]) { /* LevelPlay Init API =*/
+        [self init:call.arguments result:result];
     } else if([@"isInterstitialAdPlacementCapped" isEqualToString:call.method]) { /* LPMInterstitialAd API =*/
         [self isInterstitialAdPlacementCapped:call.arguments result:result];
     } else if ([@"createInterstitialAd" isEqualToString:call.method]) {
@@ -217,6 +240,7 @@ static IronSourceMediationPlugin *instance = nil;
     }
 }
 
+# pragma mark - Legacy API =======================================================================
 # pragma mark - Base API =========================================================================
 
 /**
@@ -224,7 +248,7 @@ static IronSourceMediationPlugin *instance = nil;
  *
  * @param result The result to be returned after validating the integration.
  */
-- (void)validateIntegration:(nonnull FlutterResult)result {
+- (void)validateIntegrationLegacy:(nonnull FlutterResult)result {
     [ISIntegrationHelper validateIntegration];
     return result(nil);
 }
@@ -254,7 +278,7 @@ static IronSourceMediationPlugin *instance = nil;
  * @param args   The arguments containing the debug mode information.
  * @param result The result to be returned after processing.
  */
-- (void)setAdaptersDebug:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setAdaptersDebugLegacy:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -273,7 +297,7 @@ static IronSourceMediationPlugin *instance = nil;
  * @param args   The arguments containing the dynamic user ID.
  * @param result The result to be returned after processing.
  */
-- (void)setDynamicUserId:(nullable id) args
+- (void)setDynamicUserIdLegacy:(nullable id) args
                           result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
@@ -302,7 +326,7 @@ static IronSourceMediationPlugin *instance = nil;
  * @param args   The arguments containing the consent status.
  * @param result The result to be returned after processing.
  */
-- (void)setConsent:(nullable id) args result:(nonnull FlutterResult)result {
+- (void)setConsentLegacy:(nullable id) args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -321,7 +345,7 @@ static IronSourceMediationPlugin *instance = nil;
  * @param args   The arguments containing the segment data.
  * @param result The result to be returned after processing.
  */
-- (void)setSegment:(nullable id) args result:(nonnull FlutterResult)result  {
+- (void)setSegmentLegacy:(nullable id) args result:(nonnull FlutterResult)result  {
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -391,7 +415,7 @@ static IronSourceMediationPlugin *instance = nil;
  * @param args   The arguments containing the metadata.
  * @param result The result to be returned after processing.
  */
-- (void)setMetaData:(nullable id) args
+- (void)setMetaDataLegacy:(nullable id) args
                      result:(nonnull FlutterResult)result  {
     if (!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
@@ -418,7 +442,7 @@ static IronSourceMediationPlugin *instance = nil;
  *
  * @param result The result to be returned after processing.
  */
-- (void)launchTestSuite:(nonnull FlutterResult)result{
+- (void)launchTestSuiteLegacy:(nonnull FlutterResult)result{
     [IronSource launchTestSuite:[self getRootViewController]];
     return result(nil);
 }
@@ -492,14 +516,13 @@ static IronSourceMediationPlugin *instance = nil;
     return result(nil);
 }
 
-//TODO: Use real error codes
 /**
  * Initializes IronSource with the provided app key and ad units.
  *
  * @param args   The arguments containing the app key and ad units.
  * @param result The result to be returned after processing.
  */
-- (void)init:(nullable id)args result:(nonnull FlutterResult)result {
+- (void)initLegacy:(nullable id)args result:(nonnull FlutterResult)result {
     if(!args){
         return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
     }
@@ -1144,23 +1167,169 @@ static IronSourceMediationPlugin *instance = nil;
     return result(nil);
 }
 
+#pragma mark - New API =====================================================================================
+#pragma mark - Base Init ====================================================================================
+/**
+ * Validates the integration of the SDK.
+ *
+ * @param result The result to be returned after validating the integration.
+ */
+- (void)validateIntegration:(nonnull FlutterResult)result {
+    [LevelPlay validateIntegration];
+    result(nil);
+}
+
+/**
+ * Enables or disables debug mode for adapters.
+ *
+ * @param args   The arguments containing the debug mode information.
+ * @param result The result to be returned after processing.
+ */
+- (void)setAdaptersDebug:(nullable id) args result:(nonnull FlutterResult)result {
+    NSNumber *isEnabledNum = [args valueForKey:@"isEnabled"];
+    BOOL isEnabled = [isEnabledNum boolValue];
+    [LevelPlay setAdaptersDebug:isEnabled];
+    result(nil);
+}
+
+/**
+ * Sets the dynamic user ID for LevelPlay.
+ *
+ * @param args   The arguments containing the dynamic user ID.
+ * @param result The result to be returned after processing.
+ */
+- (void)setDynamicUserId:(nullable id) args result:(nonnull FlutterResult)result {
+    NSString *userId = [args valueForKey:@"userId"];
+    [LevelPlay setDynamicUserId:userId];
+    result(nil);
+}
+
+/**
+ * Sets the consent status for LevelPlay.
+ *
+ * @param args   The arguments containing the consent status.
+ * @param result The result to be returned after processing.
+ */
+- (void)setConsent:(nullable id) args result:(nonnull FlutterResult)result {
+    NSNumber *isConsentNum = [args valueForKey:@"isConsent"];
+    BOOL isConsent = [isConsentNum boolValue];
+    [LevelPlay setConsent:isConsent];
+    result(nil);
+}
+
+/**
+ * Sets the segment data for LevelPlay.
+ *
+ * @param args   The arguments containing the segment data.
+ * @param result The result to be returned after processing.
+ */
+- (void)setSegment:(nullable id) args result:(nonnull FlutterResult)result  {
+    NSDictionary *segmentDict = [args valueForKey:@"segment"];
+    LPMSegment *segment = [[LPMSegment alloc] init];
+    NSMutableArray<NSString*> *allKeys = [[segmentDict allKeys] mutableCopy];
+    for (NSString *key in allKeys) {
+        if ([key isEqualToString:@"level"]){
+            NSNumber *level = [segmentDict objectForKey:key];
+            if(level != nil && ![[NSNull null] isEqual:level]){
+                segment.level = [level intValue];
+            }
+        } else if ([key isEqualToString:@"isPaying"]){
+            NSNumber *isPayingNum = [segmentDict objectForKey:key];
+            if(isPayingNum != nil && ![[NSNull null] isEqual:isPayingNum]){
+                segment.paying = [isPayingNum boolValue];
+            }
+        } else if ([key isEqualToString:@"userCreationDate"]){
+            NSNumber *ucd = [segmentDict objectForKey:key];
+            if(ucd != nil && ![[NSNull null] isEqual:ucd]){
+                NSDate *date = [NSDate dateWithTimeIntervalSince1970: [ucd doubleValue]/1000];
+                segment.userCreationDate = date;
+            }
+        } else if ([key isEqualToString:@"segmentName"]){
+            NSString *segmentName = [segmentDict objectForKey:key];
+            if(segmentName != nil && ![[NSNull null] isEqual:segmentName]){
+                segment.segmentName = segmentName;
+            }
+        } else if ([key isEqualToString:@"iapTotal"]){
+            NSNumber *iapTotalNum = [segmentDict objectForKey:key];
+            if(iapTotalNum != nil && ![[NSNull null] isEqual:iapTotalNum]){
+                segment.iapTotal = [iapTotalNum doubleValue];
+            }
+        } else if ([key isEqualToString:@"customParameters"]){
+            NSDictionary *customParams = [segmentDict objectForKey:key];
+            if(customParams != nil && ![[NSNull null] isEqual:customParams]){
+                // set custom values
+                NSMutableArray<NSString*> *customKeys = [[customParams allKeys] mutableCopy];
+                for (NSString *customKey in customKeys) {
+                    NSString *customValue = [customParams objectForKey:customKey];
+                    if(customValue != nil && ![[NSNull null] isEqual:customValue]){
+                        [segment setCustomValue:customValue forKey:customKey];
+                    }
+                }
+            }
+        }
+    }
+    [LevelPlay setSegment:segment];
+    result(nil);
+}
+
+/**
+ * Sets metadata for LevelPlay.
+ *
+ * @param args   The arguments containing the metadata.
+ * @param result The result to be returned after processing.
+ */
+- (void)setMetaData:(nullable id) args result:(nonnull FlutterResult)result  {
+    NSDictionary<NSString*, NSArray<NSString*>*> *metaDataDict = [args valueForKey:@"metaData"];
+    NSMutableArray<NSString*> *allKeys = [[metaDataDict allKeys] mutableCopy];
+    for (NSString* key in allKeys) {
+        NSArray<NSString*> *valArr = [metaDataDict objectForKey:key];
+        if(valArr != nil && ![[NSNull null] isEqual:valArr]) {
+            [LevelPlay setMetaDataWithKey:key values:[valArr mutableCopy]];
+        }
+    }
+    result(nil);
+}
+
+/**
+ * Launches the LevelPlay test suite for integration validation.
+ *
+ * @param result The result to be returned after processing.
+ */
+- (void)launchTestSuite:(nonnull FlutterResult)result{
+    [LevelPlay launchTestSuite:[self getRootViewController]];
+    result(nil);
+}
+
+/**
+ * Adds a listener for receiving impression data events from LevelPlay.
+ *
+ * @param args   The arguments (unused for this method).
+ * @param result The result to be returned after processing.
+ */
+- (void)addImpressionDataListener:(nullable id) args result:(nonnull FlutterResult)result {
+    [LevelPlay addImpressionDataDelegate:self.levelPlayImpressionDataDelegateHandler];
+    result(nil);
+}
+
 #pragma mark - LevelPlay Init ===============================================================================
 /**
- * Initializes IronSource with the provided app key and ad units.
+ * Initializes LevelPlay with the provided app key and ad units.
  *
  * @param args   The arguments containing the app key and ad units.
  * @param result The result to be returned after processing.
  */
-- (void)initLevelPlay:(nullable id)args result:(nonnull FlutterResult)result {
+- (void)init:(nullable id)args result:(nonnull FlutterResult)result {
     if(!args){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        return;
     }
 
     NSString *appKey = [args valueForKey:@"appKey"];
     NSString *userId = [args valueForKey:@"userId"];
     NSArray<NSString*> *adFormats = [args valueForKey:@"adFormats"];
     if(appKey == nil || [[NSNull null] isEqual:appKey]){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"appKey is missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"appKey is missing" details:nil]);
+        return;
     }
 
     NSMutableArray<NSString*> *parsedLegacyAdFormats = [[NSMutableArray alloc]init];
@@ -1193,7 +1362,7 @@ static IronSourceMediationPlugin *instance = nil;
         }
     }];
 
-    return result(nil);
+    result(nil);
 }
 
 #pragma mark - LPMInterstitialAd ===============================================================================
@@ -1206,28 +1375,49 @@ static IronSourceMediationPlugin *instance = nil;
  */
 - (void)isInterstitialAdPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        return;
     }
     NSString *placementName = [args valueForKey:@"placementName"];
     if(placementName == nil || [[NSNull null] isEqual:placementName]){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+        return;
     }
     BOOL isCapped = [LPMInterstitialAd isPlacementCapped:placementName];
-    return result([NSNumber numberWithBool:isCapped]);
+    result([NSNumber numberWithBool:isCapped]);
 }
 
+/**
+ * Creates a new LevelPlay interstitial ad instance.
+ *
+ * @param args   The arguments containing the ad unit ID and optional bid floor.
+ * @param result The result to be returned containing the created ad instance ID.
+ */
 - (void)createInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adUnitId = args[@"adUnitId"];
-    NSString *adId = [self.levelPlayAdObjectManager createInterstitialAd:adUnitId];
+    NSNumber *bidFloor = args[@"bidFloor"];
+    NSString *adId = [self.levelPlayAdObjectManager createInterstitialAd:adUnitId bidFloor:bidFloor];
     result(adId);
 }
 
+/**
+ * Loads a LevelPlay interstitial ad.
+ *
+ * @param args   The arguments containing the ad instance ID.
+ * @param result The result to be returned after processing.
+ */
 - (void)loadInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     [self.levelPlayAdObjectManager loadInterstitialAd:adId];
     result(nil);
 }
 
+/**
+ * Shows a LevelPlay interstitial ad.
+ *
+ * @param args   The arguments containing the ad instance ID and optional placement name.
+ * @param result The result to be returned after processing.
+ */
 - (void)showInterstitialAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     NSString *placementName = args[@"placementName"];
@@ -1235,18 +1425,35 @@ static IronSourceMediationPlugin *instance = nil;
     result(nil);
 }
 
+/**
+ * Checks if a LevelPlay interstitial ad is ready to be shown.
+ *
+ * @param args   The arguments containing the ad instance ID.
+ * @param result The result to be returned containing the ready status as a boolean.
+ */
 - (void)isInterstitialAdReady:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     BOOL isReady = [self.levelPlayAdObjectManager isInterstitialAdReady:adId];
     result(@(isReady));
 }
 
+/**
+ * Disposes of a LevelPlay ad instance and releases its resources.
+ *
+ * @param args   The arguments containing the ad instance ID.
+ * @param result The result to be returned after processing.
+ */
 - (void)disposeAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     [self.levelPlayAdObjectManager disposeAd:adId];
     result(nil);
 }
 
+/**
+ * Disposes of all LevelPlay ad instances and releases their resources.
+ *
+ * @param result The result to be returned after processing.
+ */
 - (void)disposeAllAd:(nullable FlutterResult) result {
     [self.levelPlayAdObjectManager disposeAllAds];
     result(nil);
@@ -1254,18 +1461,26 @@ static IronSourceMediationPlugin *instance = nil;
 
 #pragma mark - LPMAdSize ===============================================================================
 
+/**
+ * Creates an adaptive ad size for LevelPlay banner ads.
+ *
+ * @param args   The arguments containing the optional width parameter.
+ * @param result The result to be returned containing the adaptive ad size data.
+ */
 - (void)createAdaptiveAdSize:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        return;
     }
     NSNumber *widthNumber = [args[@"width"] isKindOfClass:[NSNumber class]] ? args[@"width"] : nil;
     if (widthNumber == nil) {
         LPMAdSize *adSize = [LPMAdSize createAdaptiveAdSize];
-        return result([LevelPlayUtils dictionaryForAdSize: adSize]);
+        result([LevelPlayUtils dictionaryForAdSize: adSize]);
+        return;
     }
     CGFloat width = [widthNumber floatValue];
     LPMAdSize *adSize = [LPMAdSize createAdaptiveAdSizeWithWidth: width];
-    return result([LevelPlayUtils dictionaryForAdSize: adSize]);
+    result([LevelPlayUtils dictionaryForAdSize: adSize]);
 }
 
 #pragma mark - LPMRewardedAd ===============================================================================
@@ -1278,28 +1493,49 @@ static IronSourceMediationPlugin *instance = nil;
  */
 - (void)isRewardedAdPlacementCapped:(nullable id) args result:(nonnull FlutterResult)result{
     if(!args){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"arguments are missing" details:nil]);
+        return;
     }
     NSString *placementName = [args valueForKey:@"placementName"];
     if(placementName == nil || [[NSNull null] isEqual:placementName]){
-        return result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+        result([FlutterError errorWithCode:@"ERROR" message:@"placementName is missing" details:nil]);
+        return;
     }
     BOOL isCapped = [LPMRewardedAd isPlacementCapped:placementName];
-    return result([NSNumber numberWithBool:isCapped]);
+    result([NSNumber numberWithBool:isCapped]);
 }
 
+/**
+ * Creates a new LevelPlay rewarded ad instance.
+ *
+ * @param args   The arguments containing the ad unit ID and optional bid floor.
+ * @param result The result to be returned containing the created ad instance ID.
+ */
 - (void)createRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adUnitId = args[@"adUnitId"];
-    NSString *adId = [self.levelPlayAdObjectManager createRewardedAd:adUnitId];
+    NSNumber *bidFloor = args[@"bidFloor"];
+    NSString *adId = [self.levelPlayAdObjectManager createRewardedAd:adUnitId bidFloor:bidFloor];
     result(adId);
 }
 
+/**
+ * Loads a LevelPlay rewarded ad.
+ *
+ * @param args   The arguments containing the ad instance ID.
+ * @param result The result to be returned after processing.
+ */
 - (void)loadRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     [self.levelPlayAdObjectManager loadRewardedAd:adId];
     result(nil);
 }
 
+/**
+ * Shows a LevelPlay rewarded ad.
+ *
+ * @param args   The arguments containing the ad instance ID and optional placement name.
+ * @param result The result to be returned after processing.
+ */
 - (void)showRewardedAd:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     NSString *placementName = args[@"placementName"];
@@ -1307,6 +1543,12 @@ static IronSourceMediationPlugin *instance = nil;
     result(nil);
 }
 
+/**
+ * Checks if a LevelPlay rewarded ad is ready to be shown.
+ *
+ * @param args   The arguments containing the ad instance ID.
+ * @param result The result to be returned containing the ready status as a boolean.
+ */
 - (void)isRewardedAdReady:(nullable id) args result:(nonnull FlutterResult)result{
     NSString *adId = args[@"adId"];
     BOOL isReady = [self.levelPlayAdObjectManager isRewardedAdReady:adId];
@@ -1315,6 +1557,11 @@ static IronSourceMediationPlugin *instance = nil;
 
 #pragma mark - Utils ===============================================================================
 
+/**
+ * Retrieves the root view controller from the main application window.
+ *
+ * @return The root view controller of the application.
+ */
 - (UIViewController *)getRootViewController {
     return [UIApplication sharedApplication].keyWindow.rootViewController;
 }

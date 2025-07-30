@@ -36,13 +36,23 @@
     NSString *placementName = [args[@"placementName"] isKindOfClass:[NSString class]] ? args[@"placementName"] : nil;
     NSDictionary *adSizeDict = args[@"adSize"];
     LPMAdSize *adSize = [self getLevelPlayAdSize:adSizeDict];
-    LPMBannerAdView *bannerAdView = [[LPMBannerAdView alloc] initWithAdUnitId: adUnitId];
+    NSNumber *bidFloor = args[@"bidFloor"];
+
+    LPMBannerAdViewConfigBuilder *adConfigBuilder = [LPMBannerAdViewConfigBuilder new];
     if (adSize != nil) {
-        [bannerAdView setAdSize:adSize];
+        [adConfigBuilder setWithAdSize:adSize];
     }
-    if (placementName != nil) {
-        [bannerAdView setPlacementName: placementName];
+    if (placementName != nil && ![placementName isEqualToString:@""]) {
+        [adConfigBuilder setWithPlacementName:placementName];
     }
+    if (bidFloor != nil) {
+        [adConfigBuilder setWithBidFloor:bidFloor];
+    }
+    LPMBannerAdViewConfig *adConfig = [adConfigBuilder build];
+
+    // Create a new banner view
+    LPMBannerAdView *bannerAdView = [[LPMBannerAdView alloc] initWithAdUnitId:adUnitId config:adConfig];
+
     return [[LevelPlayBannerAdView alloc] initWithFrame:frame
                                                  viewId:viewId
                                levelPlayBinaryMessenger:self.levelPlayBinaryMessenger

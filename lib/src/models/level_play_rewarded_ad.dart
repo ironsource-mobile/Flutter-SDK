@@ -7,15 +7,18 @@ class LevelPlayRewardedAd {
   /// The ad unit id
   final String adUnitId;
 
-   String adId = "";
+  /// Unique ad object identifier
+  String adId = "";
 
   /// Unique ad object id
   @Deprecated("This parameter will be removed in future sdk version, Please use [adId] instead.")
   late int adObjectId;
 
-
   /// A listener for rewarded ad events
   LevelPlayRewardedAdListener? listener;
+
+  /// Optional bid floor
+  double? bidFloor;
 
   /// The instance ad manager of the MADU interstitial & rewarded ads
   final LevelPlayAdObjectManager _levelPlayAdObjectManager = LevelPlayAdObjectManager();
@@ -36,6 +39,16 @@ class LevelPlayRewardedAd {
   /// Get the listener for handling ad events
   LevelPlayRewardedAdListener? getListener() {
     return listener;
+  }
+
+  /// Set the bid floor
+  void setBidFloor(double bidFloor) {
+    this.bidFloor = bidFloor;
+  }
+
+  /// Get the bid floor value
+  double? getBidFloor() {
+    return bidFloor;
   }
 
   /// Return whether placement is capped or not.

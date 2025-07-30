@@ -8,6 +8,7 @@ import './utils/outgoing_value_parser.dart';
 import './utils/ironsource_constants.dart';
 import './models/models.dart';
 
+@Deprecated("This method will be removed in 4.0.0 version.")
 class IronSource {
   static final MethodChannel _channel = LevelPlayMethodChannel().channel;
   static String? _flutterVersion;
@@ -15,12 +16,14 @@ class IronSource {
   /** Utils ======================================================================================*/
 
   /// Returns the plugin version.
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static String getPluginVersion() {
     return IronConst.PLUGIN_VERSION;
   }
 
   /// Returns the native SDK version for [platform].
   /// - [platform] should be either 'android' or 'ios'.
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static String getNativeSDKVersion(String platform) {
     return platform == 'android'
         ? IronConst.ANDROID_SDK_VERSION
@@ -31,6 +34,7 @@ class IronSource {
 
   /// Pass the Flutter [version] used for app build.
   /// - __Note__: Must be called before [init].
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static void setFlutterVersion(String version) {
     _flutterVersion = version;
   }
@@ -42,8 +46,9 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: validateIntegration
   /// -     iOS: validateIntegration
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> validateIntegration() async {
-    return _channel.invokeMethod('validateIntegration');
+    return _channel.invokeMethod('validateIntegrationLegacy');
   }
 
   /// Track the device's network connection state and dynamically changes ad availability
@@ -63,9 +68,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setAdaptersDebug
   /// -     iOS: setAdaptersDebug
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setAdaptersDebug(bool isEnabled) async {
     final args = OutgoingValueParser.setAdaptersDebug(isEnabled);
-    return _channel.invokeMethod('setAdaptersDebug', args);
+    return _channel.invokeMethod('setAdaptersDebugLegacy', args);
   }
 
   /// For RV server-to-server callbacks.
@@ -74,9 +80,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setDynamicUserId
   /// -     iOS: setDynamicUserId
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setDynamicUserId(String dynamicUserId) async {
     final args = OutgoingValueParser.setDynamicUserId(dynamicUserId);
-    return _channel.invokeMethod('setDynamicUserId', args);
+    return _channel.invokeMethod('setDynamicUserIdLegacy', args);
   }
 
   /// Returns GAID/IDFA (or an empty String if not available).
@@ -96,9 +103,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setConsent
   /// -     iOS: setConsent
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setConsent(bool isConsent) async {
     final args = OutgoingValueParser.setConsent(isConsent);
-    return _channel.invokeMethod('setConsent', args);
+    return _channel.invokeMethod('setConsentLegacy', args);
   }
 
   /// Registers [segment] data.
@@ -106,9 +114,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setSegment
   /// -     iOS: setSegment
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setSegment(IronSourceSegment segment) async {
     final args = OutgoingValueParser.setSegment(segment);
-    return _channel.invokeMethod('setSegment', args);
+    return _channel.invokeMethod('setSegmentLegacy', args);
   }
 
   /// Registers [metaData].
@@ -118,9 +127,10 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setMetaData
   /// -     iOS: setMetaDataWithKey
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setMetaData(Map<String, List<String>> metaData) async {
     final args = OutgoingValueParser.setMetaData(metaData);
-    return _channel.invokeMethod('setMetaData', args);
+    return _channel.invokeMethod('setMetaDataLegacy', args);
   }
 
   /// Launches the test suite.
@@ -128,8 +138,9 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: launchTestSuite
   /// -     iOS: launchTestSuite
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> launchTestSuite() {
-    return _channel.invokeMethod('launchTestSuite');
+    return _channel.invokeMethod('launchTestSuiteLegacy');
   }
 
   /// Registers [waterfallConfiguration].
@@ -139,6 +150,7 @@ class IronSource {
   /// Native SDK Reference
   /// - Android: setWaterfallConfiguration
   /// -     iOS: setWaterfallConfiguration
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static Future<void> setWaterfallConfiguration(WaterfallConfiguration waterfallConfiguration, IronSourceAdUnit adUnit) async {
     final args = OutgoingValueParser.setWaterfallConfiguration(waterfallConfiguration, adUnit);
     return _channel.invokeMethod('setWaterfallConfiguration', args);
@@ -183,7 +195,7 @@ class IronSource {
 
     // init
     final args = OutgoingValueParser.init(appKey: appKey, adUnits: adUnits);
-    return _channel.invokeMethod('init', args);
+    return _channel.invokeMethod('initLegacy', args);
   }
 
   /** RewardedVideo API =====================================================================================*/
@@ -486,6 +498,7 @@ class IronSource {
     IronSourceMethodCallHandler.setImpressionDataListener(listener);
   }
 
+  @Deprecated("This method will be removed in 4.0.0 version.")
   static void addImpressionDataListener(ImpressionDataListener? listener) {
     IronSourceMethodCallHandler.setImpressionDataListener(null); // Make sure only one listener is set
     IronSourceMethodCallHandler.addImpressionDataListener(listener);

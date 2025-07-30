@@ -23,8 +23,10 @@ import com.ironsource.mediationsdk.model.Placement
 import com.unity3d.mediation.LevelPlay
 import com.unity3d.mediation.LevelPlayAdSize
 import com.unity3d.mediation.LevelPlayInitRequest
+import com.unity3d.mediation.impression.LevelPlayImpressionDataListener
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
 import com.unity3d.mediation.rewarded.LevelPlayRewardedAd
+import com.unity3d.mediation.segment.LevelPlaySegment
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -58,12 +60,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   // Listeners
   private var mImpressionDataListener: ImpressionDataListener? = null
   private var mInitializationListener: InitializationListener? = null
-
-  // LevelPlay Listeners
-  private var mLevelPlayInitListener: LevelPlayInitListener? = null
   private var mLevelPlayRewardedVideoListener: LevelPlayRewardedVideoListener? = null
   private var mLevelPlayInterstitialListener: LevelPlayInterstitialListener? = null
   private var mLevelPlayBannerListener: LevelPlayBannerListener? = null
+
+  private var mLevelPlayImpressionDataListener: LevelPlayImpressionDataListener? = null
+  private var mLevelPlayInitListener: LevelPlayInitListener? = null
 
   // LevelPlay Native Ad
   private var nativeAdViewFactories = hashMapOf<String, PlatformViewFactory>()
@@ -114,10 +116,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       if (mInitializationListener == null) {
         mInitializationListener = InitializationListener(channel)
       }
-      // LevelPlay Init Listener
-      if (mLevelPlayInitListener == null) {
-        mLevelPlayInitListener = LevelPlayInitListener(channel)
-      }
       // LevelPlay RewardedVideo
       if (mLevelPlayRewardedVideoListener == null) {
         mLevelPlayRewardedVideoListener = LevelPlayRewardedVideoListener(channel)
@@ -132,6 +130,14 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       if (mLevelPlayBannerListener == null) {
         mLevelPlayBannerListener = LevelPlayBannerListener(channel)
       }
+      // LevelPlay ImpressionData Listener
+      if (mLevelPlayImpressionDataListener == null) {
+        mLevelPlayImpressionDataListener = LevelPlayImpressionDataListener(channel)
+      }
+      // LevelPlay Init Listener
+      if (mLevelPlayInitListener == null) {
+        mLevelPlayInitListener = LevelPlayInitListener(channel)
+      }
     }
   }
 
@@ -144,33 +150,41 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     mImpressionDataListener = null
     // Init
     mInitializationListener = null
-    // LevelPlay Init
-    mLevelPlayInitListener = null
     // LevelPlay RewardedVideo
     mLevelPlayRewardedVideoListener = null
     // LevelPlay Interstitial
     mLevelPlayInterstitialListener = null
 
     IronSource.setLevelPlayRewardedVideoListener(null)
+
+    // LevelPlay ImpressionData
+    mLevelPlayImpressionDataListener = null
+    // LevelPlay Init
+    mLevelPlayInitListener = null
   }
 
+  /**
+   * Note: Shared method names for legacy and new API(IronSource and LevelPlay), are differentiated by Legacy at the end of the function.
+   * Example: IronSource.validateIntegrationLegacy, LevelPlay.validateIntegration
+   */
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
+      /** LEGACY API =============================================================================*/
       /** Base API ===============================================================================*/
-      "validateIntegration" -> validateIntegration(result)
+      "validateIntegrationLegacy" -> validateIntegrationLegacy(result)
       "shouldTrackNetworkState" -> shouldTrackNetworkState(call, result)
-      "setAdaptersDebug" -> setAdaptersDebug(call, result)
-      "setDynamicUserId" -> setDynamicUserId(call, result)
+      "setAdaptersDebugLegacy" -> setAdaptersDebugLegacy(call, result)
+      "setDynamicUserIdLegacy" -> setDynamicUserIdLegacy(call, result)
       "getAdvertiserId" -> getAdvertiserId(result)
-      "setConsent" -> setConsent(call, result)
-      "setSegment" -> setSegment(call, result)
-      "setMetaData" -> setMetaData(call, result)
+      "setConsentLegacy" -> setConsentLegacy(call, result)
+      "setSegmentLegacy" -> setSegmentLegacy(call, result)
+      "setMetaDataLegacy" -> setMetaDataLegacy(call, result)
       "setWaterfallConfiguration" -> setWaterfallConfiguration(call, result)
       /**Test Suite API ==========================================================================*/
-      "launchTestSuite" -> launchTestSuite(result)
+      "launchTestSuiteLegacy" -> launchTestSuiteLegacy(result)
       /** Init API ===============================================================================*/
-      "setUserId" -> setUserId(call, result)
-      "init" -> initIronSource(call, result)
+      "setUserIdLegacy" -> setUserId(call, result)
+      "initLegacy" -> initLegacy(call, result)
       /** RewardedVideo API =================================================================================*/
       "showRewardedVideo" -> showRewardedVideo(call, result)
       "getRewardedVideoPlacementInfo" -> getRewardedVideoPlacementInfo(call, result)
@@ -197,8 +211,20 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       /** Internal Config API ====================================================================*/
       "setPluginData" -> setPluginData(call, result)
 
+
+
+      /** NEW API =============================================================================*/
+      /** BASE API =============================================================================*/
+      "validateIntegration" -> validateIntegration(result)
+      "setAdaptersDebug" -> setAdaptersDebug(call, result)
+      "setDynamicUserId" -> setDynamicUserId(call, result)
+      "setConsent" -> setConsent(call, result)
+      "setSegment" -> setSegment(call, result)
+      "setMetaData" -> setMetaData(call, result)
+      "launchTestSuite" -> launchTestSuite(result)
+      "addImpressionDataListener" -> addImpressionDataListener(result)
       /** LevelPlay Init API ===============================================================================*/
-      "initLevelPlay" -> initLevelPlay(call, result)
+      "init" -> init(call, result)
       /** LevelPlayInterstitialAd API ===============================================================================*/
       "isInterstitialAdPlacementCapped" -> isInterstitialAdPlacementCapped(call, result)
       "createInterstitialAd" -> createInterstitialAd(call, result) // function that assist to create interstital ad object and retrieve the adId
@@ -219,6 +245,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     }
   }
 
+  /** LEGACY API =================================================================================*/
   /** region Base API ============================================================================*/
 
   /**
@@ -226,7 +253,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after validating the integration.
    */
-  private fun validateIntegration(result: Result) {
+  private fun validateIntegrationLegacy(result: Result) {
     activity?.apply {
       IntegrationHelper.validateIntegration(this)
       return result.success(null)
@@ -255,7 +282,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setAdaptersDebug(call: MethodCall, result: Result) {
+  private fun setAdaptersDebugLegacy(call: MethodCall, result: Result) {
     val isEnabled = call.argument("isEnabled") as Boolean?
       ?: return result.error("ERROR", "isEnabled is null", null)
     IronSource.setAdaptersDebug(isEnabled)
@@ -268,7 +295,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setDynamicUserId(call: MethodCall, result: Result) {
+  private fun setDynamicUserIdLegacy(call: MethodCall, result: Result) {
     val userId = call.argument("userId") as String?
       ?: return result.error("ERROR", "userId is null", null)
 
@@ -298,7 +325,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setConsent(call: MethodCall, result: Result) {
+  private fun setConsentLegacy(call: MethodCall, result: Result) {
     val isConsent = call.argument("isConsent") as Boolean?
       ?: return result.error("ERROR", "isConsent is null", null)
     IronSource.setConsent(isConsent)
@@ -311,7 +338,8 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setSegment(call: MethodCall, result: Result) {
+
+  private fun setSegmentLegacy(call: MethodCall, result: Result) {
     val segmentMap = call.argument("segment") as HashMap<String, Any?>?
       ?: return result.error("ERROR", "segment is null", null)
     val iSSegment = IronSourceSegment()
@@ -342,7 +370,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing arguments.
    * @param result The result to be returned after processing.
    */
-  private fun setMetaData(call: MethodCall, result: Result) {
+  private fun setMetaDataLegacy(call: MethodCall, result: Result) {
     val metaDataMap = call.argument("metaData") as HashMap<String, List<String>>?
       ?: return result.error("ERROR", "metaData is null", null)
     // internally overload function uses setMetaData(key: String, values:List<String>) after all
@@ -360,7 +388,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    *
    * @param result The result to be returned after processing.
    */
-  private fun launchTestSuite(result: Result) {
+  private fun launchTestSuiteLegacy(result: Result) {
     context?.let { IronSource.launchTestSuite(it) }
     return result.success(null)
   }
@@ -424,7 +452,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
    * @param call The method call containing the app key and ad units as arguments.
    * @param result The result to be returned after processing.
    */
-  private fun initIronSource(call: MethodCall, result: Result) {
+  private fun initLegacy(call: MethodCall, result: Result) {
     if (activity == null) {
       return result.error("ERROR", "Activity is null", null)
     }
@@ -441,7 +469,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
           "INTERSTITIAL" -> IronSource.AD_UNIT.INTERSTITIAL
           "BANNER" -> IronSource.AD_UNIT.BANNER
           "NATIVE_AD" -> IronSource.AD_UNIT.NATIVE_AD
-          else -> return@initIronSource result.error("ERROR", "Unsupported ad unit: $it", null)
+          else -> return@initLegacy result.error("ERROR", "Unsupported ad unit: $it", null)
         }
       }.toTypedArray()
       IronSource.init(activity, appKey, mInitializationListener, *parsed)
@@ -886,7 +914,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   /** region Internal Config API =================================================================*/
 
   /**
-   * Sets plugin data for IronSource mediation.
+   * Sets plugin data for LevelPlay mediation.
    * Only called internally in the process of init on the Flutter plugin
    *
    * @param call   The method call containing arguments.
@@ -901,14 +929,135 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     val pluginFrameworkVersion = call.argument("pluginFrameworkVersion") as String?
 
     ConfigFile.getConfigFile().setPluginData(pluginType, pluginVersion, pluginFrameworkVersion)
-    return result.success(null)
+    result.success(null)
   }
 
   // endregion
+  /** NEW API ====================================================================================*/
+  /** region Base API ============================================================================*/
+
+  /**
+   * Validates the integration of the SDK.
+   *
+   * @param result The result to be returned after validating the integration.
+   */
+  private fun validateIntegration(result: Result) {
+    context?.let { LevelPlay.validateIntegration(it) }
+    result.success(null)
+  }
+
+  /**
+   * Sets whether to enable debug mode for LevelPlay SDK adapters.
+   *
+   * @param call The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+  private fun setAdaptersDebug(call: MethodCall, result: Result) {
+    val isEnabled: Boolean = call.argument("isEnabled")!!
+    LevelPlay.setAdaptersDebug(isEnabled)
+    result.success(null)
+  }
+
+  /**
+   * Sets the dynamic user ID for LevelPlay SDK.
+   *
+   * @param call The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+  private fun setDynamicUserId(call: MethodCall, result: Result) {
+    val userId: String = call.argument("userId")!!
+    LevelPlay.setDynamicUserId(userId)
+    result.success(null)
+  }
+
+  /**
+   * Sets the consent status for the user.
+   *
+   * @param call The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+  private fun setConsent(call: MethodCall, result: Result) {
+    val isConsent: Boolean = call.argument("isConsent")!!
+    LevelPlay.setConsent(isConsent)
+    result.success(null)
+  }
+
+  /**
+   * Sets the segment for the user.
+   *
+   * @param call The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+
+  private fun setSegment(call: MethodCall, result: Result) {
+    val segmentMap: HashMap<String, Any?> = call.argument("segment")!!
+    val segment = LevelPlaySegment()
+    segmentMap.entries.forEach { entry ->
+      when (entry.key) {
+        // Dart int is 64bits, so if the value is over 32bits it is parsed into Long else Int
+        // Therefore, the number fields must be safely cast
+        "segmentName" -> entry.value?.let { segment.segmentName = it as String }
+        "level" -> entry.value?.let { segment.level = if (it is Int) it else (it as Long).toInt() }
+        "isPaying" -> entry.value?.let { segment.isPaying = (it as Boolean) }
+        "userCreationDate" -> entry.value?.let { segment.userCreationDate = (if (it is Long) it else (it as Int).toLong()) }
+        "iapTotal" -> entry.value?.let { segment.iapTotal = (it as Double) }
+        "customParameters" -> entry.value?.let { params ->
+          (params as HashMap<String, String>).entries.forEach { param ->
+            segment.setCustom(param.key, param.value)
+          }
+        }
+      }
+    }
+    LevelPlay.setSegment(segment)
+    result.success(null)
+  }
+
+  /**
+   * Sets meta data for LevelPlay.
+   *
+   * @param call The method call containing arguments.
+   * @param result The result to be returned after processing.
+   */
+  private fun setMetaData(call: MethodCall, result: Result) {
+    val metaDataMap: HashMap<String, List<String>> = call.argument("metaData")!!
+    metaDataMap.entries.forEach { entry: Map.Entry<String, List<String>> ->
+      LevelPlay.setMetaData(
+        entry.key,
+        entry.value
+      )
+    }
+    result.success(null)
+  }
+
+  /**
+   * Launches the LevelPlay test suite.
+   *
+   * @param result The result to be returned after processing.
+   */
+  private fun launchTestSuite(result: Result) {
+    context?.let { LevelPlay.launchTestSuite(it) }
+    result.success(null)
+  }
+
+  /**
+   * Adds a listener for receiving impression data events from LevelPlay.
+   *
+   * @param result The result to be returned after processing.
+   */
+  private fun addImpressionDataListener(result: Result) {
+    LevelPlay.addImpressionDataListener(mLevelPlayImpressionDataListener!!)
+    result.success(null)
+  }
 
   /** region LevelPlay Init API =================================================================*/
 
-  private fun initLevelPlay(call: MethodCall, result: Result) {
+  /**
+   * Initializes LevelPlay with the provided app key, ad formats, and optional user ID.
+   *
+   * @param call The method call containing the app key, ad formats, and optional user ID.
+   * @param result The result to be returned after processing.
+   */
+  private fun init(call: MethodCall, result: Result) {
     if (context == null) {
       return result.error("ERROR", "Context is null", null)
     }
@@ -922,7 +1071,7 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
         "INTERSTITIAL" -> LevelPlay.AdFormat.INTERSTITIAL
         "BANNER" -> LevelPlay.AdFormat.BANNER
         "NATIVE_AD" -> LevelPlay.AdFormat.NATIVE_AD
-        else -> return@initLevelPlay result.error("ERROR", "Unsupported ad format: $it", null)
+        else -> return@init result.error("ERROR", "Unsupported ad format: $it", null)
       }
     }.toList()
     val requestBuilder = LevelPlayInitRequest.Builder(appKey)
@@ -932,13 +1081,18 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     val initRequest = requestBuilder.build()
 
     LevelPlay.init(context!!, initRequest, mLevelPlayInitListener!!)
-
-    return result.success(null)
+    result.success(null)
   }
 
   // endregion
 
   /** region LevelPlayInterstitialAd API =================================================================*/
+  /**
+   * Checks whether the specified placement for LevelPlay interstitial ads is capped.
+   *
+   * @param call The method call containing the placement name.
+   * @param result The result to be returned containing the capped status as a boolean.
+   */
   private fun isInterstitialAdPlacementCapped(call: MethodCall, result: Result) {
     val placementName: String = call.argument("placementName")!!
     val isCapped = LevelPlayInterstitialAd.isPlacementCapped(placementName)
@@ -954,18 +1108,31 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   private fun createInterstitialAd(call: MethodCall, result: Result) {
     val adUnitId: String = call.argument("adUnitId")!!
+    val bidFloor: Double? = call.argument("bidFloor")
     // Create interstitial ad through the manager and get its unique adId
-    val adId: String = levelPlayAdObjectManager.createInterstitialAd(adUnitId)
+    val adId: String = levelPlayAdObjectManager.createInterstitialAd(adUnitId, bidFloor)
     // Return the adId to Flutter
     result.success(adId)
   }
 
+  /**
+   * Loads a LevelPlay interstitial ad.
+   *
+   * @param call The method call containing the ad instance ID.
+   * @param result The result to be returned after processing.
+   */
   private fun loadInterstitialAd(call: MethodCall, result: Result) {
     val adId: String = call.argument("adId")!!
     levelPlayAdObjectManager.loadInterstitialAd(adId)
     result.success(null)
   }
 
+  /**
+   * Shows a LevelPlay interstitial ad.
+   *
+   * @param call The method call containing the ad instance ID and optional placement name.
+   * @param result The result to be returned after processing.
+   */
   private fun showInterstitialAd(call: MethodCall, result: Result) {
     val adId: String = call.argument("adId")!!
     val placementName: String? = call.argument("placementName")
@@ -973,6 +1140,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
     result.success(null)
   }
 
+  /**
+   * Checks if a LevelPlay interstitial ad is ready to be shown.
+   *
+   * @param call The method call containing the ad instance ID.
+   * @param result The result to be returned containing the ready status as a boolean.
+   */
   private fun isInterstitialAdReady(call: MethodCall, result: Result) {
     val adId: String = call.argument("adId")!!
     val isReady = levelPlayAdObjectManager.isInterstitialAdReady(adId)
@@ -980,12 +1153,23 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
 
+  /**
+   * Disposes of a LevelPlay ad instance and releases its resources.
+   *
+   * @param call The method call containing the ad instance ID.
+   * @param result The result to be returned after processing.
+   */
   private fun disposeAd(call: MethodCall, result: Result) {
     val adId: String = call.argument("adId")!!
     levelPlayAdObjectManager.disposeAd(adId)
     result.success(null)
   }
 
+  /**
+   * Disposes of all LevelPlay ad instances and releases their resources.
+   *
+   * @param result The result to be returned after processing.
+   */
   private fun disposeAllAds(result: Result) {
     levelPlayAdObjectManager.disposeAllAds()
     result.success(null)
@@ -995,17 +1179,29 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   /** region LevelPlayAdSize API =================================================================*/
 
+  /**
+   * Creates an adaptive ad size for LevelPlay banner ads.
+   *
+   * @param call The method call containing the optional width parameter.
+   * @param result The result to be returned containing the adaptive ad size data.
+   */
   private fun createAdaptiveAdSize(call: MethodCall, result: Result) {
     val width = call.argument("width") as Int?
     val size = context?.let {
       LevelPlayAdSize.createAdaptiveAdSize(it, width)
     }
-    return result.success(size.toMap())
+    result.success(size.toMap())
   }
 
   // endregion
 
   /** region LevelPlayRewardedAd API =================================================================*/
+  /**
+   * Checks whether the specified placement for LevelPlay rewarded ads is capped.
+   *
+   * @param call The method call containing the placement name.
+   * @param result The result to be returned containing the capped status as a boolean.
+   */
   private fun isRewardedAdPlacementCapped(call: MethodCall, result: Result) {
     val placementName: String = call.argument("placementName")!!
     val isCapped = LevelPlayRewardedAd.isPlacementCapped(placementName)
@@ -1021,18 +1217,31 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
   private fun createRewardedAd(call: MethodCall, result: Result) {
     val adUnitId: String = call.argument("adUnitId")!!
+    val bidFloor: Double? = call.argument("bidFloor")
     // Create a rewarded ad through the manager and get its unique adId
-    val adId: String = levelPlayAdObjectManager.createRewardedAd(adUnitId)
+    val adId: String = levelPlayAdObjectManager.createRewardedAd(adUnitId, bidFloor)
     // Return the adId to Flutter
     result.success(adId)
   }
 
+    /**
+     * Loads a LevelPlay rewarded ad.
+     *
+     * @param call The method call containing the ad instance ID.
+     * @param result The result to be returned after processing.
+     */
     private fun loadRewardedAd(call: MethodCall, result: Result) {
       val adId: String = call.argument("adId")!!
       levelPlayAdObjectManager.loadRewardedAd(adId)
       result.success(null)
     }
 
+    /**
+     * Shows a LevelPlay rewarded ad.
+     *
+     * @param call The method call containing the ad instance ID and optional placement name.
+     * @param result The result to be returned after processing.
+     */
     private fun showRewardedAd(call: MethodCall, result: Result) {
       val adId: String = call.argument("adId")!!
       val placementName: String? = call.argument("placementName")
@@ -1040,6 +1249,12 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       result.success(null)
     }
 
+    /**
+     * Checks if a LevelPlay rewarded ad is ready to be shown.
+     *
+     * @param call The method call containing the ad instance ID.
+     * @param result The result to be returned containing the ready status as a boolean.
+     */
     private fun isRewardedAdReady(call: MethodCall, result: Result) {
       val adId: String = call.argument("adId")!!
       val isReady = levelPlayAdObjectManager.isRewardedAdReady(adId)
@@ -1153,6 +1368,6 @@ class IronSourceMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
       Center(1),
       Bottom(2)
     }
-  }
+}
 
 

@@ -31,12 +31,6 @@ class IronSourceMethodCallHandler {
     _consentViewListener = listener;
   }
 
-  // LevelPlay Init
-  static LevelPlayInitListener? _levelPlayInitListener;
-  static void setLevelPlayInitListener(LevelPlayInitListener listener) {
-    _levelPlayInitListener = listener;
-  }
-
   // LevelPlay RewardedVideo
   static LevelPlayRewardedVideoListener? _levelPlayRewardedVideoListener;
   static void setLevelPlayRewardedVideoListener(
@@ -63,6 +57,18 @@ class IronSourceMethodCallHandler {
   @Deprecated("This method will be removed in future versions. Please use LevelPlayBannerAdView instead.")
   static void setLevelPlayBannerListener(LevelPlayBannerListener? listener) {
     _levelPlayBannerListener = listener;
+  }
+
+  // LevelPlay ImpressionData listener
+  static LevelPlayImpressionDataListener? _levelPlayImpressionDataListener;
+  static void addLevelPlayImpressionDataListener(LevelPlayImpressionDataListener? listener) {
+    _levelPlayImpressionDataListener = listener;
+  }
+
+  // LevelPlay Init
+  static LevelPlayInitListener? _levelPlayInitListener;
+  static void setLevelPlayInitListener(LevelPlayInitListener listener) {
+    _levelPlayInitListener = listener;
   }
 
   // Triggers corresponding listener functions.
@@ -100,13 +106,6 @@ class IronSourceMethodCallHandler {
         final consentViewType = IncomingValueParser.getConsentViewTypeString(call.arguments);
         return _consentViewListener?.consentViewDidAccept(consentViewType);
 
-      // LevelPlay Init
-      case 'onInitFailed':
-        final error = LevelPlayInitError.fromMap(call.arguments);
-        return _levelPlayInitListener?.onInitFailed(error);
-      case 'onInitSuccess':
-        final configuration = LevelPlayConfiguration.fromMap(call.arguments);
-        return _levelPlayInitListener?.onInitSuccess(configuration);
       // LevelPlay Listeners
       // Auto RewardedVideo
       case 'LevelPlay_RewardedVideo:onAdAvailable':
@@ -195,6 +194,18 @@ class IronSourceMethodCallHandler {
         final adInfo = IncomingValueParser.getIronSourceAdInfo(call.arguments);
         return _levelPlayBannerListener?.onAdLeftApplication(adInfo);
 
+      // LevelPlay ImpressionData
+      case 'onLevelPlayImpressionSuccess':
+        final impressionData = LevelPlayImpressionData.fromMap(call.arguments);
+        return _levelPlayImpressionDataListener?.onImpressionSuccess(impressionData);
+
+      // LevelPlay Init
+      case 'onInitFailed':
+        final error = LevelPlayInitError.fromMap(call.arguments);
+        return _levelPlayInitListener?.onInitFailed(error);
+      case 'onInitSuccess':
+        final configuration = LevelPlayConfiguration.fromMap(call.arguments);
+        return _levelPlayInitListener?.onInitSuccess(configuration);
 
       // LevelPlay Rewarded Ad
       case 'onRewardedAdLoaded':

@@ -1,4 +1,5 @@
 /// Interface for "female" & "male" string values
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 enum IronSourceUserGender { Female, Male }
 
 /// Segment
@@ -6,6 +7,7 @@ enum IronSourceUserGender { Female, Male }
 /// and only non null values will be passed to native segments.
 /// - No restriction other than basic types,
 /// validations happen on the native level except for the Gender type.
+@Deprecated("This class will be removed in Flutter 4.0.0 version.")
 class IronSourceSegment {
   // initial values
   String? segmentName;

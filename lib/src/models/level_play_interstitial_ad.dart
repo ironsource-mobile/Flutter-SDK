@@ -6,7 +6,8 @@ import './listeners/level_play_interstitial_ad_listener.dart';
 class LevelPlayInterstitialAd {
   /// The ad unit id
   final String adUnitId;
-  // The Ad id that is used to identify the ad object - replacing adObjectId
+
+  /// Unique ad object identifier
   String adId = "";
 
   /// Unique ad object id
@@ -15,6 +16,9 @@ class LevelPlayInterstitialAd {
 
   /// A listener for interstitial ad events
   LevelPlayInterstitialAdListener? listener;
+
+  /// Optional bid floor
+  double? bidFloor;
 
   /// The instance ad manager of the MADU interstitial ads
   final LevelPlayAdObjectManager _levelPlayAdObjectManager = LevelPlayAdObjectManager();
@@ -37,6 +41,15 @@ class LevelPlayInterstitialAd {
     return listener;
   }
 
+  /// Set the bid floor
+  void setBidFloor(double bidFloor) {
+    this.bidFloor = bidFloor;
+  }
+
+  /// Get the bid floor value
+  double? getBidFloor() {
+    return bidFloor;
+  }
 
   /// Return whether placement is capped or not.
   static Future<bool> isPlacementCapped(String placementName) async {
