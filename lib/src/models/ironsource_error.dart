@@ -6,6 +6,13 @@ class IronSourceError {
 
   IronSourceError({required this.errorCode, this.message});
 
+  factory IronSourceError.fromMap(dynamic args) {
+    return IronSourceError(
+      errorCode: args['errorCode'] as int,
+      message: args['message'] as String?,
+    );
+  }
+
   @override
   String toString() {
     return 'errorCode: $errorCode, message:$message';
@@ -19,28 +26,4 @@ class IronSourceError {
 
   @override
   int get hashCode => errorCode.hashCode ^ message.hashCode;
-}
-
-@Deprecated("This class will be removed in Flutter 4.0.0 version.")
-class IronSourceConsentViewError extends IronSourceError {
-  final String consentViewType;
-  IronSourceConsentViewError({errorCode, message, required this.consentViewType})
-      : super(errorCode: errorCode, message: message);
-
-  @override
-  String toString() {
-    return "${super.toString()}, consentViewType: $consentViewType";
-  }
-
-  /// Equality overrides
-  @override
-  bool operator ==(other) {
-    return (other is IronSourceConsentViewError) &&
-        other.errorCode == errorCode &&
-        other.message == message &&
-        other.consentViewType == consentViewType;
-  }
-
-  @override
-  int get hashCode => super.hashCode ^ consentViewType.hashCode;
 }

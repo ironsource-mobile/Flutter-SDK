@@ -1,6 +1,6 @@
 #import "LevelPlayAdObjectManager.h"
-#import "./DelegateHandlers/LevelPlay/LevelPlayInterstitialAdDelegate.h"
-#import "./DelegateHandlers/LevelPlay/LevelPlayRewardedAdDelegate.h"
+#import "LevelPlayInterstitialAdDelegate.h"
+#import "LevelPlayRewardedAdDelegate.h"
 
 @interface LevelPlayAdObjectManager ()
 

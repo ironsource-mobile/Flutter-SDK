@@ -1,4 +1,4 @@
-group 'com.ironSource.ironsource_mediation'
+group 'com.unity3d.flutter'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -25,7 +25,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace = "com.ironSource.ironsource_mediation"
+    namespace = "com.unity3d.flutter"
 
     compileSdk = 35
 
@@ -47,5 +47,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.10.0'
+    implementation 'com.unity3d.ads-mediation:mediation-sdk:9.2.0'
 }

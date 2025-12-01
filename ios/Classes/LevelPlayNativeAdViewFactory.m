@@ -90,7 +90,7 @@
         }
         // Get the bundle path for the resource bundle
         bundle = [NSBundle bundleForClass:[self class]];
-        NSURL *bundleURL = [bundle URLForResource:@"ironsource_mediation" withExtension:@"bundle"];
+        NSURL *bundleURL = [bundle URLForResource:@"unity_levelplay_mediation" withExtension:@"bundle"];
         bundle = [NSBundle bundleWithURL:bundleURL]; // Resource bundle
         // Load the NIB file from the resource bundle
         nib = [UINib nibWithNibName:nibName bundle:bundle];

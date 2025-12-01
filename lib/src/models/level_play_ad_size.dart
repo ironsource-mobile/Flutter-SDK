@@ -1,6 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 import '../utils/level_play_method_channel.dart';
-import '../utils/ironsource_constants.dart';
+import '../utils/levelplay_constants.dart';
 
 /// Represents the size of an ad in LevelPlay.
 class LevelPlayAdSize {
@@ -18,21 +18,21 @@ class LevelPlayAdSize {
     this.isAdaptive = false
   });
 
-  static LevelPlayAdSize BANNER = LevelPlayAdSize._(width: IronConst.BANNER_WIDTH, height: IronConst.BANNER_HEIGHT, adLabel: IronConst.SIZE_BANNER);
-  static LevelPlayAdSize LARGE = LevelPlayAdSize._(width: IronConst.LARGE_WIDTH, height: IronConst.LARGE_HEIGHT, adLabel: IronConst.SIZE_LARGE);
-  static LevelPlayAdSize MEDIUM_RECTANGLE = LevelPlayAdSize._(width: IronConst.MEDIUM_RECTANGLE_WIDTH, height: IronConst.MEDIUM_RECTANGLE_HEIGHT, adLabel: IronConst.SIZE_MEDIUM_RECTANGLE);
+  static LevelPlayAdSize BANNER = LevelPlayAdSize._(width: LevelPlayConstants.BANNER_WIDTH, height: LevelPlayConstants.BANNER_HEIGHT, adLabel: LevelPlayConstants.SIZE_BANNER);
+  static LevelPlayAdSize LARGE = LevelPlayAdSize._(width: LevelPlayConstants.LARGE_WIDTH, height: LevelPlayConstants.LARGE_HEIGHT, adLabel: LevelPlayConstants.SIZE_LARGE);
+  static LevelPlayAdSize MEDIUM_RECTANGLE = LevelPlayAdSize._(width: LevelPlayConstants.MEDIUM_RECTANGLE_WIDTH, height: LevelPlayConstants.MEDIUM_RECTANGLE_HEIGHT, adLabel: LevelPlayConstants.SIZE_MEDIUM_RECTANGLE);
 
   static LevelPlayAdSize createCustomSize({required int width, required int height}) {
-    return LevelPlayAdSize._(width: width, height: height, adLabel: IronConst.SIZE_CUSTOM);
+    return LevelPlayAdSize._(width: width, height: height, adLabel: LevelPlayConstants.SIZE_CUSTOM);
   }
 
   static LevelPlayAdSize createAdSize({required String adSize}) {
     switch(adSize) {
-      case IronConst.SIZE_BANNER:
+      case LevelPlayConstants.SIZE_BANNER:
         return LevelPlayAdSize.BANNER;
-      case IronConst.SIZE_LARGE:
+      case LevelPlayConstants.SIZE_LARGE:
         return LevelPlayAdSize.LARGE;
-      case IronConst.SIZE_MEDIUM_RECTANGLE:
+      case LevelPlayConstants.SIZE_MEDIUM_RECTANGLE:
         return LevelPlayAdSize.MEDIUM_RECTANGLE;
       default:
         throw ArgumentError('Wrong Ad Size');

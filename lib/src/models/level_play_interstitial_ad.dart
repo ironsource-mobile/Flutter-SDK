@@ -10,10 +10,6 @@ class LevelPlayInterstitialAd {
   /// Unique ad object identifier
   String adId = "";
 
-  /// Unique ad object id
-  @Deprecated("This parameter will be removed in future sdk version, Please use [adId] instead.")
-  late int adObjectId;
-
   /// A listener for interstitial ad events
   LevelPlayInterstitialAdListener? listener;
 
@@ -27,9 +23,7 @@ class LevelPlayInterstitialAd {
   static final _channel = LevelPlayMethodChannel().channel;
 
   /// Constructs an instance of [LevelPlayInterstitialAd].
-  LevelPlayInterstitialAd({required this.adUnitId}) {
-    adObjectId = _levelPlayAdObjectManager.generateAdObjectId();
-  }
+  LevelPlayInterstitialAd({required this.adUnitId});
 
   /// Set the listener to handle ad events
   void setListener(LevelPlayInterstitialAdListener listener) {

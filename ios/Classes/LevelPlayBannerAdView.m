@@ -57,7 +57,7 @@
         [self pauseAutoRefresh:result];
     } else if ([methodName isEqualToString:@"resumeAutoRefresh"]) {
         [self resumeAutoRefresh:result];
-    } else if ([methodName isEqualToString:@"getAdId"]) { // Add getAdId handling here
+    } else if ([methodName isEqualToString:@"getAdId"]) {
         [self getAdId:result];
     }  else {
         result(FlutterMethodNotImplemented);

@@ -9,15 +9,11 @@
 + (NSDictionary *)dictionaryForAdInfo:(ISAdInfo *)adInfo;
 + (NSDictionary *)dictionaryForError:(NSError *)error;
 + (NSData *)dataFromImage:(UIImage *)image;
-+ (ISAdUnit *)getAdUnit:(NSString *)adUnitString;
 + (NSDictionary *)dictionaryForInitError:(NSError *)error;
 + (NSDictionary *)dictionaryForInitSuccess:(LPMConfiguration *)config;
 + (NSDictionary *)dictionaryForLevelPlayAdInfo:(LPMAdInfo *)adInfo;
-+ (NSDictionary *)dictionaryForImpressionData:(ISImpressionData *)impressionData;
 + (NSDictionary *)dictionaryForAdSize:(LPMAdSize *)adSize;
 + (NSDictionary *)dictionaryForLevelPlayAdError:(NSError *)error adUnitId:(NSString *) adUnitId;
-+ (NSDictionary *)dictionaryForPlacementInfo:(ISPlacementInfo *)placementInfo;
-+ (NSDictionary *)dictionaryForIronSourceConsentViewError:(NSError *)error consentViewType:(NSString *)consentViewType;
 + (UIViewController *)getRootViewController;
 + (NSDictionary *)dictionaryForLPMReward:(LPMReward *)reward;
 + (NSDictionary *)dictionaryForLPMImpressionData:(LPMImpressionData *)impressionData;

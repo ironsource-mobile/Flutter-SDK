@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ironsource_mediation/ironsource_mediation.dart';
+import 'package:unity_levelplay_mediation/unity_levelplay_mediation.dart';
 
 const APP_USER_ID = '[YOUR_UNIQUE_APP_USER_ID]';
 const String TAG = 'LevelPlayFlutterDemo';
@@ -53,7 +53,10 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, LevelPlayInitListener {
+class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, LevelPlayInitListener, LevelPlayBannerAdViewListener {
+  // Bottom banner ad variables
+  GlobalKey<LevelPlayBannerAdViewState> bannerAdKey = GlobalKey<LevelPlayBannerAdViewState>();
+  final adSize = LevelPlayAdSize.BANNER;
 
   @override
   void initState() {
@@ -102,9 +105,7 @@ class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, Lev
 
       // Finally, initialize
       // LevelPlay Init
-      List<AdFormat> legacyAdFormats = [AdFormat.NATIVE_AD];
       final initRequest = LevelPlayInitRequest.builder(appKey)
-        .withLegacyAdFormats(legacyAdFormats)
         .withUserId(APP_USER_ID)
         .build();
       await LevelPlay.init(initRequest: initRequest, initListener: this);
@@ -115,26 +116,87 @@ class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, Lev
 
   @override
   Widget build(BuildContext context) {
+
+    // Banner ad methods
+    void loadBannerAd() {
+      bannerAdKey.currentState?.loadAd();
+    }
+
+    void destroyBannerAd() {
+      bannerAdKey.currentState?.destroy();
+      setState(() {
+        bannerAdKey = GlobalKey<LevelPlayBannerAdViewState>();
+      });
+    }
+
     return MaterialApp(
       home: Builder(builder: (BuildContext context) {
         return Scaffold(
+          backgroundColor: Colors.white,
           body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  Image.asset('assets/images/iS_logo.png'),
-                  const SizedBox(height: 15),
-                  const LevelPlayRewardedVideoSection(),
-                  const SizedBox(height: 15),
-                  const LevelPlayInterstitialAdSection(),
-                  const SizedBox(height: 15),
-                  const LevelPlayBannerAdSection(),
-                  const SizedBox(height: 15),
-                  const LevelPlayNativeAdSection(),
-                  const SizedBox(height: 15),
-                ],
-              ),
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      // Logo with text below
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/logo_small.png',
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Text(
+                                  'for Flutter',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const LevelPlayRewardedVideoSection(),
+                      const LevelPlayInterstitialAdSection(),
+                      LevelPlayBannerAdSection(
+                        onLoadBanner: loadBannerAd,
+                        onDestroyBanner: destroyBannerAd,
+                      ),
+                      const LevelPlayNativeAdSection(),
+                      const SizedBox(height: 80), // Space for bottom banner
+                    ],
+                  ),
+                ),
+                // Banner positioned at bottom
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    width: adSize.width.toDouble(),
+                    height: adSize.height.toDouble(),
+                    alignment: Alignment.center,
+                    child: LevelPlayBannerAdView(
+                      key: bannerAdKey,
+                      adUnitId: bannerAdUnitId,
+                      adSize: adSize,
+                      listener: this,
+                      placementName: 'DefaultBanner',
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -157,6 +219,47 @@ class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, Lev
   @override
   void onInitSuccess(LevelPlayConfiguration configuration) {
     logMethodName('InitListener', 'onInitSuccess', configuration);
+  }
+
+  /// Bottom Banner Ad listener methods ----------------------------------///
+  @override
+  void onAdClicked(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdClicked', adInfo);
+  }
+
+  @override
+  void onAdCollapsed(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdCollapsed', adInfo);
+  }
+
+  @override
+  void onAdDisplayFailed(LevelPlayAdInfo adInfo, LevelPlayAdError error) {
+    logMethodName('Bottom Banner Ad', 'onAdDisplayFailed', '$error | $adInfo');
+  }
+
+  @override
+  void onAdDisplayed(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdDisplayed', adInfo);
+  }
+
+  @override
+  void onAdExpanded(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdExpanded', adInfo);
+  }
+
+  @override
+  void onAdLeftApplication(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdLeftApplication', adInfo);
+  }
+
+  @override
+  void onAdLoadFailed(LevelPlayAdError error) {
+    logMethodName('Bottom Banner Ad', 'onAdLoadFailed', error);
+  }
+
+  @override
+  void onAdLoaded(LevelPlayAdInfo adInfo) {
+    logMethodName('Bottom Banner Ad', 'onAdLoaded', adInfo);
   }
 }
 /// LevelPlay Rewarded Video Section -------------------------------------------///
@@ -194,10 +297,11 @@ class _LevelPlayRewardedVideoSectionState extends State<LevelPlayRewardedVideoSe
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Rewarded Ad", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Rewarded Ad", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black)),
+      const SizedBox(height: 10),
       HorizontalButtons([
-        ButtonInfo("Load Ad", _loadAd),
-        ButtonInfo("Show Ad", _showAd),
+        ButtonInfo("Load Rewarded", _loadAd),
+        ButtonInfo("Show Rewarded", _showAd),
       ]),
     ]);
   }
@@ -274,10 +378,11 @@ class _LevelPlayInterstitialAdSectionState extends State<LevelPlayInterstitialAd
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Interstitial Ad", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Interstitial Ad", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black)),
+      const SizedBox(height: 10),
       HorizontalButtons([
-        ButtonInfo("Load Ad", _loadAd),
-        ButtonInfo("Show Ad", _showAd),
+        ButtonInfo("Load Interstitial", _loadAd),
+        ButtonInfo("Show Interstitial", _showAd),
       ]),
     ]);
   }
@@ -320,54 +425,30 @@ class _LevelPlayInterstitialAdSectionState extends State<LevelPlayInterstitialAd
 
 /// LevelPlay Banner Ad Section -------------------------------------------///
 class LevelPlayBannerAdSection extends StatefulWidget {
-  const LevelPlayBannerAdSection({Key? key}) : super(key: key);
+  final VoidCallback onLoadBanner;
+  final VoidCallback onDestroyBanner;
+  
+  const LevelPlayBannerAdSection({
+    Key? key,
+    required this.onLoadBanner,
+    required this.onDestroyBanner,
+  }) : super(key: key);
 
   @override
   _LevelPlayBannerAdSectionState createState() => _LevelPlayBannerAdSectionState();
 }
 
-class _LevelPlayBannerAdSectionState extends State<LevelPlayBannerAdSection> with LevelPlayBannerAdViewListener {
-  // GlobalKey to control the LevelPlayBannerAd state (e.g., load, destroy)
-  GlobalKey<LevelPlayBannerAdViewState> _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
-  final _adSize = LevelPlayAdSize.BANNER;
-  final _adUnitId = bannerAdUnitId;
-  final _placementName = '';
-
-  // Initiates loading of the banner ad.
-  void _loadAd() {
-    _bannerKey.currentState?.loadAd();
-  }
-
-  // Destroys the current banner ad view and prepares for a new one.
-  void _destroyAd() {
-    _bannerKey.currentState?.destroy();
-
-    // Recreate the banner key to reset the state of the banner ad view.
-    // This ensures that if we load again, it's a fresh banner instance.
-    setState(() {
-      _bannerKey = GlobalKey<LevelPlayBannerAdViewState>();
-    });
-  }
+class _LevelPlayBannerAdSectionState extends State<LevelPlayBannerAdSection> {
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Banner Ad", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Banner Ad", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black)),
+      const SizedBox(height: 10),
       HorizontalButtons([
-        ButtonInfo("Load Ad", _loadAd),
-        ButtonInfo("Destroy Ad", _destroyAd)
+        ButtonInfo("Load Banner", widget.onLoadBanner),
+        ButtonInfo("Destroy Banner", widget.onDestroyBanner)
       ]),
-      SizedBox(
-        width: _adSize.width.toDouble(),
-        height: _adSize.height.toDouble(),
-        child: LevelPlayBannerAdView(
-          key: _bannerKey,
-          adUnitId: _adUnitId,
-          adSize: _adSize,
-          listener: this,
-          placementName: _placementName,
-        ),
-      )
     ]);
   }
 
@@ -466,18 +547,23 @@ class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdSection> with Le
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      const Text("Native Ad",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      const Text("Native Ad", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black)),
+      const SizedBox(height: 10),
       HorizontalButtons([
-        ButtonInfo("Load Ad", _loadAd),
-        ButtonInfo("Destroy Ad", _destroyAd),
+        ButtonInfo("Load Native Ad", _loadAd),
+        ButtonInfo("Destroy Native Ad", _destroyAd),
       ]),
-      LevelPlayNativeAdView(
-        key: _nativeAdKey,
-        height: _height,
+      const SizedBox(height: 15),
+      SizedBox(
         width: _width,
-        nativeAd: _nativeAd,
-        templateType: _templateType,
+        height: _height,
+        child: LevelPlayNativeAdView(
+          key: _nativeAdKey,
+          height: _height,
+          width: _width,
+          nativeAd: _nativeAd,
+          templateType: _templateType,
+        ),
       )
     ],
     );
@@ -485,29 +571,27 @@ class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdSection> with Le
 
   // LevelPlay NativeAd listener
   @override
-  void onAdClicked(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+  void onAdClicked(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
     logMethodName('Native Ad', 'onAdClicked', adInfo);
   }
 
   @override
-  void onAdImpression(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+  void onAdImpression(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
     logMethodName('Native Ad', 'onAdImpression', adInfo);
   }
 
   @override
-  void onAdLoadFailed(LevelPlayNativeAd? nativeAd, IronSourceError? error) {
+  void onAdLoadFailed(LevelPlayNativeAd nativeAd, IronSourceError error) {
     logMethodName('Native Ad', 'onAdLoadFailed', error);
   }
 
   @override
-  void onAdLoaded(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
+  void onAdLoaded(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
     logMethodName('Native Ad', 'onAdLoaded', adInfo);
-    if (nativeAd != null) {
-      setState(() {
-        // Update the state with the loaded native ad.
-        _nativeAd = nativeAd;
-      });
-    }
+    setState(() {
+      // Update the state with the loaded native ad.
+      _nativeAd = nativeAd;
+    });
   }
 }
 
@@ -549,16 +633,29 @@ class HorizontalButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final smallBtnStyle = ElevatedButton.styleFrom(minimumSize: const Size(150, 45));
     return Row(
         children: buttons
             .map((btn) => Expanded(
           child: Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(5.0),
               child: ElevatedButton(
                 onPressed: btn.onPressed,
-                child: Text(btn.title),
-                style: smallBtnStyle,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2196F3),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(150, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 2,
+                ),
+                child: Text(
+                  btn.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
               )),
         ))
             .toList());

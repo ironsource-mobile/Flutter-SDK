@@ -1,4 +1,20 @@
+## 9.0.0
+
+### Breaking Changes
+- **Package renamed** from `ironsource_mediation` to `unity_levelplay_mediation`
+- The old plugin `ironsource_mediation` is now **deprecated**
+- Removal of old deprecated IronSource classes and methods
+
+### SDK Updates
+- Wraps Android SDK 9.2.0 API
+- Wraps iOS SDK 9.2.0 API
+
+### Bug Fixes
+Fixed iOS test suite launch
+
 ## 3.2.0 , 2025
+
+> **DEPRECATION NOTICE**: This is the last version published under the package name `ironsource_mediation`. The package has been renamed to `unity_levelplay_mediation` starting from version 9.0.0. Please migrate to the new package.
 
 - Android SDK: 8.10.0
 - iOS SDK: 8.10.0
