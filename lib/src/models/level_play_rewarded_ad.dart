@@ -10,10 +10,6 @@ class LevelPlayRewardedAd {
   /// Unique ad object identifier
   String adId = "";
 
-  /// Unique ad object id
-  @Deprecated("This parameter will be removed in future sdk version, Please use [adId] instead.")
-  late int adObjectId;
-
   /// A listener for rewarded ad events
   LevelPlayRewardedAdListener? listener;
 
@@ -27,9 +23,7 @@ class LevelPlayRewardedAd {
   static final _channel = LevelPlayMethodChannel().channel;
 
   /// Constructs an instance of [LevelPlayRewardedAd].
-  LevelPlayRewardedAd( {required this.adUnitId}) {
-    adObjectId = _levelPlayAdObjectManager.generateAdObjectId();
-  }
+  LevelPlayRewardedAd( {required this.adUnitId});
 
   /// Set the listener to handle ad events
   void setListener(LevelPlayRewardedAdListener listener) {

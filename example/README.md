@@ -1,6 +1,6 @@
-# ironsource_mediation_example
+# unity_levelplay_mediation_example
 
-Demonstrates how to use the ironsource_mediation plugin.
+Demonstrates how to use the unity_levelplay_mediation plugin.
 
 ## Getting Started
 

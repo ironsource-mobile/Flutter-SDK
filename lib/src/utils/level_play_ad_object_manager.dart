@@ -15,10 +15,6 @@ class LevelPlayAdObjectManager {
   final Map<String, LevelPlayInterstitialAd> interstitialAdsMap = <String, LevelPlayInterstitialAd>{};
   final Map<String, LevelPlayRewardedAd> rewardedAdsMap = <String, LevelPlayRewardedAd>{};
 
-  /// Ad object id
-  @Deprecated('This field is deprecated and will be removed in 4.0.0 version. Use the adId property on ad objects instead.')
-  int _adObjectId = 0;
-
   /// Private constructor
   LevelPlayAdObjectManager._internal();
 
@@ -143,9 +139,4 @@ class LevelPlayAdObjectManager {
     rewardedAdsMap.clear();
     await _channel.invokeMethod('disposeAllAds');
   }
-
-  int generateAdObjectId() {
-    return _adObjectId++;
-  }
-
 }

@@ -1,19 +1,14 @@
-import './ad_format.dart';
-
-/// Represents a request for init, defining its appKey, userId and legacyAdFormats.
+/// Represents a request for init, defining its appKey and userId.
 class LevelPlayInitRequest {
   final String appKey;
   final String? userId;
-  @Deprecated("This variable will be removed in 4.0.0 version.")
-  final List<AdFormat> legacyAdFormats;
 
-  LevelPlayInitRequest({required this.appKey, this.userId = '', required this.legacyAdFormats});
+  LevelPlayInitRequest({required this.appKey, this.userId = ''});
 
   Map<String, dynamic> toMap() {
     return {
       'appKey': appKey,
       'userId': userId,
-      'adFormats': legacyAdFormats.map((unit) => unit.value).toList()
     };
   }
 
@@ -25,8 +20,7 @@ class LevelPlayInitRequest {
   String toString() {
     return 'LevelPlayInitRequest{'
         'appKey=$appKey, '
-        'userId=$userId, '
-        'legacyAdFormats=$legacyAdFormats'
+        'userId=$userId'
         '}';
   }
 }
@@ -34,7 +28,6 @@ class LevelPlayInitRequest {
 class LevelPlayInitRequestBuilder {
   String appKey;
   String userId = '';
-  List<AdFormat> legacyAdFormats = [];
 
   LevelPlayInitRequestBuilder({required this.appKey});
 
@@ -43,13 +36,7 @@ class LevelPlayInitRequestBuilder {
     return this;
   }
 
-  @Deprecated("This method will be removed in 4.0.0 version.")
-  LevelPlayInitRequestBuilder withLegacyAdFormats(List<AdFormat> legacyAdFormats) {
-    this.legacyAdFormats = legacyAdFormats;
-    return this;
-  }
-
   LevelPlayInitRequest build() {
-    return LevelPlayInitRequest(appKey: appKey, userId: userId, legacyAdFormats: legacyAdFormats);
+    return LevelPlayInitRequest(appKey: appKey, userId: userId);
   }
 }

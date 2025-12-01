@@ -1,13 +1,9 @@
 import 'package:flutter/services.dart';
 
-import '../utils/ironsource_constants.dart';
 import './listeners/level_play_native_ad_listener.dart';
-import '../utils/incoming_value_parser.dart';
-import './ironsource_ad_info.dart';
-import './ironsource_error.dart';
 
 /// Class representing a level play native ad
-class LevelPlayNativeAd with LevelPlayNativeAdListener {
+class LevelPlayNativeAd {
   String? placementName;
   LevelPlayNativeAdListener? listener;
   final String? title;
@@ -15,7 +11,10 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener {
   final String? advertiser;
   final String? callToAction;
   final LevelPlayNativeAdIcon? icon;
-  MethodChannel? methodChannel;
+  
+  // Private callback functions assigned by LevelPlayNativeAdView
+  Function()? _loadAdCallback;
+  Function()? _destroyAdCallback;
 
   LevelPlayNativeAd({
     this.placementName,
@@ -27,12 +26,6 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener {
     this.icon,
   });
 
-  void setMethodChannel(MethodChannel? methodChannel) {
-    this.methodChannel = methodChannel;
-    // Set handler for every method call
-    methodChannel?.setMethodCallHandler(_onNativeAdMethodCall);
-  }
-
   void setListener(LevelPlayNativeAdListener? listener) {
     this.listener = listener;
   }
@@ -40,14 +33,24 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener {
   void setPlacementName(String? placementName) {
     this.placementName = placementName;
   }
-
-  LevelPlayNativeAd? _extractCompletedNativeAd(dynamic args) {
-    final nativeAd = LevelPlayNativeAd.fromMap(args[IronConstKey.NATIVE_AD]);
-    // Copy existing variables to complete the native ad object
-    nativeAd.methodChannel = methodChannel;
-    nativeAd.listener = listener;
-    nativeAd.placementName = placementName;
-    return nativeAd;
+  
+  // Internal setter methods for LevelPlayNativeAdView (not exposed to users in docs)
+  void setLoadAdCallback(Function() callback) {
+    _loadAdCallback = callback;
+  }
+  
+  void setDestroyAdCallback(Function() callback) {
+    _destroyAdCallback = callback;
+  }
+  
+  // Load ad method - calls the callback assigned by LevelPlayNativeAdView
+  void loadAd() {
+    _loadAdCallback?.call();
+  }
+  
+  // Destroy ad method - calls the callback assigned by LevelPlayNativeAdView
+  void destroyAd() {
+    _destroyAdCallback?.call();
   }
 
   Map<String, dynamic> toMap() {
@@ -72,45 +75,6 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener {
     );
   }
 
-  /// Handle various method calls from the native platform
-  Future<dynamic> _onNativeAdMethodCall(MethodCall call) async {
-    switch(call.method) {
-      case 'onAdLoaded':
-        // Extract native ad and ad info from arguments
-        final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
-        // Notify user on ad loaded event
-        listener?.onAdLoaded(nativeAd, adInfo);
-        break;
-      case 'onAdLoadFailed':
-        // Extract native ad and error from arguments
-        final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final error = IncomingValueParser.getIronSourceError(IncomingValueParser.getValueForKey(IronConstKey.ERROR, call.arguments));
-        // Notify user on ad load failed event
-        listener?.onAdLoadFailed(nativeAd, error);
-        break;
-      case 'onAdImpression':
-        // Extract native ad and ad info from arguments
-        final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
-        // Notify user on ad load impression event
-        listener?.onAdImpression(nativeAd, adInfo);
-        break;
-      case 'onAdClicked':
-        // Extract native ad and ad info from arguments
-        final nativeAd = _extractCompletedNativeAd(call.arguments);
-        final adInfo = IncomingValueParser.getIronSourceAdInfo(IncomingValueParser.getValueForKey(IronConstKey.AD_INFO, call.arguments));
-        // Notify user on ad load clicked event
-        listener?.onAdClicked(nativeAd, adInfo);
-        break;
-      default: break;
-    }
-  }
-
-  Future<void> loadAd() async => await methodChannel?.invokeMethod('loadAd');
-
-  Future<void> destroyAd() async => methodChannel?.invokeMethod('destroyAd');
-
   @override
   String toString() {
     return 'LevelPlayNativeAd{title: $title, body: $body, advertiser: $advertiser, callToAction: $callToAction, iconUriString: ${icon?.uri}';
@@ -134,26 +98,6 @@ class LevelPlayNativeAd with LevelPlayNativeAdListener {
       advertiser.hashCode ^
       callToAction.hashCode ^
       icon.hashCode;
-
-  @override
-  void onAdClicked(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    listener?.onAdClicked(nativeAd, adInfo);
-  }
-
-  @override
-  void onAdImpression(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    listener?.onAdImpression(nativeAd, adInfo);
-  }
-
-  @override
-  void onAdLoadFailed(LevelPlayNativeAd? nativeAd, IronSourceError? error) {
-    listener?.onAdLoadFailed(nativeAd, error);
-  }
-
-  @override
-  void onAdLoaded(LevelPlayNativeAd? nativeAd, IronSourceAdInfo? adInfo) {
-    listener?.onAdLoaded(nativeAd, adInfo);
-  }
 
   /// Builder class for LevelPlayNativeAd
   static LevelPlayNativeAdBuilder builder() {
