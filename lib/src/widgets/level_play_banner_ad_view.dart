@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../utils/ironsource_constants.dart';
 import '../models/listeners/level_play_banner_ad_view_listener.dart';
 import '../models/level_play_ad_size.dart';
 import '../models/level_play_ad_info.dart';
@@ -65,7 +64,7 @@ class LevelPlayBannerAdView extends StatefulWidget {
 }
 
 class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
-  final String viewType = 'levelPlayBannerAdView';
+  final String viewType = 'LevelPlayBannerAdView';
   MethodChannel? channel;
   String _adId = "";
 
@@ -115,36 +114,36 @@ class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
   Future<dynamic> _onNativeAdMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onAdLoaded':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdLoaded(adInfo);
         break;
       case 'onAdLoadFailed':
-        final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
+        final error = LevelPlayAdError.fromMap(call.arguments['error']);
         widget.listener.onAdLoadFailed(error);
         break;
       case 'onAdDisplayed':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdDisplayed(adInfo);
         break;
       case 'onAdDisplayFailed':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
-        final error = LevelPlayAdError.fromMap(call.arguments[IronConstKey.ERROR]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
+        final error = LevelPlayAdError.fromMap(call.arguments['error']);
         widget.listener.onAdDisplayFailed(adInfo, error);
         break;
       case 'onAdClicked':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdClicked(adInfo);
         break;
       case 'onAdExpanded':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdExpanded(adInfo);
         break;
       case 'onAdCollapsed':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdCollapsed(adInfo);
         break;
       case 'onAdLeftApplication':
-        final adInfo = LevelPlayAdInfo.fromMap(call.arguments[IronConstKey.AD_INFO]);
+        final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdLeftApplication(adInfo);
         break;
       default:

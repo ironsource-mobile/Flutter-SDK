@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
-import './ironsource_constants.dart';
+import './levelplay_constants.dart';
 
 /// based on ATTrackingManager.AuthorizationStatus
 /// https://developer.apple.com/documentation/apptrackingtransparency/attrackingmanager/authorizationstatus
@@ -26,7 +26,7 @@ extension ATTStatusParser on int {
 }
 
 class ATTrackingManager {
-  static const _METHOD_CHANNEL = '${IronConst.METHOD_CHANNEL}/att';
+  static const _METHOD_CHANNEL = '${LevelPlayConstants.METHOD_CHANNEL}/att';
   static const MethodChannel _channel = MethodChannel(_METHOD_CHANNEL);
 
   static Future<ATTStatus> getTrackingAuthorizationStatus() async {

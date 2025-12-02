@@ -7,7 +7,7 @@
 // Register the MethodCallHandler to the channel with the main plugin's binaryMessenger
 + (void)registerWithMessenger:(NSObject<FlutterBinaryMessenger> *)messenger{
     FlutterMethodChannel* attChannel = [FlutterMethodChannel
-                                     methodChannelWithName:@"ironsource_mediation/att"
+                                     methodChannelWithName:@"unity_levelplay_mediation/att"
                                      binaryMessenger:messenger];
     
     // This handler will be invoked on the UI thread.

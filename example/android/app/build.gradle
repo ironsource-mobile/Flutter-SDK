@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace "com.ironSource.ironsource_mediation_example"
+    namespace "com.levelplaymediationexample"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -23,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.ironSource.ironsource_mediation_example"
+        applicationId "com.levelplaymediationexample"
         minSdk flutter.minSdkVersion
         targetSdk flutter.targetSdkVersion
         versionCode flutter.versionCode
@@ -57,7 +57,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:18.2.0'
 
     // Required when using custom native ad implementation
-    implementation 'com.unity3d.ads-mediation:mediation-sdk:8.10.0'
+    implementation 'com.unity3d.ads-mediation:mediation-sdk:9.2.0'
 
     // Add Adapters and Network SDKs here
     // https://developers.is.com/ironsource-mobile/flutter/mediation-networks-flutter/

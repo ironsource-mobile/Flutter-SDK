@@ -1,7 +1,7 @@
 #import "AppDelegate.h"
 #import "GeneratedPluginRegistrant.h"
 #import "NativeAdViewFactoryExample.h"
-#import "IronSourceMediationPlugin.h"
+#import "LevelPlayMediationPlugin.h"
 
 @implementation AppDelegate
 
@@ -18,9 +18,9 @@
     NativeAdViewFactoryExample *nativeAdViewFactoryExample = [[NativeAdViewFactoryExample alloc] initWithMessenger: flutterViewController.binaryMessenger layoutName: @"MyCustomNativeAdViewTemplate"];
 
     // Custom native ad view template must be registered here
-    [IronSourceMediationPlugin registerNativeAdViewFactory:self
-                                                  viewTypeId:@"ExampleViewType"
-                                         nativeAdViewFactory:nativeAdViewFactoryExample];
+    [LevelPlayMediationPlugin registerNativeAdViewFactory:self
+                                                viewTypeId:@"ExampleViewType"
+                                       nativeAdViewFactory:nativeAdViewFactoryExample];
   }
 
 

@@ -1,6 +1,6 @@
-name: ironsource_mediation_example
-description: Demonstrates how to use the ironsource_mediation plugin.
-version: 3.2.0
+name: levelplay_mediation_example
+description: Demonstrates how to use the unity_levelplay_mediation plugin.
+version: 9.0.0
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -13,9 +13,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  ironsource_mediation:
+  unity_levelplay_mediation:
     # When depending on this package from a real application you should use:
-    #   ironsource_mediation: ^x.y.z
+    #   unity_levelplay_mediation: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.
@@ -42,7 +42,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/iS_logo.png
+    - assets/images/logo_small.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

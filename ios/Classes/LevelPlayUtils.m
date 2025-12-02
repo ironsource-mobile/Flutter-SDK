@@ -49,7 +49,6 @@
 + (NSDictionary *)dictionaryForAdInfo:(ISAdInfo *)adInfo {
     return @{
             @"auctionId": adInfo.auction_id ?: [NSNull null],
-            @"adUnit": adInfo.ad_unit ?: [NSNull null],
             @"adNetwork": adInfo.ad_network ?: [NSNull null],
             @"instanceName": adInfo.instance_name ?: [NSNull null],
             @"instanceId": adInfo.instance_id ?: [NSNull null],
@@ -58,8 +57,7 @@
             @"precision": adInfo.precision ?: [NSNull null],
             @"ab": adInfo.ab ?: [NSNull null],
             @"segmentName": adInfo.segment_name ?: [NSNull null],
-            @"lifetimeRevenue": adInfo.lifetime_revenue != nil ? @(adInfo.lifetime_revenue.doubleValue) : [NSNull null],
-            @"encryptedCpm": adInfo.encrypted_cpm ?: [NSNull null],
+            @"encryptedCPM": adInfo.encrypted_cpm ?: [NSNull null],
             @"conversionValue": adInfo.conversion_value != nil ? @(adInfo.conversion_value.doubleValue) : [NSNull null],
     };
 }
@@ -95,27 +93,6 @@
 }
 
 /**
- * Converts the ad unit string to the corresponding ISAdUnit object.
- *
- * @param adUnitString The string representation of the ad unit.
- * @return The ISAdUnit object corresponding to the ad unit string.
- */
-+ (ISAdUnit *)getAdUnit:(NSString *)adUnitString {
-    // Check the ad unit string and return the corresponding ISAdUnit object
-    if ([adUnitString isEqualToString:@"REWARDED_VIDEO"]) {
-        return ISAdUnit.IS_AD_UNIT_REWARDED_VIDEO;
-    } else if ([adUnitString isEqualToString:@"INTERSTITIAL"]) {
-        return ISAdUnit.IS_AD_UNIT_INTERSTITIAL;
-    } else if ([adUnitString isEqualToString:@"BANNER"]) {
-        return ISAdUnit.IS_AD_UNIT_BANNER;
-    } else if ([adUnitString isEqualToString:@"NATIVE_AD"]) {
-        return ISAdUnit.IS_AD_UNIT_NATIVE_AD;
-    } else {
-        return nil; // Return nil if the ad unit string is invalid
-    }
-}
-
-/**
  Creates a dictionary containing information about the init error.
 
  @param error The NSError object representing the error.
@@ -129,14 +106,15 @@
 }
 
 /**
- Creates a dictionary containing information about the init error.
+ Creates a dictionary containing information about the init success.
 
- @param error The NSError object representing the error.
- @return A dictionary containing the error information.
+ @param config The LPMConfiguration object representing the configuration.
+ @return A dictionary containing the configuration information.
  */
 + (NSDictionary *)dictionaryForInitSuccess:(LPMConfiguration *)config {
     return @{
-            @"isAdQualityEnabled": [NSNumber numberWithBool:config.isAdQualityEnabled]
+            @"isAdQualityEnabled": [NSNumber numberWithBool:config.isAdQualityEnabled],
+            @"ab": config.ab ?: [NSNull null]
     };
 }
 
@@ -150,50 +128,22 @@
     return @{
             @"adId": adInfo.adId, // (nonnull)
             @"adUnitId": adInfo.adUnitId, // (nonnull)
-            @"adFormat": adInfo.adFormat, // (nonnull)
-            @"impressionData": @{
-                    @"auctionId": adInfo.auctionId, // (nonnull)
-                    @"adUnitName": adInfo.adUnitName, // (nonnull)
-                    @"adUnitId": adInfo.adUnitId, // (nonnull)
-                    @"adFormat": adInfo.adFormat, // (nonnull)
-                    @"country": adInfo.country, // (nonnull)
-                    @"ab": adInfo.ab, // (nonnull)
-                    @"segmentName": adInfo.segmentName, // (nonnull)
-                    @"placement": adInfo.placementName ?: [NSNull null], // (nullable)
-                    @"adNetwork": adInfo.adNetwork, // (nonnull)
-                    @"instanceName": adInfo.instanceName, // (nonnull)
-                    @"instanceId": adInfo.instanceId, // (nonnull)
-                    @"revenue": @([adInfo.revenue doubleValue]), // (nonnull)
-                    @"precision": adInfo.precision, // (nonnull)
-                    @"encryptedCPM": adInfo.encryptedCPM,  // (nonnull)
-                    @"conversionValue": adInfo.conversionValue ? @([adInfo.conversionValue doubleValue]) : [NSNull null], // (nullable)
-                    @"creativeId": adInfo.creativeId, // (nonnull)
-            },
+            @"adUnitName": adInfo.adUnitName, // (nonnull)
             @"adSize": [self dictionaryForAdSize:adInfo.adSize],
-            @"placementName": adInfo.placementName ?: [NSNull null]
-    };
-}
-
-+ (NSDictionary *)dictionaryForImpressionData:(ISImpressionData *)impressionData {
-    return @{
-            @"auctionId": impressionData.auction_id ?: [NSNull null],
-            @"adUnit": impressionData.ad_unit ?: [NSNull null],
-            @"adUnitName": impressionData.mediation_ad_unit_name ?: [NSNull null],
-            @"adUnitId": impressionData.mediation_ad_unit_id ?: [NSNull null],
-            @"adFormat": impressionData.ad_format ?: [NSNull null],
-            @"country": impressionData.instance_name ?: [NSNull null],
-            @"ab": impressionData.ab ?: [NSNull null],
-            @"segmentName": impressionData.segment_name ?: [NSNull null],
-            @"placement": impressionData.placement ?: [NSNull null],
-            @"adNetwork": impressionData.ad_network ?: [NSNull null],
-            @"instanceName": impressionData.instance_name ?: [NSNull null],
-            @"instanceId": impressionData.instance_id ?: [NSNull null],
-            @"revenue": impressionData.revenue ? @([impressionData.revenue doubleValue]) : [NSNull null],
-            @"precision": impressionData.precision ?: [NSNull null],
-            @"lifetimeRevenue": impressionData.lifetime_revenue ? @([impressionData.lifetime_revenue doubleValue]) : [NSNull null],
-            @"encryptedCPM": impressionData.encrypted_cpm ?: [NSNull null],
-            @"conversionValue": impressionData.conversion_value ? @([impressionData.conversion_value doubleValue]) : [NSNull null],
-            @"creativeId": impressionData.creative_id ?: [NSNull null],
+            @"adFormat": adInfo.adFormat, // (nonnull)
+            @"placementName": adInfo.placementName ?: [NSNull null], // (nullable)
+            @"auctionId": adInfo.auctionId, // (nonnull)
+            @"country": adInfo.country, // (nonnull)
+            @"ab": adInfo.ab, // (nonnull)
+            @"segmentName": adInfo.segmentName, // (nonnull)
+            @"adNetwork": adInfo.adNetwork, // (nonnull)
+            @"instanceName": adInfo.instanceName, // (nonnull)
+            @"instanceId": adInfo.instanceId, // (nonnull)
+            @"revenue": @([adInfo.revenue doubleValue]), // (nonnull)
+            @"precision": adInfo.precision, // (nonnull)
+            @"encryptedCPM": adInfo.encryptedCPM,  // (nonnull)
+            @"conversionValue": adInfo.conversionValue ? @([adInfo.conversionValue doubleValue]) : [NSNull null], // (nullable)
+            @"creativeId": adInfo.creativeId, // (nonnull)
     };
 }
 
@@ -227,27 +177,6 @@
             @"errorCode": [NSNumber numberWithInteger:error.code],
             @"errorMessage": error.userInfo[NSLocalizedDescriptionKey],
     };
-}
-
-+ (NSDictionary *)dictionaryForPlacementInfo:(ISPlacementInfo *)placementInfo {
-    return @{
-            @"placementName": placementInfo.placementName ?: [NSNull null],
-            @"rewardName": placementInfo.rewardName ?: [NSNull null],
-            @"rewardAmount": placementInfo.rewardAmount ?: [NSNull null],
-    };
-}
-
-/// For IronSourceConsentViewError on the plugin
-+ (NSDictionary *)dictionaryForIronSourceConsentViewError:(NSError *)error consentViewType:(NSString *)consentViewType {
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    if(consentViewType != nil){
-        dict[@"consentViewType"] = consentViewType;
-    }
-    dict[@"errorCode"] = [NSNumber numberWithInteger: error.code];
-    if(error.userInfo != nil){
-        dict[@"message"] = error.userInfo[NSLocalizedDescriptionKey];
-    }
-    return dict;
 }
 
 + (UIViewController *)getRootViewController {
