@@ -1,3 +1,8 @@
+## 9.0.1
+
+### Bug Fixes
+- Fixed Android dependency configuration to resolve compile-time class resolution issues
+
 ## 9.0.0
 
 ### Breaking Changes
@@ -11,6 +16,7 @@
 
 ### Bug Fixes
 Fixed iOS test suite launch
+Fixed NullPointerException crash in Android when banner/native ad callbacks fire after view disposal
 
 ## 3.2.0 , 2025
 
