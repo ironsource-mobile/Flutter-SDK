@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'unity_levelplay_mediation'
-  s.version          = '9.0.1'
+  s.version          = '9.1.0'
   s.summary          = 'Unity LevelPlay - The Leading Mobile Advertising Technology Platform'
   s.description      = <<-DESC
 Monetize & Promote Your Apps
@@ -25,6 +25,6 @@ Mobile SDK for Unity LevelPlay
       'unity_levelplay_mediation' => ['Classes/**/*.xib']
   }
 
-  s.dependency 'IronSourceSDK','9.2.0.0'
+  s.dependency 'IronSourceSDK','9.4.0.0'
 end
 
