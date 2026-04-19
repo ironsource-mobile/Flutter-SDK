@@ -7,24 +7,20 @@ const APP_USER_ID = '[YOUR_UNIQUE_APP_USER_ID]';
 const String TAG = 'LevelPlayFlutterDemo';
 
 // App Keys
-const String APP_KEY_ANDROID = '85460dcd';
-const String APP_KEY_IOS = '8545d445';
+const String APP_KEY_ANDROID = '25b63cf85';
+const String APP_KEY_IOS = '25c43a4a5';
 
 // Rewarded video ad unit IDs
-const String REWARDED_AD_UNIT_ID_ANDROID = '76yy3nay3ceui2a3';
-const String REWARDED_AD_UNIT_ID_IOS = 'qwouvdrkuwivay5q';
+const String REWARDED_AD_UNIT_ID_ANDROID = 'syz3d8ekts22q0or';
+const String REWARDED_AD_UNIT_ID_IOS = 'l1quzz1xmmdhw5er';
 
 // Interstitial ad unit IDs
-const String INTERSTITIAL_AD_UNIT_ID_ANDROID = 'aeyqi3vqlv6o8sh9';
-const String INTERSTITIAL_AD_UNIT_ID_IOS = 'wmgt0712uuux8ju4';
+const String INTERSTITIAL_AD_UNIT_ID_ANDROID = 'h3xw38h9214adgxo';
+const String INTERSTITIAL_AD_UNIT_ID_IOS = 'obg6ohwts3y690ks';
 
 // Banner ad unit IDs
-const String BANNER_AD_UNIT_ID_ANDROID = 'thnfvcsog13bhn08';
-const String BANNER_AD_UNIT_ID_IOS = 'iep3rxsyp9na3rw8';
-
-// Native ad unit IDs
-const String NATIVE_AD_UNIT_ID_ANDROID = 'ysoafvxg3grxe59f';
-const String NATIVE_AD_UNIT_ID_IOS = 'w58kpushhcbps32x';
+const String BANNER_AD_UNIT_ID_ANDROID = '4fpetq4lhe5lsw3e';
+const String BANNER_AD_UNIT_ID_IOS = 'xc2bsuntn9ea734t';
 
 // Helper methods to get platform-specific appkeys and ad unit IDs.
 String get appKey => Platform.isAndroid ? APP_KEY_ANDROID : Platform.isIOS ? APP_KEY_IOS
@@ -38,9 +34,6 @@ String get interstitialAdUnitId => Platform.isAndroid ? INTERSTITIAL_AD_UNIT_ID_
 
 String get bannerAdUnitId => Platform.isAndroid ? BANNER_AD_UNIT_ID_ANDROID : Platform.isIOS ? BANNER_AD_UNIT_ID_IOS
     : throw Exception("Unsupported Platform for Banner Ad Unit ID");
-
-String get nativeAdUnitId => Platform.isAndroid ? NATIVE_AD_UNIT_ID_ANDROID : Platform.isIOS ? NATIVE_AD_UNIT_ID_IOS
-    : throw Exception("Unsupported Platform for Native Ad Unit ID");
 
 void main() {
   runApp(const MyApp());
@@ -173,7 +166,6 @@ class _MyAppState extends State<MyApp> with LevelPlayImpressionDataListener, Lev
                         onLoadBanner: loadBannerAd,
                         onDestroyBanner: destroyBannerAd,
                       ),
-                      const LevelPlayNativeAdSection(),
                       const SizedBox(height: 80), // Space for bottom banner
                     ],
                   ),
@@ -490,108 +482,6 @@ class _LevelPlayBannerAdSectionState extends State<LevelPlayBannerAdSection> {
   @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdLoaded', adInfo);
-  }
-}
-
-/// LevelPlay Native Ad Section -------------------------------------------///
-class LevelPlayNativeAdSection extends StatefulWidget {
-
-  const LevelPlayNativeAdSection({Key? key}) : super(key: key);
-
-  @override
-  _LevelPlayNativeAdsSection createState() =>
-      _LevelPlayNativeAdsSection();
-}
-
-class _LevelPlayNativeAdsSection extends State<LevelPlayNativeAdSection> with LevelPlayNativeAdListener {
-  late LevelPlayNativeAd _nativeAd;
-  // GlobalKey to allow re-rendering the LevelPlayNativeAdView widget when the ad is destroyed and re-created.
-  GlobalKey _nativeAdKey = GlobalKey();
-  final double _width = 350;
-  final double _height = 300;
-  final String _placementName = '';
-  final LevelPlayTemplateType _templateType = LevelPlayTemplateType
-      .MEDIUM; // Built-in native ad template(not required when implementing custom template)
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the native ad
-    _createNativeAd();
-  }
-
-  // Creates a new instance of LevelPlayNativeAd with the specified listener and placement.
-  void _createNativeAd() {
-    _nativeAd = LevelPlayNativeAd.builder()
-        .withPlacementName(_placementName)
-        .withListener(this)
-        .build();
-  }
-
-  // Initiates loading of the native ad.
-  void _loadAd() {
-    _nativeAd.loadAd();
-  }
-
-  // Destroys the current native ad and prepares for a new one.
-  void _destroyAd() {
-    _nativeAd.destroyAd();
-    // Create a new key and a new native ad instance to force widget recreation
-    setState(() {
-      _nativeAdKey = GlobalKey(); // Create a new key to force view recreation
-      _createNativeAd(); // Create a new native ad instance
-    });
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      const Text("Native Ad", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black)),
-      const SizedBox(height: 10),
-      HorizontalButtons([
-        ButtonInfo("Load Native Ad", _loadAd),
-        ButtonInfo("Destroy Native Ad", _destroyAd),
-      ]),
-      const SizedBox(height: 15),
-      SizedBox(
-        width: _width,
-        height: _height,
-        child: LevelPlayNativeAdView(
-          key: _nativeAdKey,
-          height: _height,
-          width: _width,
-          nativeAd: _nativeAd,
-          templateType: _templateType,
-        ),
-      )
-    ],
-    );
-  }
-
-  // LevelPlay NativeAd listener
-  @override
-  void onAdClicked(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
-    logMethodName('Native Ad', 'onAdClicked', adInfo);
-  }
-
-  @override
-  void onAdImpression(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
-    logMethodName('Native Ad', 'onAdImpression', adInfo);
-  }
-
-  @override
-  void onAdLoadFailed(LevelPlayNativeAd nativeAd, IronSourceError error) {
-    logMethodName('Native Ad', 'onAdLoadFailed', error);
-  }
-
-  @override
-  void onAdLoaded(LevelPlayNativeAd nativeAd, AdInfo adInfo) {
-    logMethodName('Native Ad', 'onAdLoaded', adInfo);
-    setState(() {
-      // Update the state with the loaded native ad.
-      _nativeAd = nativeAd;
-    });
   }
 }
 

@@ -81,6 +81,13 @@ static LevelPlayMediationPlugin *instance = nil;
         [self addImpressionDataListener:call.arguments result:result];
     } else if([@"setPluginData" isEqualToString:call.method]) {
         [self setPluginData:call.arguments result:result];
+    // LevelPlay Privacy Settings API
+    } else if([@"setGDPRConsents" isEqualToString:call.method]) {
+        [self setGDPRConsents:call.arguments result:result];
+    } else if([@"setCCPA" isEqualToString:call.method]) {
+        [self setCCPA:call.arguments result:result];
+    } else if([@"setCOPPA" isEqualToString:call.method]) {
+        [self setCOPPA:call.arguments result:result];
     // LevelPlay Init API
     } else if ([@"init" isEqualToString:call.method]) {
         [self init:call.arguments result:result];
@@ -294,6 +301,46 @@ static LevelPlayMediationPlugin *instance = nil;
     }
     
     return result(nil);
+}
+
+#pragma mark - LevelPlay Privacy Settings ==================================================================
+
+/**
+ * Sets the GDPR consent per network.
+ *
+ * @param args   The arguments containing the network consents dictionary.
+ * @param result The result to be returned after processing.
+ */
+- (void)setGDPRConsents:(nullable id) args result:(nonnull FlutterResult)result {
+    NSDictionary<NSString*, NSNumber*> *networkConsents = [args valueForKey:@"networkConsents"];
+    [LPMPrivacySettings setGDPRConsents:networkConsents];
+    result(nil);
+}
+
+/**
+ * Sets the CCPA (California Consumer Privacy Act) flag.
+ *
+ * @param args   The arguments containing the CCPA value.
+ * @param result The result to be returned after processing.
+ */
+- (void)setCCPA:(nullable id) args result:(nonnull FlutterResult)result {
+    NSNumber *valueNum = [args valueForKey:@"value"];
+    BOOL value = [valueNum boolValue];
+    [LPMPrivacySettings setCCPA:value];
+    result(nil);
+}
+
+/**
+ * Sets the COPPA (Children's Online Privacy Protection Act) flag.
+ *
+ * @param args   The arguments containing the COPPA value.
+ * @param result The result to be returned after processing.
+ */
+- (void)setCOPPA:(nullable id) args result:(nonnull FlutterResult)result {
+    NSNumber *valueNum = [args valueForKey:@"value"];
+    BOOL value = [valueNum boolValue];
+    [LPMPrivacySettings setCOPPA:value];
+    result(nil);
 }
 
 #pragma mark - LevelPlay Init ===============================================================================

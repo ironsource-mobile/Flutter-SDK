@@ -16,6 +16,7 @@ import com.unity3d.mediation.impression.LevelPlayImpressionDataListener
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
 import com.unity3d.mediation.rewarded.LevelPlayRewardedAd
 import com.unity3d.mediation.segment.LevelPlaySegment
+import com.unity3d.mediation.LevelPlayPrivacySettings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -84,6 +85,10 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       "launchTestSuite" -> launchTestSuite(result)
       "addImpressionDataListener" -> addImpressionDataListener(result)
       "setPluginData" -> setPluginData(call, result)
+      /** LevelPlay Privacy Settings API ===============================================================================*/
+      "setGDPRConsents" -> setGDPRConsents(call, result)
+      "setCCPA" -> setCCPA(call, result)
+      "setCOPPA" -> setCOPPA(call, result)
       /** LevelPlay Init API ===============================================================================*/
       "init" -> init(call, result)
       /** LevelPlay Interstitial Ad API ===============================================================================*/
@@ -236,6 +241,46 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     val pluginFrameworkVersion = call.argument("pluginFrameworkVersion") as String?
 
     ConfigFile.getConfigFile().setPluginData(pluginType, pluginVersion, pluginFrameworkVersion)
+    result.success(null)
+  }
+
+  // endregion
+
+  /** region LevelPlay Privacy Settings API ====================================================*/
+
+  /**
+   * Sets the GDPR consent per network.
+   *
+   * @param call The method call containing the network consents map.
+   * @param result The result to be returned after processing.
+   */
+  private fun setGDPRConsents(call: MethodCall, result: Result) {
+    val networkConsents: HashMap<String, Boolean> = call.argument("networkConsents")!!
+    LevelPlayPrivacySettings.setGDPRConsents(networkConsents)
+    result.success(null)
+  }
+
+  /**
+   * Sets the CCPA (California Consumer Privacy Act) flag.
+   *
+   * @param call The method call containing the CCPA value.
+   * @param result The result to be returned after processing.
+   */
+  private fun setCCPA(call: MethodCall, result: Result) {
+    val value: Boolean = call.argument("value")!!
+    LevelPlayPrivacySettings.setCCPA(value)
+    result.success(null)
+  }
+
+  /**
+   * Sets the COPPA (Children's Online Privacy Protection Act) flag.
+   *
+   * @param call The method call containing the COPPA value.
+   * @param result The result to be returned after processing.
+   */
+  private fun setCOPPA(call: MethodCall, result: Result) {
+    val value: Boolean = call.argument("value")!!
+    LevelPlayPrivacySettings.setCOPPA(value)
     result.success(null)
   }
 

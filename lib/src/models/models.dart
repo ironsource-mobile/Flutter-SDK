@@ -16,3 +16,4 @@ export './level_play_reward.dart';
 export './level_play_rewarded_ad.dart';
 export './level_play_segment.dart';
 export './level_play_impression_data.dart';
+export './level_play_privacy_settings.dart';

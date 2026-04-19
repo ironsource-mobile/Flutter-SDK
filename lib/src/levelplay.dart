@@ -68,9 +68,13 @@ class LevelPlay {
   /// Sets [isConsent] as the GDPR setting.
   /// - __Note__: Must be called before [init].
   ///
+  /// __Deprecated:__ Use [LevelPlayPrivacySettings.setGDPRConsents] instead.
+  /// This method is deprecated and will be removed in a future version.
+  ///
   /// Native SDK Reference
   /// - Android: setConsent
   /// -     iOS: setConsent
+  @Deprecated('Use LevelPlayPrivacySettings.setGDPRConsents instead')
   static Future<void> setConsent(bool isConsent) async {
     return _channel.invokeMethod('setConsent', {'isConsent': isConsent});
   }

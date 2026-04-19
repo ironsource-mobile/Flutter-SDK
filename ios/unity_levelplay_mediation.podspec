@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'unity_levelplay_mediation'
-  s.version          = '9.1.0'
+  s.version          = '9.2.0'
   s.summary          = 'Unity LevelPlay - The Leading Mobile Advertising Technology Platform'
   s.description      = <<-DESC
 Monetize & Promote Your Apps

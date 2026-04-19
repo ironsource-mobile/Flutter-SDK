@@ -1,3 +1,8 @@
+## 9.2.0
+
+### Features
+- Add LevelPlayPrivacySettings API with support for GDPR, CCPA, and COPPA compliance
+
 ## 9.1.0
 
 ### SDK Updates
