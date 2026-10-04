@@ -68,13 +68,13 @@ class LevelPlay {
   /// Sets [isConsent] as the GDPR setting.
   /// - __Note__: Must be called before [init].
   ///
-  /// __Deprecated:__ Use [LevelPlayPrivacySettings.setGDPRConsents] instead.
+  /// __Deprecated:__ Use [LevelPlayPrivacySettings.setGDPRConsent] instead.
   /// This method is deprecated and will be removed in a future version.
   ///
   /// Native SDK Reference
   /// - Android: setConsent
   /// -     iOS: setConsent
-  @Deprecated('Use LevelPlayPrivacySettings.setGDPRConsents instead')
+  @Deprecated('Use LevelPlayPrivacySettings.setGDPRConsent instead')
   static Future<void> setConsent(bool isConsent) async {
     return _channel.invokeMethod('setConsent', {'isConsent': isConsent});
   }
@@ -211,6 +211,12 @@ class LevelPlay {
         final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adId];
         rewardedAdObject?.getListener()?.onAdRewarded(reward, adInfo);
         break;
+      case 'onRewardedAdImpressionSuccess':
+        final adId = call.arguments["adId"] as String;
+        final impressionData = LevelPlayImpressionData.fromMap(call.arguments['impressionData']);
+        final rewardedAdObject = _levelPlayAdObjectManager.rewardedAdsMap[adId];
+        rewardedAdObject?.getImpressionDataListener()?.onImpressionSuccess(impressionData);
+        break;
 
     // LevelPlay Interstitial Ad
       case 'onInterstitialAdLoaded':
@@ -255,6 +261,12 @@ class LevelPlay {
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adId];
         interstitialAdObject?.getListener()?.onAdClosed(adInfo);
+        break;
+      case 'onInterstitialAdImpressionSuccess':
+        final adId = call.arguments["adId"] as String;
+        final impressionData = LevelPlayImpressionData.fromMap(call.arguments['impressionData']);
+        final interstitialAdObject = _levelPlayAdObjectManager.interstitialAdsMap[adId];
+        interstitialAdObject?.getImpressionDataListener()?.onImpressionSuccess(impressionData);
         break;
       default:
         throw UnimplementedError("Method not implemented: ${call.method}");

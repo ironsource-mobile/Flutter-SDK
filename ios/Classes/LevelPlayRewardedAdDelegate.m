@@ -86,4 +86,12 @@
     [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.channel methodName: @"onRewardedAdRewarded" args: args];
 }
 
+- (void)impressionDataDidSucceed:(LPMImpressionData *)impressionData {
+    NSDictionary *args = @{
+            @"adId": self.adId,
+            @"impressionData": [LevelPlayUtils dictionaryForLPMImpressionData:impressionData]
+    };
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.channel methodName: @"onRewardedAdImpressionSuccess" args: args];
+}
+
 @end

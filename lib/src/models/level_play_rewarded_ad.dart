@@ -1,6 +1,7 @@
 import '../utils/level_play_ad_object_manager.dart';
 import '../utils/level_play_method_channel.dart';
 import './listeners/level_play_rewarded_ad_listener.dart';
+import './listeners/level_play_impression_data_listener.dart';
 
 /// Represents a LevelPlay rewarded ad.
 class LevelPlayRewardedAd {
@@ -33,6 +34,21 @@ class LevelPlayRewardedAd {
   /// Get the listener for handling ad events
   LevelPlayRewardedAdListener? getListener() {
     return listener;
+  }
+
+  /// A listener for impression-level revenue data of this ad instance
+  LevelPlayImpressionDataListener? impressionDataListener;
+
+  /// Set the listener for impression-level revenue data of this ad instance
+  /// - Android: setImpressionDataListener
+  /// -     iOS: setImpressionDataDelegate
+  void setImpressionDataListener(LevelPlayImpressionDataListener listener) {
+    impressionDataListener = listener;
+  }
+
+  /// Get the listener for impression-level revenue data of this ad instance
+  LevelPlayImpressionDataListener? getImpressionDataListener() {
+    return impressionDataListener;
   }
 
   /// Set the bid floor

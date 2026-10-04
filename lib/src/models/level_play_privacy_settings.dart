@@ -11,6 +11,24 @@ import '../utils/level_play_method_channel.dart';
 class LevelPlayPrivacySettings {
   static final _channel = LevelPlayMethodChannel().channel;
 
+  /// Sets the user's GDPR consent.
+  ///
+  /// [consent] true if the user has granted consent to collect and share data, false otherwise.
+  ///
+  /// Example:
+  /// ```dart
+  /// LevelPlayPrivacySettings.setGDPRConsent(true);
+  /// ```
+  ///
+  /// Native SDK Reference
+  /// - Android: setGDPRConsent
+  /// -     iOS: setGDPRConsent
+  static Future<void> setGDPRConsent(bool consent) async {
+    return _channel.invokeMethod('setGDPRConsent', {'consent': consent});
+  }
+
+  /// __Deprecated:__ Use [setGDPRConsent] instead.
+  ///
   /// Sets the consent per network for GDPR compliance.
   ///
   /// This method allows you to specify which ad networks have been granted
@@ -31,6 +49,7 @@ class LevelPlayPrivacySettings {
   /// Native SDK Reference
   /// - Android: setGDPRConsents
   /// -     iOS: setGDPRConsents
+  @Deprecated('Use LevelPlayPrivacySettings.setGDPRConsent instead')
   static Future<void> setGDPRConsents(Map<String, bool> networkConsents) async {
     return _channel.invokeMethod('setGDPRConsents', {'networkConsents': networkConsents});
   }

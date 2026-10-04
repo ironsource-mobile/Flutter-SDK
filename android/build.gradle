@@ -2,7 +2,7 @@ group 'com.unity3d.flutter'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "2.1.21"
     repositories {
         google()
         mavenCentral()
@@ -47,5 +47,5 @@ android {
 }
 
 dependencies {
-    api 'com.unity3d.ads-mediation:mediation-sdk:9.4.0'
+    api 'com.unity3d.ads-mediation:mediation-sdk:9.6.1'
 }

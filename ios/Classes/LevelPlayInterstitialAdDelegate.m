@@ -77,4 +77,12 @@
     [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.channel methodName: @"onInterstitialAdClosed" args: args];
 }
 
+- (void)impressionDataDidSucceed:(LPMImpressionData *)impressionData {
+    NSDictionary *args = @{
+            @"adId": self.adId,
+            @"impressionData": [LevelPlayUtils dictionaryForLPMImpressionData:impressionData]
+    };
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.channel methodName: @"onInterstitialAdImpressionSuccess" args: args];
+}
+
 @end

@@ -16,7 +16,7 @@ class LevelPlayAdError {
 
   factory LevelPlayAdError.fromMap(dynamic args) {
     return LevelPlayAdError(
-      errorMessage: args['errorMessage'] as String,
+      errorMessage: args['errorMessage'] as String? ?? '',
       errorCode: args['errorCode'] as int,
       adUnitId: args['adUnitId'] as String?,
     );

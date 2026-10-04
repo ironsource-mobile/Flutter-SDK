@@ -86,6 +86,7 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       "addImpressionDataListener" -> addImpressionDataListener(result)
       "setPluginData" -> setPluginData(call, result)
       /** LevelPlay Privacy Settings API ===============================================================================*/
+      "setGDPRConsent" -> setGDPRConsent(call, result)
       "setGDPRConsents" -> setGDPRConsents(call, result)
       "setCCPA" -> setCCPA(call, result)
       "setCOPPA" -> setCOPPA(call, result)
@@ -254,6 +255,16 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
    * @param call The method call containing the network consents map.
    * @param result The result to be returned after processing.
    */
+  private fun setGDPRConsent(call: MethodCall, result: Result) {
+    val consent: Boolean = call.argument("consent")!!
+    LevelPlayPrivacySettings.setGDPRConsent(consent)
+    result.success(null)
+  }
+
+  /**
+   * Sets the consent per network. Deprecated by the native SDK in favor of setGDPRConsent.
+   */
+  @Suppress("DEPRECATION")
   private fun setGDPRConsents(call: MethodCall, result: Result) {
     val networkConsents: HashMap<String, Boolean> = call.argument("networkConsents")!!
     LevelPlayPrivacySettings.setGDPRConsents(networkConsents)
@@ -543,14 +554,8 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-      if (activity is FlutterActivity) {
-        activity = binding.activity as FlutterActivity
-        (activity as FlutterActivity).lifecycle.addObserver(this)
-      } else if (activity is FlutterFragmentActivity) {
-        activity = binding.activity as FlutterFragmentActivity
-        (activity as FlutterFragmentActivity).lifecycle.addObserver(this)
-      }
-      levelPlayAdObjectManager.activity = activity
+      // activity was cleared in onDetachedFromActivityForConfigChanges, so re-attach from the binding
+      onAttachedToActivity(binding)
     }
 
     override fun onDetachedFromActivity() {

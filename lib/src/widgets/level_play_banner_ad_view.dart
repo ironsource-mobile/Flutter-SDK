@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/listeners/level_play_banner_ad_view_listener.dart';
+import '../models/listeners/level_play_impression_data_listener.dart';
+import '../models/level_play_impression_data.dart';
 import '../models/level_play_ad_size.dart';
 import '../models/level_play_ad_info.dart';
 import '../models/level_play_ad_error.dart';
@@ -20,6 +22,11 @@ class LevelPlayBannerAdView extends StatefulWidget {
   /// A listener to banner ad view events
   final LevelPlayBannerAdViewListener listener;
 
+  /// An optional listener for impression-level revenue data of this banner instance
+  /// - Android: setImpressionDataListener
+  /// -     iOS: setImpressionDataDelegate
+  final LevelPlayImpressionDataListener? impressionDataListener;
+
   /// A placement string for the banner ad
   final String? placementName;
 
@@ -35,6 +42,7 @@ class LevelPlayBannerAdView extends StatefulWidget {
     required this.adUnitId,
     required this.adSize,
     required this.listener,
+    this.impressionDataListener,
     this.placementName,
     this.bidFloor,
     this.onPlatformViewCreated,
@@ -145,6 +153,10 @@ class LevelPlayBannerAdViewState extends State<LevelPlayBannerAdView> {
       case 'onAdLeftApplication':
         final adInfo = LevelPlayAdInfo.fromMap(call.arguments['adInfo']);
         widget.listener.onAdLeftApplication(adInfo);
+        break;
+      case 'onAdImpressionSuccess':
+        final impressionData = LevelPlayImpressionData.fromMap(call.arguments['impressionData']);
+        widget.impressionDataListener?.onImpressionSuccess(impressionData);
         break;
       default:
         break;

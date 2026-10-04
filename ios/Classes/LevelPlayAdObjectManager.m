@@ -54,6 +54,7 @@
                                                                    channel:self.channel];
         
     [interstitialAd setDelegate:interstitialAdDelegate];
+    [interstitialAd setImpressionDataDelegate:interstitialAdDelegate];
         
     // Store references
     self.interstitialDelegatesDict[interstitialAd.adId] = interstitialAdDelegate;
@@ -117,6 +118,7 @@
                                                        initWithAdId:rewardedAd.adId
                                                        channel:self.channel];
     [rewardedAd setDelegate: rewardedAdDelegate];
+    [rewardedAd setImpressionDataDelegate: rewardedAdDelegate];
     
     // Store references
     self.rewardedDelegatesDict[rewardedAd.adId] = rewardedAdDelegate;

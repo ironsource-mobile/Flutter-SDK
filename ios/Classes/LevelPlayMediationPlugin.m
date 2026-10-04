@@ -82,6 +82,8 @@ static LevelPlayMediationPlugin *instance = nil;
     } else if([@"setPluginData" isEqualToString:call.method]) {
         [self setPluginData:call.arguments result:result];
     // LevelPlay Privacy Settings API
+    } else if([@"setGDPRConsent" isEqualToString:call.method]) {
+        [self setGDPRConsent:call.arguments result:result];
     } else if([@"setGDPRConsents" isEqualToString:call.method]) {
         [self setGDPRConsents:call.arguments result:result];
     } else if([@"setCCPA" isEqualToString:call.method]) {
@@ -310,6 +312,15 @@ static LevelPlayMediationPlugin *instance = nil;
  *
  * @param args   The arguments containing the network consents dictionary.
  * @param result The result to be returned after processing.
+ */
+- (void)setGDPRConsent:(nullable id) args result:(nonnull FlutterResult)result {
+    NSNumber *consentNum = [args valueForKey:@"consent"];
+    [LPMPrivacySettings setGDPRConsent:[consentNum boolValue]];
+    result(nil);
+}
+
+/**
+ * Sets the consent per network. Deprecated by the native SDK in favor of setGDPRConsent.
  */
 - (void)setGDPRConsents:(nullable id) args result:(nonnull FlutterResult)result {
     NSDictionary<NSString*, NSNumber*> *networkConsents = [args valueForKey:@"networkConsents"];

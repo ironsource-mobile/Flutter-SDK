@@ -4,6 +4,8 @@ import android.app.Activity
 import com.unity3d.flutter.LevelPlayUtils.Companion.invokeMethodOnUiThread
 import com.unity3d.mediation.LevelPlayAdError
 import com.unity3d.mediation.LevelPlayAdInfo
+import com.unity3d.mediation.impression.LevelPlayImpressionData
+import com.unity3d.mediation.impression.LevelPlayImpressionDataListener
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAdListener
 import com.unity3d.mediation.rewarded.LevelPlayReward
@@ -29,6 +31,10 @@ class LevelPlayAdObjectManager(
         val interstitialAd = LevelPlayInterstitialAd(adUnitId, adConfigBuilder.build())
         // Set the listener for the interstitial ad
         interstitialAd.setListener(createInterstitialAdListener(interstitialAd.adId))
+        // Set the per-instance impression data listener
+        interstitialAd.setImpressionDataListener(
+            createImpressionDataListener(interstitialAd.adId, "onInterstitialAdImpressionSuccess")
+        )
         // Store the interstitial ad in the map
         interstitialAdsMap[interstitialAd.adId] = interstitialAd
         // Return the unique adId for the created ad object
@@ -111,6 +117,10 @@ class LevelPlayAdObjectManager(
         val rewardedAd = LevelPlayRewardedAd(adUnitId, adConfigBuilder.build())
         // Set the listener for the rewarded ad
         rewardedAd.setListener(createRewardedAdListener(rewardedAd.adId))
+        // Set the per-instance impression data listener
+        rewardedAd.setImpressionDataListener(
+            createImpressionDataListener(rewardedAd.adId, "onRewardedAdImpressionSuccess")
+        )
         // Store the rewarded ad in the map
         rewardedAdsMap[rewardedAd.adId] = rewardedAd
         // Return the unique adId for the created ad object
@@ -195,6 +205,15 @@ class LevelPlayAdObjectManager(
     }
 
     // Shared Methods
+    private fun createImpressionDataListener(adId: String, methodName: String): LevelPlayImpressionDataListener {
+        return object : LevelPlayImpressionDataListener {
+            override fun onImpressionSuccess(impressionData: LevelPlayImpressionData) {
+                val args = hashMapOf("adId" to adId, "impressionData" to impressionData.toMap())
+                invokeMethodOnUiThread(channel, methodName, args)
+            }
+        }
+    }
+
     fun disposeAd(adId: String) {
         if (interstitialAdsMap.containsKey(adId))
             interstitialAdsMap.remove(adId)

@@ -5,6 +5,8 @@ import com.unity3d.mediation.LevelPlayAdError
 import com.unity3d.mediation.LevelPlayAdInfo
 import com.unity3d.mediation.banner.LevelPlayBannerAdView
 import com.unity3d.mediation.banner.LevelPlayBannerAdViewListener
+import com.unity3d.mediation.impression.LevelPlayImpressionData
+import com.unity3d.mediation.impression.LevelPlayImpressionDataListener
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -15,13 +17,14 @@ internal class LevelPlayBannerAdView(
     levelPlayBinaryMessenger: BinaryMessenger,
     viewType: String,
     private var levelPlayBanner: LevelPlayBannerAdView?
-) : PlatformView, LevelPlayBannerAdViewListener {
+) : PlatformView, LevelPlayBannerAdViewListener, LevelPlayImpressionDataListener {
     private var methodChannel: MethodChannel? = null
 
     init {
         methodChannel = MethodChannel(levelPlayBinaryMessenger, "${viewType}_$viewId")
         methodChannel!!.setMethodCallHandler { call, result ->  handleMethodCall(call, result)}
         levelPlayBanner?.setBannerListener(this)
+        levelPlayBanner?.setImpressionDataListener(this)
     }
 
     /**
@@ -135,6 +138,13 @@ internal class LevelPlayBannerAdView(
         methodChannel?.let { channel ->
             val args = hashMapOf("adInfo" to adInfo.toMap())
             invokeMethodOnUiThread(channel, "onAdLeftApplication", args)
+        }
+    }
+
+    override fun onImpressionSuccess(impressionData: LevelPlayImpressionData) {
+        methodChannel?.let { channel ->
+            val args = hashMapOf("impressionData" to impressionData.toMap())
+            invokeMethodOnUiThread(channel, "onAdImpressionSuccess", args)
         }
     }
 }

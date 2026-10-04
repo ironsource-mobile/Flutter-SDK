@@ -82,6 +82,8 @@
         return [LPMAdSize largeSize];
     } else if ([adLabel isEqualToString:@"MEDIUM_RECTANGLE"]) {
         return [LPMAdSize mediumRectangleSize];
+    } else if ([adLabel isEqualToString:@"LEADERBOARD"]) {
+        return [LPMAdSize leaderBoardSize];
     } else if ([adLabel isEqualToString:@"CUSTOM"]) {
         return [LPMAdSize customSizeWithWidth:width height:height];
     } else {

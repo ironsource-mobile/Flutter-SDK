@@ -2,7 +2,7 @@
 #import <IronSource/IronSource.h>
 #import <Flutter/Flutter.h>
 
-@interface LevelPlayInterstitialAdDelegate : NSObject <LPMInterstitialAdDelegate>
+@interface LevelPlayInterstitialAdDelegate : NSObject <LPMInterstitialAdDelegate, LPMImpressionDataDelegate>
 
 - (instancetype)initWithAdId:(NSString *)adId
                      channel:(FlutterMethodChannel *)channel;

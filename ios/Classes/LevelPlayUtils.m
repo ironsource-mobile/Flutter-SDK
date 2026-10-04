@@ -143,7 +143,7 @@
             @"precision": adInfo.precision, // (nonnull)
             @"encryptedCPM": adInfo.encryptedCPM,  // (nonnull)
             @"conversionValue": adInfo.conversionValue ? @([adInfo.conversionValue doubleValue]) : [NSNull null], // (nullable)
-            @"creativeId": adInfo.creativeId, // (nonnull)
+            @"creativeId": adInfo.creativeId ?: @"", // (nonnull)
     };
 }
 
@@ -175,7 +175,7 @@
     return @{
             @"adUnitId": adUnitId?: [NSNull null],
             @"errorCode": [NSNumber numberWithInteger:error.code],
-            @"errorMessage": error.userInfo[NSLocalizedDescriptionKey],
+            @"errorMessage": error.userInfo[NSLocalizedDescriptionKey] ?: @"",
     };
 }
 

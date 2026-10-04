@@ -21,6 +21,7 @@ class LevelPlayAdSize {
   static LevelPlayAdSize BANNER = LevelPlayAdSize._(width: LevelPlayConstants.BANNER_WIDTH, height: LevelPlayConstants.BANNER_HEIGHT, adLabel: LevelPlayConstants.SIZE_BANNER);
   static LevelPlayAdSize LARGE = LevelPlayAdSize._(width: LevelPlayConstants.LARGE_WIDTH, height: LevelPlayConstants.LARGE_HEIGHT, adLabel: LevelPlayConstants.SIZE_LARGE);
   static LevelPlayAdSize MEDIUM_RECTANGLE = LevelPlayAdSize._(width: LevelPlayConstants.MEDIUM_RECTANGLE_WIDTH, height: LevelPlayConstants.MEDIUM_RECTANGLE_HEIGHT, adLabel: LevelPlayConstants.SIZE_MEDIUM_RECTANGLE);
+  static LevelPlayAdSize LEADERBOARD = LevelPlayAdSize._(width: LevelPlayConstants.LEADERBOARD_WIDTH, height: LevelPlayConstants.LEADERBOARD_HEIGHT, adLabel: LevelPlayConstants.SIZE_LEADERBOARD);
 
   static LevelPlayAdSize createCustomSize({required int width, required int height}) {
     return LevelPlayAdSize._(width: width, height: height, adLabel: LevelPlayConstants.SIZE_CUSTOM);
@@ -34,6 +35,8 @@ class LevelPlayAdSize {
         return LevelPlayAdSize.LARGE;
       case LevelPlayConstants.SIZE_MEDIUM_RECTANGLE:
         return LevelPlayAdSize.MEDIUM_RECTANGLE;
+      case LevelPlayConstants.SIZE_LEADERBOARD:
+        return LevelPlayAdSize.LEADERBOARD;
       default:
         throw ArgumentError('Wrong Ad Size');
     }

@@ -59,6 +59,8 @@ class LevelPlayBannerAdViewFactory(
             LevelPlayAdSize.LARGE
         } else if (adLabel.equals("MEDIUM_RECTANGLE", true)) {
             LevelPlayAdSize.MEDIUM_RECTANGLE
+        } else if (adLabel.equals("LEADERBOARD", true)) {
+            LevelPlayAdSize.LEADERBOARD
         } else if (adLabel.equals("CUSTOM", true)) {
             LevelPlayAdSize.createCustomSize(width, height)
         } else {

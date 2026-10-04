@@ -110,7 +110,7 @@ class LevelPlayAdInfo {
           ? LevelPlayAdSize.fromMap(args['adSize'])
           : null,
       adFormat: args['adFormat'] as String,
-      placementName: args['placementName'] as String,
+      placementName: args['placementName'] as String? ?? '',
       auctionId: args['auctionId'] as String,
       country: args['country'] as String,
       ab: args['ab'] as String,
@@ -122,7 +122,7 @@ class LevelPlayAdInfo {
       precision: args['precision'] as String,
       encryptedCPM: args['encryptedCPM'] as String,
       conversionValue: args['conversionValue'] as double?,
-      creativeId: args['creativeId'] as String,
+      creativeId: args['creativeId'] as String? ?? '',
     );
   }
 

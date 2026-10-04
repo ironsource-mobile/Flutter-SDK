@@ -444,42 +444,34 @@ class _LevelPlayBannerAdSectionState extends State<LevelPlayBannerAdSection> {
     ]);
   }
 
-  @override
   void onAdClicked(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdClicked', adInfo);
   }
 
-  @override
   void onAdCollapsed(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdCollapsed', adInfo);
   }
 
-  @override
   void onAdDisplayFailed(LevelPlayAdInfo adInfo, LevelPlayAdError error) {
     logMethodName('Banner Ad', 'onAdDisplayFailed', '$error | $adInfo');
   }
 
-  @override
   void onAdDisplayed(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdDisplayed', adInfo);
   }
 
-  @override
   void onAdExpanded(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdExpanded', adInfo);
   }
 
-  @override
   void onAdLeftApplication(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdLeftApplication', adInfo);
   }
 
-  @override
   void onAdLoadFailed(LevelPlayAdError error) {
     logMethodName('Banner Ad', 'onAdLoadFailed', error);
   }
 
-  @override
   void onAdLoaded(LevelPlayAdInfo adInfo) {
     logMethodName('Banner Ad', 'onAdLoaded', adInfo);
   }

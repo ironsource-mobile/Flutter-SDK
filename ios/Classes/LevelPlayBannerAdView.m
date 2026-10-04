@@ -2,7 +2,7 @@
 #import "LevelPlayBannerAdView.h"
 #import "LevelPlayUtils.h"
 
-@interface LevelPlayBannerAdView()<LPMBannerAdViewDelegate>
+@interface LevelPlayBannerAdView()<LPMBannerAdViewDelegate, LPMImpressionDataDelegate>
 
 // MARK: Properties
 
@@ -26,6 +26,7 @@
     {
         self.bannerAdView = bannerAdView;
         [self.bannerAdView setDelegate: self];
+        [self.bannerAdView setImpressionDataDelegate: self];
 
         NSString *uniqueChannelName = [NSString stringWithFormat: @"%@_%lld", viewType, viewId];
         self.methodChannel = [FlutterMethodChannel methodChannelWithName: uniqueChannelName binaryMessenger: levelPlayBinaryMessenger];
@@ -175,6 +176,13 @@
             @"adInfo": [LevelPlayUtils dictionaryForLevelPlayAdInfo:adInfo]
     };
     [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdCollapsed" args: args];
+}
+
+- (void)impressionDataDidSucceed:(LPMImpressionData *)impressionData {
+    NSDictionary *args = @{
+            @"impressionData": [LevelPlayUtils dictionaryForLPMImpressionData:impressionData]
+    };
+    [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdImpressionSuccess" args: args];
 }
 
 @end

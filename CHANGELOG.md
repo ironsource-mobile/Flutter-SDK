@@ -1,3 +1,27 @@
+## 9.3.0
+
+### SDK Updates
+- Wraps Android SDK 9.6.1 API
+- Wraps iOS SDK 9.6.1 API
+
+### Features
+- Add `LevelPlayPrivacySettings.setGDPRConsent(consent)`
+- Add per-instance impression data listeners: `LevelPlayInterstitialAd.setImpressionDataListener`, `LevelPlayRewardedAd.setImpressionDataListener`, and the `impressionDataListener` parameter of `LevelPlayBannerAdView`
+- Add `LevelPlayAdSize.LEADERBOARD` banner size
+
+### Deprecations
+- `LevelPlayPrivacySettings.setGDPRConsents` is deprecated, use `setGDPRConsent` instead
+- `LevelPlay.addImpressionDataListener` is deprecated by the native SDKs, use the per-instance impression data listeners instead
+
+### Bug Fixes
+- Android: interstitial and rewarded ads could not be shown after an activity configuration change (e.g. rotation)
+- iOS: ad callbacks were dropped when `placementName` was not available
+- iOS: guard against missing `creativeId` / error message values
+
+### Notes
+- Android SDK 9.6.1 depends on `kotlin-stdlib` 2.1.x. Android projects must build with Kotlin 2.0 or higher.
+- iOS SDK 9.6.1 is built with Xcode 26. iOS apps must be built with Xcode 26 or higher.
+
 ## 9.2.0
 
 ### Features
