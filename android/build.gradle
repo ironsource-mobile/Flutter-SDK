@@ -47,5 +47,5 @@ android {
 }
 
 dependencies {
-    api 'com.unity3d.ads-mediation:mediation-sdk:9.6.1'
+    api 'com.unity3d.ads-mediation:mediation-sdk:9.7.0'
 }

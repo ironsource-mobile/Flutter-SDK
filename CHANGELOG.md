@@ -1,3 +1,9 @@
+## 9.4.0
+
+### SDK Updates
+- Wraps Android SDK 9.7.0 API
+- Wraps iOS SDK 9.7.0 API
+
 ## 9.3.0
 
 ### SDK Updates

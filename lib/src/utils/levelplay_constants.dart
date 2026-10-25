@@ -2,9 +2,9 @@
 class LevelPlayConstants {
   static const String METHOD_CHANNEL = 'unity_levelplay_mediation';
   static const String PLUGIN_TYPE = 'Flutter';
-  static const String PLUGIN_VERSION = '9.3.0';
-  static const String ANDROID_SDK_VERSION = '9.6.1';
-  static const String IOS_SDK_VERSION = '9.6.1';
+  static const String PLUGIN_VERSION = '9.4.0';
+  static const String ANDROID_SDK_VERSION = '9.7.0';
+  static const String IOS_SDK_VERSION = '9.7.0';
 
   // Banner
   static const int BANNER_WIDTH = 320;

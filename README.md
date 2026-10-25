@@ -2,18 +2,23 @@
 
 A bridge plugin for LevelPlay SDKs.
 
-- [LevelPlay Knowledge Center](https://developers.is.com/)
-- [Android SDK](https://developers.ironsrc.com/ironsource-mobile/android/android-sdk/)
-- [iOS SDK](https://developers.ironsrc.com/ironsource-mobile/ios/ios-sdk/)
-- [Flutter Plugin](https://developers.is.com/ironsource-mobile/flutter/flutter-plugin/)
+- [LevelPlay documentation](https://docs.unity.com/en-us/grow/levelplay)
+- [Android SDK](https://docs.unity.com/en-us/grow/levelplay/sdk/android/sdk-integration)
+- [iOS SDK](https://docs.unity.com/en-us/grow/levelplay/sdk/ios/sdk-integration)
+- [Flutter Plugin](https://docs.unity.com/en-us/grow/levelplay/sdk/flutter/plugin-integration)
 
 # Getting Started
 
 ## Installation
 
 ```
-flutter pub get unity_levelplay_mediation
+flutter pub add unity_levelplay_mediation
 ```
+
+Requirements:
+
+- **Android**: build your app with Kotlin 2.0 or higher. The LevelPlay Android SDK depends on `kotlin-stdlib` 2.1.x.
+- **iOS**: build your app with Xcode 26 or higher, with a minimum deployment target of iOS 13.
 
 ## Android Configuration
 
@@ -29,7 +34,6 @@ dependencies {
   ...
     implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-    implementation 'com.google.android.gms:play-services-basement:18.3.0'
 }
 ```
 
@@ -68,8 +72,6 @@ Note:
 ```
 
 ### <ins>App Tracking Transparency (ATT) Prompt</ins>
-
-<b>TODO: Remove or keep this?</b>
 
 Implement the ATT prompt to request user authorization for app-related data.
 
@@ -256,7 +258,7 @@ Future<void> init() async {
   final appKey = '[YOUR_APP_KEY]';
   final userId = '[YOUR_USER_ID]';
   try {
-    final initRequest = LevelPlayInitRequest.builder(configState.appKey)
+    final initRequest = LevelPlayInitRequest.builder(appKey)
         .withUserId(userId)
         .build();
     await LevelPlay.init(initRequest: initRequest, initListener: this);
@@ -265,6 +267,35 @@ Future<void> init() async {
   }
 }
 ```
+
+### Privacy settings
+
+Set the user's privacy choices with `LevelPlayPrivacySettings` before you initialize the SDK:
+
+```dart
+await LevelPlayPrivacySettings.setGDPRConsent(true);
+await LevelPlayPrivacySettings.setCCPA(false);
+await LevelPlayPrivacySettings.setCOPPA(false);
+```
+
+For more information, refer to [Regulation advanced settings](https://docs.unity.com/en-us/grow/levelplay/sdk/flutter/regulation-advanced-settings).
+
+### Impression data
+
+Set an impression data listener on each ad to receive its impression-level revenue data. `LevelPlay.addImpressionDataListener` is deprecated.
+
+```dart
+class MyImpressionDataListener implements LevelPlayImpressionDataListener {
+  @override
+  void onImpressionSuccess(LevelPlayImpressionData impressionData) {}
+}
+
+interstitialAd.setImpressionDataListener(MyImpressionDataListener());
+rewardedAd.setImpressionDataListener(MyImpressionDataListener());
+// Banners: the impressionDataListener parameter of LevelPlayBannerAdView
+```
+
+For more information, refer to [Impression-level revenue integration](https://docs.unity.com/en-us/grow/levelplay/sdk/flutter/impression-level-revenue-integration).
 
 ### Show Ads Example
 
@@ -373,7 +404,7 @@ Refer to the [example app](./example) for the more detailed implementation sampl
 
 Note:
 
-- Make sure to read the official documents at [LevelPlay Knowledge Center](TODO: replace with the real KC link) for proper usage.
+- Make sure to read the official documents at [LevelPlay Flutter documentation](https://docs.unity.com/en-us/grow/levelplay/sdk/flutter/plugin-integration) for proper usage.
 - Some configurations must be done before initialization.
 - LevelPlayBannerListener is deprecated - Please use LevelPlayBannerAdViewListener with LevelPlayBannerAdView instead.
 - LevelPlayInterstitialListener is deprecated - Please use LevelPlayInterstitialAdListener with LevelPlayInterstitialAd instead.
@@ -386,14 +417,14 @@ Note:
 
 ## Android
 
-Make sure to follow [LevelPlay Knowledge Center](https://developers.ironsrc.com/ironsource-mobile/android/mediation-networks-android/) document for additional setup.
+Make sure to follow the [Android mediation networks](https://docs.unity.com/en-us/grow/levelplay/sdk/android/mediation-networks) document for additional setup.
 
 - Add dependencies to `YOUR_PROJECT/android/app/build.gradle`
 - Add required settings to `YOUR_PROJECT/android/app/src/main/AndroidManifest.xml`
 
 ## iOS
 
-Make sure to follow [LevelPlay Knowledge Center](https://developers.ironsrc.com/ironsource-mobile/ios/mediation-networks-ios/) document for additional setup.
+Make sure to follow the [iOS mediation networks](https://docs.unity.com/en-us/grow/levelplay/sdk/ios/mediation-networks) document for additional setup.
 
 - Add pod dependencies to `YOUR_PROJECT/ios/Podfile: target 'Runner'`
 - Add required settings to `YOUR_PROJECT/ios/Runner/info.plist`
