@@ -14,6 +14,14 @@ class LevelPlayAdObjectManager {
   /// Ad cache
   final Map<String, LevelPlayInterstitialAd> interstitialAdsMap = <String, LevelPlayInterstitialAd>{};
   final Map<String, LevelPlayRewardedAd> rewardedAdsMap = <String, LevelPlayRewardedAd>{};
+  // In-flight native ad creations, so concurrent loadAd() calls on the same ad object share one native ad
+  final Map<Object, Future<String>> _pendingCreations = <Object, Future<String>>{};
+
+  Future<String> _ensureNativeAd(Object ad, String adId, Future<String> Function() create) {
+    if (adId.isNotEmpty) return Future.value(adId);
+    // The whenComplete callback must not return the removed Future: whenComplete would wait for it, i.e. for itself
+    return _pendingCreations.putIfAbsent(ad, () => create().whenComplete(() { _pendingCreations.remove(ad); }));
+  }
 
   /// Private constructor
   LevelPlayAdObjectManager._internal();
@@ -48,8 +56,8 @@ class LevelPlayAdObjectManager {
   }
 
   Future<void> loadInterstitialAd(LevelPlayInterstitialAd interstitialAd) async {
-    final adId = interstitialAd.adId.isEmpty ?
-      await createInterstitialAd(interstitialAd) : interstitialAd.adId;
+    // If the native ad doesn't exist yet, create it first to get an adId
+    final adId = await _ensureNativeAd(interstitialAd, interstitialAd.adId, () => createInterstitialAd(interstitialAd));
     await _channel.invokeMethod('loadInterstitialAd', { 'adId': adId });
   }
 
@@ -92,8 +100,8 @@ class LevelPlayAdObjectManager {
     }
 
   Future<void> loadRewardedAd(LevelPlayRewardedAd rewardedAd) async {
-    final adId = rewardedAd.adId.isEmpty ?
-    await createRewardedAd(rewardedAd) : rewardedAd.adId;
+    // If the native ad doesn't exist yet, create it first to get an adId
+    final adId = await _ensureNativeAd(rewardedAd, rewardedAd.adId, () => createRewardedAd(rewardedAd));
     await _channel.invokeMethod('loadRewardedAd', { 'adId': adId });
     }
 
@@ -116,15 +124,17 @@ class LevelPlayAdObjectManager {
   Future<void> disposeAd(String adId) async {
     bool wasRemoved = false;
 
-    // Check and remove from interstitial ads map
-    if (interstitialAdsMap.containsKey(adId)) {
-      interstitialAdsMap.remove(adId);
+    // Check and remove from interstitial ads map, and reset the ad object's id so a later loadAd() creates a new native ad
+    final interstitialAd = interstitialAdsMap.remove(adId);
+    if (interstitialAd != null) {
+      interstitialAd.adId = "";
       wasRemoved = true;
     }
 
-    // Check and remove from rewarded ads map
-    if (rewardedAdsMap.containsKey(adId)) {
-      rewardedAdsMap.remove(adId);
+    // Check and remove from rewarded ads map, and reset the ad object's id so a later loadAd() creates a new native ad
+    final rewardedAd = rewardedAdsMap.remove(adId);
+    if (rewardedAd != null) {
+      rewardedAd.adId = "";
       wasRemoved = true;
     }
 
@@ -135,6 +145,9 @@ class LevelPlayAdObjectManager {
   }
 
   Future<void> disposeAllAds() async {
+    // Reset the ad objects' ids so a later loadAd() creates new native ads
+    for (final ad in interstitialAdsMap.values) { ad.adId = ""; }
+    for (final ad in rewardedAdsMap.values) { ad.adId = ""; }
     interstitialAdsMap.clear();
     rewardedAdsMap.clear();
     await _channel.invokeMethod('disposeAllAds');

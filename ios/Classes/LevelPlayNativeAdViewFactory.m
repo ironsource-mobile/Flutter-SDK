@@ -57,7 +57,9 @@
     NSString *viewType = [args[@"viewType"] isKindOfClass:[NSString class]] ? args[@"viewType"] : nil; // May be NSNull
     NSDictionary *templateStyleDict = [args[@"templateStyle"] isKindOfClass:[NSDictionary class]] ? args[@"templateStyle"] : nil; // May be NSNull
     // Parse LevelPlayNativeAdElementStyle objects
-    NSNumber *mainBackgroundColor = templateStyleDict[@"mainBackgroundColor"];
+    // Dart sends null (NSNull) when no background color is set
+    id mainBackgroundColorValue = templateStyleDict[@"mainBackgroundColor"];
+    NSNumber *mainBackgroundColor = [mainBackgroundColorValue isKindOfClass:[NSNumber class]] ? mainBackgroundColorValue : nil;
     LevelPlayNativeAdElementStyle *titleStyle = [self parseElementStyle:templateStyleDict[@"titleStyle"]];
     LevelPlayNativeAdElementStyle *bodyStyle = [self parseElementStyle:templateStyleDict[@"bodyStyle"]];
     LevelPlayNativeAdElementStyle *advertiserStyle = [self parseElementStyle:templateStyleDict[@"advertiserStyle"]];

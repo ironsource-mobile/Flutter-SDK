@@ -66,7 +66,7 @@ fun LevelPlayNativeAd.toMap(): HashMap<String, Any?> {
         "advertiser" to this.advertiser,
         "callToAction" to this.callToAction,
         "icon" to hashMapOf(
-            "uri" to this.icon?.uri.toString(),
+            "uri" to this.icon?.uri?.toString(),
             "imageData" to this.icon?.drawable?.toBytes()
         )
     )

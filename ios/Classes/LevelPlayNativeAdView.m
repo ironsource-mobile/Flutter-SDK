@@ -59,10 +59,7 @@
               callToActionView:(UIButton *)callToActionView {
     if (self.templateStyle) {
         if(self.templateStyle.mainBackgroundColor) {
-            UIColor *mainBackgroundColor = [UIColor colorWithRed:((CGFloat)(([self.templateStyle.mainBackgroundColor integerValue] >> 16) & 0xFF)) / 255.0
-                                                       green:((CGFloat)(([self.templateStyle.mainBackgroundColor integerValue] >> 8) & 0xFF)) / 255.0
-                                                        blue:((CGFloat)([self.templateStyle.mainBackgroundColor integerValue] & 0xFF)) / 255.0
-                                                       alpha:1.0];
+            UIColor *mainBackgroundColor = [self colorFromARGB:self.templateStyle.mainBackgroundColor];
             self.isNativeAdView.backgroundColor = mainBackgroundColor;
         }
         [self applyStyleToTextView:titleView style:self.templateStyle.titleStyle];
@@ -77,10 +74,7 @@
         [self applyCommonStyles:textView style:style];
 
         if (style.textColor && ![style.textColor isKindOfClass:[NSNull class]]) {
-            UIColor *textColor = [UIColor colorWithRed:((CGFloat)(([style.textColor integerValue] >> 16) & 0xFF)) / 255.0
-                                                 green:((CGFloat)(([style.textColor integerValue] >> 8) & 0xFF)) / 255.0
-                                                  blue:((CGFloat)([style.textColor integerValue] & 0xFF)) / 255.0
-                                                 alpha:1.0];
+            UIColor *textColor = [self colorFromARGB:style.textColor];
             [textView setTextColor:textColor];
         }
         if (style.fontStyle && ![style.fontStyle isKindOfClass:[NSNull class]]) {
@@ -97,10 +91,7 @@
         [self applyCommonStyles:button style:style];
 
         if (style.textColor && ![style.textColor isKindOfClass:[NSNull class]]) {
-            UIColor *textColor = [UIColor colorWithRed:((CGFloat)(([style.textColor integerValue] >> 16) & 0xFF)) / 255.0
-                                                 green:((CGFloat)(([style.textColor integerValue] >> 8) & 0xFF)) / 255.0
-                                                  blue:((CGFloat)([style.textColor integerValue] & 0xFF)) / 255.0
-                                                 alpha:1.0];
+            UIColor *textColor = [self colorFromARGB:style.textColor];
             [button setTitleColor:textColor forState:UIControlStateNormal];
         }
         if (style.fontStyle && ![style.fontStyle isKindOfClass:[NSNull class]]) {
@@ -115,10 +106,7 @@
 - (void)applyCommonStyles:(UIView *)view style:(LevelPlayNativeAdElementStyle *)style {
     if (view && style) {
         if (style.backgroundColor && ![style.backgroundColor isKindOfClass:[NSNull class]]) {
-            UIColor *backgroundColor = [UIColor colorWithRed:((CGFloat)(([style.backgroundColor integerValue] >> 16) & 0xFF)) / 255.0
-                                                       green:((CGFloat)(([style.backgroundColor integerValue] >> 8) & 0xFF)) / 255.0
-                                                        blue:((CGFloat)([style.backgroundColor integerValue] & 0xFF)) / 255.0
-                                                       alpha:1.0];
+            UIColor *backgroundColor = [self colorFromARGB:style.backgroundColor];
             view.backgroundColor = backgroundColor;
         }
         if (style.cornerRadius && ![style.cornerRadius isKindOfClass:[NSNull class]]) {
@@ -260,7 +248,7 @@
     // Apply styles
     [self applyStylesWithTitleView:self.isNativeAdView.adTitleView
                           bodyView:self.isNativeAdView.adBodyView
-                    advertiserView:self.isNativeAdView.adBodyView
+                    advertiserView:self.isNativeAdView.adAdvertiserView
                   callToActionView:self.isNativeAdView.adCallToActionView];
 
     [self.delegate bindNativeAdToView:nativeAd isNativeAdView:self.isNativeAdView];
@@ -315,6 +303,15 @@
             [LevelPlayUtils dictionaryForAdInfo:adInfo], @"adInfo",
             nil];
     [LevelPlayUtils invokeMethodOnUiThreadWithChannel: self.methodChannel methodName: @"onAdClicked" args: args];
+}
+
+// Dart's Color.value (ARGB)
+- (UIColor *)colorFromARGB:(NSNumber *)argb {
+    long long value = [argb longLongValue];
+    return [UIColor colorWithRed:((value >> 16) & 0xFF) / 255.0
+                           green:((value >> 8) & 0xFF) / 255.0
+                            blue:(value & 0xFF) / 255.0
+                           alpha:((value >> 24) & 0xFF) / 255.0];
 }
 
 @end

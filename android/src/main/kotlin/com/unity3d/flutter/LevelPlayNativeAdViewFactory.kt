@@ -31,7 +31,7 @@ abstract class LevelPlayNativeAdViewFactory(
         val viewType = if (creationParams?.containsKey("viewType") == true) creationParams["viewType"] as String else null
         val styleMap = creationParams?.get("templateStyle") as? Map<String, Any?>
         // Parse LevelPlayNativeAdElementStyle objects
-        val mainBackgroundColor = (styleMap?.get("mainBackgroundColor") as? Long)?.toInt()
+        val mainBackgroundColor = colorFrom(styleMap?.get("mainBackgroundColor"))
         val titleElementStyle = parseElementStyle(styleMap?.get("titleStyle") as? Map<String, Any?>)
         val bodyElementStyle = parseElementStyle(styleMap?.get("bodyStyle") as? Map<String, Any?>)
         val advertiserElementStyle = parseElementStyle(styleMap?.get("advertiserStyle") as? Map<String, Any?>)
@@ -71,6 +71,9 @@ abstract class LevelPlayNativeAdViewFactory(
         }
     }
 
+    /** Dart's Color.value (ARGB) arrives as Integer or Long, depending on its size. */
+    private fun colorFrom(value: Any?): Int? = (value as? Number)?.toLong()?.toInt()
+
     /**
      * This function extract styles values from map and create instance of LevelPlayNativeAdElementStyle
      *
@@ -79,9 +82,9 @@ abstract class LevelPlayNativeAdViewFactory(
      */
     private fun parseElementStyle(styleMap: Map<String, Any?>?): LevelPlayNativeAdElementStyle? {
         return styleMap?.let {
-            val backgroundColor = (it["backgroundColor"] as? Long)?.toInt()
+            val backgroundColor = colorFrom(it["backgroundColor"])
             val textSize = (it["textSize"] as? Double)?.toFloat()
-            val textColor = (it["textColor"] as? Long)?.toInt()
+            val textColor = colorFrom(it["textColor"])
             val fontStyle = it["fontStyle"] as? String
             val cornerRadius = (it["cornerRadius"] as? Double)?.toFloat()
             LevelPlayNativeAdElementStyle(backgroundColor, textSize, textColor, fontStyle, cornerRadius)

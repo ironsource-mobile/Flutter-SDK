@@ -17,7 +17,9 @@
 
 @end
 
+// The first registered plugin (fallback for registerNativeAdViewFactory / unregisterNativeAdViewFactory)
 static LevelPlayMediationPlugin *instance = nil;
+static NSString *const kLevelPlayPluginKey = @"LevelPlayMediationPlugin";
 
 @implementation LevelPlayMediationPlugin
 
@@ -29,31 +31,39 @@ static LevelPlayMediationPlugin *instance = nil;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+    // One plugin per engine, like on Android
     FlutterMethodChannel* channel = [FlutterMethodChannel
                                      methodChannelWithName:@"unity_levelplay_mediation"
                                      binaryMessenger:[registrar messenger]];
+    LevelPlayMediationPlugin *plugin = [[LevelPlayMediationPlugin alloc] initWithChannel:channel];
+    plugin.registrar = registrar;
+    plugin.nativeAdViewFactories = [NSMutableDictionary dictionary];
     if (!instance) {
-        instance = [[LevelPlayMediationPlugin alloc] initWithChannel:channel];
-        instance.registrar = registrar;
-        instance.nativeAdViewFactories = [NSMutableDictionary dictionary];
+        instance = plugin;
     }
-    __weak LevelPlayMediationPlugin *weakInstance = instance; // Capture a weak reference to the instance
-    [registrar addMethodCallDelegate:instance channel:channel];
-        
+    [registrar addMethodCallDelegate:plugin channel:channel];
+    [registrar publish:plugin];
+
     // ATT Brigde
     [ATTrackingManagerChannel registerWithMessenger:[registrar messenger]];
 
     // Banner ad view registry
-    LevelPlayBannerAdViewFactory *bannerAdViewFactory = [[LevelPlayBannerAdViewFactory alloc] initWithMessenger:[instance.registrar messenger]];
-    [instance.registrar registerViewFactory: bannerAdViewFactory withId: @"LevelPlayBannerAdView"];
+    LevelPlayBannerAdViewFactory *bannerAdViewFactory = [[LevelPlayBannerAdViewFactory alloc] initWithMessenger:[registrar messenger]];
+    [registrar registerViewFactory: bannerAdViewFactory withId: @"LevelPlayBannerAdView"];
 
     // Native ad view registry
-    LevelPlayNativeAdViewFactoryTemplate *nativeAdViewFactory = [[LevelPlayNativeAdViewFactoryTemplate alloc] initWithMessenger:[instance.registrar messenger]];
-    [instance.nativeAdViewFactories setValue:nativeAdViewFactory forKey:@"LevelPlayNativeAdView"];
-    [instance.registrar registerViewFactory: nativeAdViewFactory withId: @"LevelPlayNativeAdView"];
+    LevelPlayNativeAdViewFactoryTemplate *nativeAdViewFactory = [[LevelPlayNativeAdViewFactoryTemplate alloc] initWithMessenger:[registrar messenger]];
+    [plugin.nativeAdViewFactories setValue:nativeAdViewFactory forKey:@"LevelPlayNativeAdView"];
+    [registrar registerViewFactory: nativeAdViewFactory withId: @"LevelPlayNativeAdView"];
 
     // Ad instance manager registry
-    instance.levelPlayAdObjectManager = [[LevelPlayAdObjectManager alloc] initWithChannel: channel];
+    plugin.levelPlayAdObjectManager = [[LevelPlayAdObjectManager alloc] initWithChannel: channel];
+}
+
+/// The plugin registered on the given registry (engine), or the first registered plugin.
++ (LevelPlayMediationPlugin *)pluginForRegistry:(id<FlutterPluginRegistry>)registry {
+    id published = [registry respondsToSelector:@selector(valuePublishedByPlugin:)] ? [registry valuePublishedByPlugin:kLevelPlayPluginKey] : nil;
+    return [published isKindOfClass:[LevelPlayMediationPlugin class]] ? published : instance;
 }
 
 /// Clean up
@@ -298,7 +308,7 @@ static LevelPlayMediationPlugin *instance = nil;
     [ISConfigurations getConfigurations].pluginVersion = pluginVersion;
     
     /// Double check if the value is not nil or null. If null is passed, the ironSource SDK would throw since it only checks nil and not null.
-    if(pluginFrameworkVersion == nil || [[NSNull null] isEqual:pluginFrameworkVersion]){
+    if(pluginFrameworkVersion != nil && ![[NSNull null] isEqual:pluginFrameworkVersion]){
         [ISConfigurations getConfigurations].pluginFrameworkVersion = pluginFrameworkVersion;
     }
     
@@ -596,11 +606,10 @@ static LevelPlayMediationPlugin *instance = nil;
 + (void)registerNativeAdViewFactory:(id<FlutterPluginRegistry>)registry
                       viewTypeId:(NSString *)viewTypeId
         nativeAdViewFactory:(LevelPlayNativeAdViewFactory *)nativeAdViewFactory {
-    LevelPlayMediationPlugin *flutterPlugin = instance;
+    LevelPlayMediationPlugin *flutterPlugin = [self pluginForRegistry:registry];
     if (!flutterPlugin) {
-        [NSException exceptionWithName:NSInvalidArgumentException
-                                reason:@"The plugin may have not been registered."
-                              userInfo:nil];
+        NSLog(@"LevelPlayMediationPlugin: The plugin may have not been registered.");
+        return;
     }
 
     if (flutterPlugin != nil && flutterPlugin.nativeAdViewFactories != nil) {
@@ -628,7 +637,7 @@ static LevelPlayMediationPlugin *instance = nil;
 + (void)unregisterNativeAdViewFactory:
         (id<FlutterPluginRegistry>)registry
         viewTypeId:(NSString *)viewTypeId {
-    LevelPlayMediationPlugin *flutterPlugin = instance;
+    LevelPlayMediationPlugin *flutterPlugin = [self pluginForRegistry:registry];
 
     id<FlutterPluginRegistry> factory = flutterPlugin.nativeAdViewFactories[viewTypeId];
     if (factory)

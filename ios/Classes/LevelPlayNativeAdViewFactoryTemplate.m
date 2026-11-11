@@ -19,7 +19,7 @@
     // Extract views
     UILabel *titleView = isNativeAdView.adTitleView;
     UILabel *bodyView = isNativeAdView.adBodyView;
-    UILabel *advertiserView = isNativeAdView.adBodyView;
+    UILabel *advertiserView = isNativeAdView.adAdvertiserView;
     UIButton *callToActionView = isNativeAdView.adCallToActionView;
     UIImageView *iconView = isNativeAdView.adAppIcon;
     LevelPlayMediaView *mediaView = isNativeAdView.adMediaView;

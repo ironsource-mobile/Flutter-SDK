@@ -315,7 +315,7 @@ void _loadRewarded() {
 
 Future<void> _showRewarded() async {
   if (await _rewardedAd.isAdReady()) {
-    _rewardedAd.showAd(placement: [YOUR_PLACEMENT]);
+    _rewardedAd.showAd(placementName: [YOUR_PLACEMENT]);
   }
 }
 
@@ -339,7 +339,7 @@ void _loadInterstitial() {
 
 Future<void> _showInterstitial() async {
   if (await _interstitialAd.isAdReady()) {
-    _interstitialAd.showAd(placement: [YOUR_PLACEMENT]);
+    _interstitialAd.showAd(placementName: [YOUR_PLACEMENT]);
   }
 }
 
@@ -406,9 +406,7 @@ Note:
 
 - Make sure to read the official documents at [LevelPlay Flutter documentation](https://docs.unity.com/en-us/grow/levelplay/sdk/flutter/plugin-integration) for proper usage.
 - Some configurations must be done before initialization.
-- LevelPlayBannerListener is deprecated - Please use LevelPlayBannerAdViewListener with LevelPlayBannerAdView instead.
-- LevelPlayInterstitialListener is deprecated - Please use LevelPlayInterstitialAdListener with LevelPlayInterstitialAd instead.
-- 
+
 # Mediation
 
 - You can use the LevelPlay's mediation feature by adding adapters/SDKs to your project.

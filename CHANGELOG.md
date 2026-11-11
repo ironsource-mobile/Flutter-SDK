@@ -1,3 +1,12 @@
+## 9.5.0
+
+### SDK Updates
+- Wraps Android SDK 9.8.0 API
+- Wraps iOS SDK 9.8.0 API
+
+### Bug Fixes
+- iOS: fix a crash at launch when a second `FlutterEngine` registers the plugin
+
 ## 9.4.0
 
 ### SDK Updates

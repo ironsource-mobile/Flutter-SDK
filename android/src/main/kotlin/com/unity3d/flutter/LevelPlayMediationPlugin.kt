@@ -587,7 +587,11 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       ) {
         try {
           val flutterPlugin =
-            flutterEngine.plugins[LevelPlayMediationPlugin::class.java] as LevelPlayMediationPlugin
+            flutterEngine.plugins[LevelPlayMediationPlugin::class.java] as? LevelPlayMediationPlugin
+          if (flutterPlugin == null) {
+            Log.e(TAG, "The plugin may have not been registered.")
+            return
+          }
           flutterPlugin.addNativeAdViewFactory(viewTypeId, nativeAdViewFactory)
         } catch (e: IllegalStateException) {
           Log.e(TAG, "The plugin may have not been registered.")
@@ -606,7 +610,11 @@ class LevelPlayMediationPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       ) {
         try {
           val flutterPlugin =
-            flutterEngine.plugins[LevelPlayMediationPlugin::class.java] as LevelPlayMediationPlugin
+            flutterEngine.plugins[LevelPlayMediationPlugin::class.java] as? LevelPlayMediationPlugin
+          if (flutterPlugin == null) {
+            Log.e(TAG, "The plugin may have not been registered.")
+            return
+          }
           flutterPlugin.removeNativeAdViewFactory(viewTypeId)
         } catch (e: IllegalStateException) {
           Log.e(TAG, "The plugin may have not been registered.")
